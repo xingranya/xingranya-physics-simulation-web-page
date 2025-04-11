@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>斜面滑动</title>
+    <style>
+        .canvas-container {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>斜面滑动计算</h1>
+    <form action="/calculateRamp" method="post">
+        <label for="angle">斜面角度 (°):</label>
+        <input type="number" name="angle" th:value="${angle}" step="0.1" required><br><br>
+        
+        <label for="mass">物体质量 (kg):</label>
+        <input type="number" name="mass" th:value="${mass}" step="0.1" required><br><br>
+        
+        <label for="frictionCoefficient">摩擦系数:</label>
+        <input type="number" name="frictionCoefficient" th:value="${frictionCoefficient}" step="0.01" required><br><br>
+        
+        <button type="submit">计算加速度</button>
+    </form>
+
+    <div th:if="${acceleration}">
+        <h3>计算结果：</h3>
+        <p>净加速度 = <span th:text="${acceleration}">0.0</span> m/s²</p>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="rampCanvas" width="400" height="300"></canvas>
+    </div>
+
+    <script th:inline="javascript">
+        const canvas = document.getElementById('rampCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function drawRamp(angle) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制斜面
+            ctx.beginPath();
+            ctx.moveTo(50, 250);
+            ctx.lineTo(350, 250);
+            ctx.lineTo(350, 250 - 200 * Math.tan(Math.PI * angle / 180));
+            ctx.closePath();
+            ctx.strokeStyle = '#666';
+            ctx.stroke();
+            
+            // 绘制物体
+            ctx.fillStyle = '#2196F3';
+            ctx.fillRect(320, 220, 30, 30);
+        }
+        
+        // 初始绘制
+        drawRamp(parseFloat([[${angle}]] || 30));
+    </script>
+</body>
+</html>

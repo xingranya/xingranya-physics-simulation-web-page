@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自由落体</title>
+    <style>
+        .animation-container {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <h1>自由落体运动计算</h1>
+    <form action="/calculateFreefall" method="post">
+        <label for="height">下落高度 (m):</label>
+        <input type="number" name="height" th:value="${height}" step="0.1" required><br><br>
+        
+        <button type="submit">计算下落时间</button>
+    </form>
+
+    <div th:if="${time}">
+        <h3>计算结果：</h3>
+        <p>下落时间 = <span th:text="${time}">0.0</span> 秒</p>
+    </div>
+
+    <div class="animation-container">
+        <canvas id="freefallCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <script th:inline="javascript">
+        const canvas = document.getElementById('freefallCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationId;
+
+        function drawBall(yPosition) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.arc(200, yPosition, 15, 0, Math.PI * 2);
+            ctx.fillStyle = '#FF5722';
+            ctx.fill();
+        }
+
+        function startAnimation(height) {
+            let startY = 50;
+            const targetY = 350;
+            const duration = parseFloat([[${time}]]) || 1;
+            let startTime;
+
+            function animate(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = (timestamp - startTime) / (duration * 1000);
+
+                if (progress < 1) {
+                    const currentY = startY + (targetY - startY) * progress;
+                    drawBall(currentY);
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    drawBall(targetY);
+                    cancelAnimationFrame(animationId);
+                }
+            }
+
+            drawBall(startY);
+            animationId = requestAnimationFrame(animate);
+        }
+
+        // 初始化动画
+        startAnimation(parseFloat([[${height}]] || 10));
+    </script>
+</body>
+</html>
