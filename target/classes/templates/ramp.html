@@ -152,8 +152,8 @@
 
         // 当页面加载时启动动画
         window.onload = function() {
-            const angle = parseFloat([[${angle}]] || 30);
-            const acceleration = parseFloat([[${acceleration}]] || 0);
+            const angle = /*[[${angle}]]*/ 30;
+            const acceleration = /*[[${acceleration}]]*/ 0;
             drawRamp(angle);
             if (acceleration > 0) {
                 startAnimation(angle, acceleration);
@@ -161,9 +161,10 @@
         };
 
         // 当表单提交后重新启动动画
-        document.querySelector('form').addEventListener('submit', function() {
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
             const angle = parseFloat(document.querySelector('input[name="angle"]').value);
-            const acceleration = parseFloat([[${acceleration}]] || 0);
+            const acceleration = /*[[${acceleration}]]*/ 0;
             if (acceleration > 0) {
                 startAnimation(angle, acceleration);
             } else {
