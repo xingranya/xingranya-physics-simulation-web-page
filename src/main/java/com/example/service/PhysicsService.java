@@ -5,8 +5,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class PhysicsService {
 
-    public double calculateLever(double leverLength, double force) {
-        return force * leverLength;
+    public double calculateLever(double leverLength, double force, double angle) {
+        // 计算有效力臂（考虑力的角度）
+        double effectiveLeverLength = leverLength * Math.sin(Math.toRadians(angle));
+        // 计算力矩
+        return force * effectiveLeverLength;
     }
 
     public double calculateFreefall(double height) {

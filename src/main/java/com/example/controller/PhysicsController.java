@@ -42,15 +42,20 @@ public class PhysicsController {
     public String showLeverPage(Model model) {
         model.addAttribute("leverLength", 2.0);
         model.addAttribute("force", 50.0);
+        model.addAttribute("angle", 30.0);
         return "lever";
     }
 
     @PostMapping("/calculateLever")
     public String calculateLever(@RequestParam double leverLength,
                                @RequestParam double force,
+                               @RequestParam double angle,
                                Model model) {
-        double torque = physicsService.calculateLever(leverLength, force);
+        double torque = physicsService.calculateLever(leverLength, force, angle);
         model.addAttribute("torque", torque);
+        model.addAttribute("leverLength", leverLength);
+        model.addAttribute("force", force);
+        model.addAttribute("angle", angle);
         return "lever";
     }
 
@@ -65,6 +70,7 @@ public class PhysicsController {
                                    Model model) {
         double velocity = physicsService.calculateFreefall(height);
         model.addAttribute("velocity", velocity);
+        model.addAttribute("height", height);
         return "freefall";
     }
 }

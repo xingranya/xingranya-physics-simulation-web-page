@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杠杆原理</title>
+    <style>
+        .canvas-container {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            background-color: #f0f8ff;
+        }
+
+        .result-container {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>杠杆原理计算</h1>
+    <form action="/calculateLever" method="post">
+        <label for="leverLength">杠杆长度 (m):</label>
+        <input type="number" name="leverLength" th:value="${leverLength}" step="0.1" required><br><br>
+        
+        <label for="force">施加力 (N):</label>
+        <input type="number" name="force" th:value="${force}" step="0.1" required><br><br>
+        
+        <label for="angle">力的角度 (°):</label>
+        <input type="number" name="angle" th:value="${angle}" step="1" required><br><br>
+        
+        <button type="submit">计算力矩</button>
+    </form>
+
+    <div class="result-container" th:if="${torque}">
+        <h3>计算结果：</h3>
+        <p>力矩 = <span th:text="${torque}">0.0</span> N·m</p>
+        <p>有效力臂 = <span th:text="${leverLength * Math.sin(Math.toRadians(angle))}">0.0</span> m</p>
+        <p>力的垂直分量 = <span th:text="${force * Math.sin(Math.toRadians(angle))}">0.0</span> N</p>
+        <p>力的水平分量 = <span th:text="${force * Math.cos(Math.toRadians(angle))}">0.0</span> N</p>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="leverCanvas" width="400" height="300"></canvas>
+    </div>
+
+    <a href="/" class="back-button">返回主页</a>
+
+    <script th:inline="javascript">
+        const canvas = document.getElementById('leverCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function drawLever(leverLength, force, angle) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制背景
+            ctx.fillStyle = '#f0f8ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制支点
+            const pivotX = canvas.width / 2;
+            const pivotY = canvas.height / 2;
+            ctx.beginPath();
+            ctx.arc(pivotX, pivotY, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#000';
+            ctx.fill();
+            
+            // 绘制杠杆
+            ctx.beginPath();
+            ctx.moveTo(pivotX - leverLength * 50, pivotY);
+            ctx.lineTo(pivotX + leverLength * 50, pivotY);
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // 绘制力的箭头
+            const radians = Math.PI * angle / 180;
+            const arrowLength = force * 2;
+            const arrowX = pivotX + leverLength * 50;
+            const arrowY = pivotY;
+            
+            // 力的方向线
+            ctx.beginPath();
+            ctx.moveTo(arrowX, arrowY);
+            ctx.lineTo(arrowX - arrowLength * Math.cos(radians), 
+                      arrowY - arrowLength * Math.sin(radians));
+            ctx.strokeStyle = '#FF5722';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 力的箭头
+            const arrowAngle = Math.atan2(arrowY - (arrowY - arrowLength * Math.sin(radians)),
+                                        arrowX - (arrowX - arrowLength * Math.cos(radians)));
+            const arrowSize = 10;
+            
+            ctx.beginPath();
+            ctx.moveTo(arrowX - arrowLength * Math.cos(radians), 
+                      arrowY - arrowLength * Math.sin(radians));
+            ctx.lineTo(arrowX - arrowLength * Math.cos(radians) + arrowSize * Math.cos(arrowAngle - Math.PI/6),
+                      arrowY - arrowLength * Math.sin(radians) + arrowSize * Math.sin(arrowAngle - Math.PI/6));
+            ctx.lineTo(arrowX - arrowLength * Math.cos(radians) + arrowSize * Math.cos(arrowAngle + Math.PI/6),
+                      arrowY - arrowLength * Math.sin(radians) + arrowSize * Math.sin(arrowAngle + Math.PI/6));
+            ctx.closePath();
+            ctx.fillStyle = '#FF5722';
+            ctx.fill();
+            
+            // 绘制力的分解
+            const verticalComponent = force * Math.sin(radians);
+            const horizontalComponent = force * Math.cos(radians);
+            
+            // 垂直分量
+            ctx.beginPath();
+            ctx.moveTo(arrowX, arrowY);
+            ctx.lineTo(arrowX, arrowY - verticalComponent * 2);
+            ctx.strokeStyle = '#4CAF50';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 水平分量
+            ctx.beginPath();
+            ctx.moveTo(arrowX, arrowY);
+            ctx.lineTo(arrowX - horizontalComponent * 2, arrowY);
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 添加标签
+            ctx.fillStyle = '#000';
+            ctx.font = '12px Arial';
+            ctx.fillText('F = ' + force + ' N', arrowX - arrowLength * Math.cos(radians) - 30, 
+                        arrowY - arrowLength * Math.sin(radians) - 10);
+            ctx.fillText('Fy = ' + verticalComponent.toFixed(2) + ' N', arrowX, 
+                        arrowY - verticalComponent * 2 - 10);
+            ctx.fillText('Fx = ' + horizontalComponent.toFixed(2) + ' N', 
+                        arrowX - horizontalComponent * 2 - 30, arrowY + 15);
+        }
+
+        // 当页面加载时绘制杠杆
+        window.onload = function() {
+            const leverLength = parseFloat([[${leverLength}]] || 2);
+            const force = parseFloat([[${force}]] || 50);
+            const angle = parseFloat([[${angle}]] || 30);
+            drawLever(leverLength, force, angle);
+        };
+
+        // 当表单提交后重新绘制
+        document.querySelector('form').addEventListener('submit', function() {
+            const leverLength = parseFloat(document.querySelector('input[name="leverLength"]').value);
+            const force = parseFloat(document.querySelector('input[name="force"]').value);
+            const angle = parseFloat(document.querySelector('input[name="angle"]').value);
+            drawLever(leverLength, force, angle);
+        });
+    </script>
+</body>
+</html> 

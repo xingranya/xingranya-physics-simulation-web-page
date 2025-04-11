@@ -13,6 +13,28 @@
         .canvas-container {
             margin: 20px 0;
             border: 1px solid #ddd;
+            background-color: #f0f8ff;
+        }
+
+        .result-container {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
         }
     </style>
 </head>
@@ -31,14 +53,20 @@
         <button type="submit">计算加速度</button>
     </form>
 
-    <div th:if="${acceleration}">
+    <div class="result-container" th:if="${acceleration}">
         <h3>计算结果：</h3>
         <p>净加速度 = <span th:text="${acceleration}">0.0</span> m/s²</p>
+        <p>重力加速度分量 = <span th:text="${mass * 9.80665 * Math.sin(Math.toRadians(angle))}">0.0</span> m/s²</p>
+        <p>摩擦力 = <span th:text="${frictionCoefficient * mass * 9.80665 * Math.cos(Math.toRadians(angle))}">0.0</span> N</p>
+        <p>法向力 = <span th:text="${mass * 9.80665 * Math.cos(Math.toRadians(angle))}">0.0</span> N</p>
+        <p>重力 = <span th:text="${mass * 9.80665}">0.0</span> N</p>
     </div>
 
     <div class="canvas-container">
         <canvas id="rampCanvas" width="400" height="300"></canvas>
     </div>
+
+    <a href="/" class="back-button">返回主页</a>
 
     <script th:inline="javascript">
         const canvas = document.getElementById('rampCanvas');
@@ -55,6 +83,10 @@
         function drawRamp(angle) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
+            // 绘制天空背景
+            ctx.fillStyle = '#f0f8ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             // 绘制斜面
             ctx.beginPath();
             ctx.moveTo(50, 250);
@@ -69,6 +101,8 @@
             // 绘制物体
             ctx.fillStyle = '#2196F3';
             ctx.fillRect(box.x, box.y, box.width, box.height);
+            ctx.strokeStyle = '#1976D2';
+            ctx.strokeRect(box.x, box.y, box.width, box.height);
         }
     
         function startAnimation(angle, acceleration) {
@@ -115,13 +149,27 @@
             drawRamp(angle);
             animationId = requestAnimationFrame(animate);
         }
-    </script>
 
-    // 当计算结果可用时启动动画
-    if ([[${acceleration}]] !== undefined) {
-        startAnimation(parseFloat([[${angle}]] || 30), parseFloat([[${acceleration}]]));
-    } else {
-        drawRamp(parseFloat([[${angle}]] || 30));
-    }
+        // 当页面加载时启动动画
+        window.onload = function() {
+            const angle = parseFloat([[${angle}]] || 30);
+            const acceleration = parseFloat([[${acceleration}]] || 0);
+            drawRamp(angle);
+            if (acceleration > 0) {
+                startAnimation(angle, acceleration);
+            }
+        };
+
+        // 当表单提交后重新启动动画
+        document.querySelector('form').addEventListener('submit', function() {
+            const angle = parseFloat(document.querySelector('input[name="angle"]').value);
+            const acceleration = parseFloat([[${acceleration}]] || 0);
+            if (acceleration > 0) {
+                startAnimation(angle, acceleration);
+            } else {
+                drawRamp(angle);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -12,6 +12,28 @@
             position: relative;
             height: 400px;
             overflow: hidden;
+            background-color: #f0f8ff;
+        }
+
+        .result-container {
+            background-color: #e8f4fc;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .back-button:hover {
+            background-color: #2980b9;
         }
     </style>
 </head>
@@ -24,14 +46,20 @@
         <button type="submit">计算下落时间</button>
     </form>
 
-    <div th:if="${time}">
+    <div class="result-container" th:if="${velocity}">
         <h3>计算结果：</h3>
-        <p>下落时间 = <span th:text="${time}">0.0</span> 秒</p>
+        <p>下落时间 = <span th:text="${velocity}">0.0</span> 秒</p>
+        <p>终端速度 = 53 m/s</p>
+        <p>空气阻力系数 = 0.5</p>
+        <p>空气密度 = 1.2 kg/m³</p>
+        <p>物体横截面积 = 0.04 m²</p>
     </div>
 
     <div class="animation-container">
         <canvas id="freefallCanvas" width="400" height="400"></canvas>
     </div>
+
+    <a href="/" class="back-button">返回主页</a>
 
     <script th:inline="javascript">
         const canvas = document.getElementById('freefallCanvas');
@@ -47,7 +75,11 @@
         function drawBall() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制更真实的地面
+            // 绘制天空背景
+            ctx.fillStyle = '#f0f8ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制地面
             ctx.beginPath();
             ctx.rect(0, 380, canvas.width, 20);
             ctx.fillStyle = '#8B4513';
@@ -103,6 +135,18 @@
             drawBall();
             animationId = requestAnimationFrame(animate);
         }
+
+        // 当页面加载时启动动画
+        window.onload = function() {
+            const height = parseFloat([[${height}]] || 10);
+            startAnimation(height);
+        };
+
+        // 当表单提交后重新启动动画
+        document.querySelector('form').addEventListener('submit', function() {
+            const height = parseFloat(document.querySelector('input[name="height"]').value);
+            startAnimation(height);
+        });
     </script>
 </body>
 </html>
