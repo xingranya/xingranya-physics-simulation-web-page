@@ -2,6 +2,11 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+
+    <!-- 其他meta标签 -->
+    <link rel="stylesheet" href="/css/style.css">
+
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>斜面滑动</title>
     <style>
@@ -38,7 +43,15 @@
     <script th:inline="javascript">
         const canvas = document.getElementById('rampCanvas');
         const ctx = canvas.getContext('2d');
-        
+        let box = {
+            x: 320,
+            y: 220,
+            width: 30,
+            height: 30,
+            vx: 0,
+            vy: 0
+        };
+    
         function drawRamp(angle) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -48,16 +61,67 @@
             ctx.lineTo(350, 250);
             ctx.lineTo(350, 250 - 200 * Math.tan(Math.PI * angle / 180));
             ctx.closePath();
+            ctx.fillStyle = '#f5f5f5';
+            ctx.fill();
             ctx.strokeStyle = '#666';
             ctx.stroke();
             
             // 绘制物体
             ctx.fillStyle = '#2196F3';
-            ctx.fillRect(320, 220, 30, 30);
+            ctx.fillRect(box.x, box.y, box.width, box.height);
         }
-        
-        // 初始绘制
-        drawRamp(parseFloat([[${angle}]] || 30));
+    
+        function startAnimation(angle, acceleration) {
+            const radians = Math.PI * angle / 180;
+            const rampTopY = 250 - 200 * Math.tan(radians);
+            let startTime;
+            let lastTimestamp;
+            let actualAcceleration = acceleration;
+            
+            function animate(timestamp) {
+                if (!startTime) {
+                    startTime = timestamp;
+                    lastTimestamp = timestamp;
+                }
+                
+                const deltaTime = (timestamp - lastTimestamp) / 1000; // 秒
+                lastTimestamp = timestamp;
+                
+                // 更精确的物理计算
+                const distance = 0.5 * actualAcceleration * Math.pow((timestamp - startTime)/1000, 2) * 100;
+                box.x = 320 - distance * Math.cos(radians);
+                box.y = 220 - distance * Math.sin(radians);
+                
+                // 添加摩擦力效果
+                if (box.x <= 50) {
+                    box.x = 50;
+                    cancelAnimationFrame(animationId);
+                    
+                    // 添加物体停止后的微小震动效果
+                    setTimeout(() => {
+                        box.y += 1;
+                        drawRamp(angle);
+                        setTimeout(() => {
+                            box.y -= 1;
+                            drawRamp(angle);
+                        }, 50);
+                    }, 100);
+                }
+                
+                drawRamp(angle);
+                animationId = requestAnimationFrame(animate);
+            }
+    
+            drawRamp(angle);
+            animationId = requestAnimationFrame(animate);
+        }
     </script>
+
+    // 当计算结果可用时启动动画
+    if ([[${acceleration}]] !== undefined) {
+        startAnimation(parseFloat([[${angle}]] || 30), parseFloat([[${acceleration}]]));
+    } else {
+        drawRamp(parseFloat([[${angle}]] || 30));
+    }
 </body>
 </html>
