@@ -35,20 +35,33 @@
         .back-button:hover {
             background-color: #2980b9;
         }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .buttons button {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <h1>自由落体运动计算</h1>
-    <form action="/calculateFreefall" method="post">
+    <form id="freefallForm">
         <label for="height">下落高度 (m):</label>
-        <input type="number" name="height" th:value="${height}" step="0.1" required><br><br>
+        <input type="number" id="height" name="height" th:value="${height}" step="0.1" required><br><br>
         
-        <button type="submit">计算下落时间</button>
+        <div class="buttons">
+            <button type="button" id="calculateBtn">计算下落时间</button>
+            <button type="button" id="animateBtn">播放动画</button>
+        </div>
     </form>
 
-    <div class="result-container" th:if="${velocity}">
+    <div class="result-container" id="resultContainer" style="display: none;">
         <h3>计算结果：</h3>
-        <p>下落时间 = <span th:text="${velocity}">0.0</span> 秒</p>
+        <p>下落时间 = <span id="timeResult">0.0</span> 秒</p>
         <p>终端速度 = 53 m/s</p>
         <p>空气阻力系数 = 0.5</p>
         <p>空气密度 = 1.2 kg/m³</p>
@@ -71,6 +84,8 @@
             vy: 0,
             scale: 50 // 像素/米的比例
         };
+        let animationId = null;
+        let isAnimating = false;
     
         function drawBall() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -102,6 +117,10 @@
         }
     
         function startAnimation(height) {
+            if (isAnimating) {
+                cancelAnimationFrame(animationId);
+            }
+            isAnimating = true;
             let startTime;
             const groundY = 380 - ball.radius;
             ball.y = 50;
@@ -124,6 +143,7 @@
                     // 添加多次反弹效果
                     if (Math.abs(ball.vy) < 1) {
                         ball.vy = 0;
+                        isAnimating = false;
                         cancelAnimationFrame(animationId);
                     }
                 }
@@ -136,17 +156,47 @@
             animationId = requestAnimationFrame(animate);
         }
 
-        // 当页面加载时启动动画
-        window.onload = function() {
-            const height = parseFloat([[${height}]] || 10);
-            startAnimation(height);
-        };
+        // 计算下落时间
+        function calculateFreefall(height) {
+            let time = 0;
+            let velocity = 0;
+            let distance = 0;
+            const deltaT = 0.01;
+            const terminalVelocity = 53;
+            
+            while (distance < height) {
+                const airResistance = 0.5 * 1.2 * 0.04 * velocity * velocity;
+                const netForce = 9.80665 - airResistance;
+                const acceleration = netForce;
+                
+                velocity += acceleration * deltaT;
+                distance += velocity * deltaT;
+                time += deltaT;
+                
+                if (velocity >= terminalVelocity) {
+                    time += (height - distance) / terminalVelocity;
+                    break;
+                }
+            }
+            
+            return time;
+        }
 
-        // 当表单提交后重新启动动画
-        document.querySelector('form').addEventListener('submit', function() {
-            const height = parseFloat(document.querySelector('input[name="height"]').value);
+        // 事件监听
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            const height = parseFloat(document.getElementById('height').value);
+            const time = calculateFreefall(height);
+            document.getElementById('timeResult').textContent = time.toFixed(2);
+            document.getElementById('resultContainer').style.display = 'block';
+        });
+
+        document.getElementById('animateBtn').addEventListener('click', function() {
+            const height = parseFloat(document.getElementById('height').value);
             startAnimation(height);
         });
+
+        // 初始绘制
+        drawBall();
     </script>
 </body>
 </html>

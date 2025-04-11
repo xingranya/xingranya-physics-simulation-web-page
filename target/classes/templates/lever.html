@@ -32,29 +32,42 @@
         .back-button:hover {
             background-color: #2980b9;
         }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .buttons button {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <h1>杠杆原理计算</h1>
-    <form action="/calculateLever" method="post">
+    <form id="leverForm">
         <label for="leverLength">杠杆长度 (m):</label>
-        <input type="number" name="leverLength" th:value="${leverLength}" step="0.1" required><br><br>
+        <input type="number" id="leverLength" name="leverLength" th:value="${leverLength}" step="0.1" required><br><br>
         
         <label for="force">施加力 (N):</label>
-        <input type="number" name="force" th:value="${force}" step="0.1" required><br><br>
+        <input type="number" id="force" name="force" th:value="${force}" step="0.1" required><br><br>
         
         <label for="angle">力的角度 (°):</label>
-        <input type="number" name="angle" th:value="${angle}" step="1" required><br><br>
+        <input type="number" id="angle" name="angle" th:value="${angle}" step="1" required><br><br>
         
-        <button type="submit">计算力矩</button>
+        <div class="buttons">
+            <button type="button" id="calculateBtn">计算力矩</button>
+            <button type="button" id="animateBtn">播放动画</button>
+        </div>
     </form>
 
-    <div class="result-container" th:if="${torque}">
+    <div class="result-container" id="resultContainer" style="display: none;">
         <h3>计算结果：</h3>
-        <p>力矩 = <span th:text="${torque}">0.0</span> N·m</p>
-        <p>有效力臂 = <span th:text="${leverLength * Math.sin(Math.toRadians(angle))}">0.0</span> m</p>
-        <p>力的垂直分量 = <span th:text="${force * Math.sin(Math.toRadians(angle))}">0.0</span> N</p>
-        <p>力的水平分量 = <span th:text="${force * Math.cos(Math.toRadians(angle))}">0.0</span> N</p>
+        <p>力矩 = <span id="torqueResult">0.0</span> N·m</p>
+        <p>有效力臂 = <span id="effectiveLeverResult">0.0</span> m</p>
+        <p>力的垂直分量 = <span id="verticalForceResult">0.0</span> N</p>
+        <p>力的水平分量 = <span id="horizontalForceResult">0.0</span> N</p>
     </div>
 
     <div class="canvas-container">
@@ -66,8 +79,13 @@
     <script th:inline="javascript">
         const canvas = document.getElementById('leverCanvas');
         const ctx = canvas.getContext('2d');
+        let animationId = null;
+        let isAnimating = false;
+        let currentAngle = 30;
+        let currentForce = 50;
+        let currentLeverLength = 2;
         
-        function drawLever(leverLength, force, angle) {
+        function drawLever(leverLength, force, angle, rotation = 0) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             // 绘制背景
@@ -83,47 +101,52 @@
             ctx.fill();
             
             // 绘制杠杆
+            const radians = Math.PI * rotation / 180;
+            ctx.save();
+            ctx.translate(pivotX, pivotY);
+            ctx.rotate(radians);
+            
             ctx.beginPath();
-            ctx.moveTo(pivotX - leverLength * 50, pivotY);
-            ctx.lineTo(pivotX + leverLength * 50, pivotY);
+            ctx.moveTo(-leverLength * 50, 0);
+            ctx.lineTo(leverLength * 50, 0);
             ctx.strokeStyle = '#666';
             ctx.lineWidth = 3;
             ctx.stroke();
             
             // 绘制力的箭头
-            const radians = Math.PI * angle / 180;
+            const forceRadians = Math.PI * angle / 180;
             const arrowLength = force * 2;
-            const arrowX = pivotX + leverLength * 50;
-            const arrowY = pivotY;
+            const arrowX = leverLength * 50;
+            const arrowY = 0;
             
             // 力的方向线
             ctx.beginPath();
             ctx.moveTo(arrowX, arrowY);
-            ctx.lineTo(arrowX - arrowLength * Math.cos(radians), 
-                      arrowY - arrowLength * Math.sin(radians));
+            ctx.lineTo(arrowX - arrowLength * Math.cos(forceRadians), 
+                      arrowY - arrowLength * Math.sin(forceRadians));
             ctx.strokeStyle = '#FF5722';
             ctx.lineWidth = 2;
             ctx.stroke();
             
             // 力的箭头
-            const arrowAngle = Math.atan2(arrowY - (arrowY - arrowLength * Math.sin(radians)),
-                                        arrowX - (arrowX - arrowLength * Math.cos(radians)));
+            const arrowAngle = Math.atan2(arrowY - (arrowY - arrowLength * Math.sin(forceRadians)),
+                                        arrowX - (arrowX - arrowLength * Math.cos(forceRadians)));
             const arrowSize = 10;
             
             ctx.beginPath();
-            ctx.moveTo(arrowX - arrowLength * Math.cos(radians), 
-                      arrowY - arrowLength * Math.sin(radians));
-            ctx.lineTo(arrowX - arrowLength * Math.cos(radians) + arrowSize * Math.cos(arrowAngle - Math.PI/6),
-                      arrowY - arrowLength * Math.sin(radians) + arrowSize * Math.sin(arrowAngle - Math.PI/6));
-            ctx.lineTo(arrowX - arrowLength * Math.cos(radians) + arrowSize * Math.cos(arrowAngle + Math.PI/6),
-                      arrowY - arrowLength * Math.sin(radians) + arrowSize * Math.sin(arrowAngle + Math.PI/6));
+            ctx.moveTo(arrowX - arrowLength * Math.cos(forceRadians), 
+                      arrowY - arrowLength * Math.sin(forceRadians));
+            ctx.lineTo(arrowX - arrowLength * Math.cos(forceRadians) + arrowSize * Math.cos(arrowAngle - Math.PI/6),
+                      arrowY - arrowLength * Math.sin(forceRadians) + arrowSize * Math.sin(arrowAngle - Math.PI/6));
+            ctx.lineTo(arrowX - arrowLength * Math.cos(forceRadians) + arrowSize * Math.cos(arrowAngle + Math.PI/6),
+                      arrowY - arrowLength * Math.sin(forceRadians) + arrowSize * Math.sin(arrowAngle + Math.PI/6));
             ctx.closePath();
             ctx.fillStyle = '#FF5722';
             ctx.fill();
             
             // 绘制力的分解
-            const verticalComponent = force * Math.sin(radians);
-            const horizontalComponent = force * Math.cos(radians);
+            const verticalComponent = force * Math.sin(forceRadians);
+            const horizontalComponent = force * Math.cos(forceRadians);
             
             // 垂直分量
             ctx.beginPath();
@@ -141,32 +164,86 @@
             ctx.lineWidth = 2;
             ctx.stroke();
             
+            ctx.restore();
+            
             // 添加标签
             ctx.fillStyle = '#000';
             ctx.font = '12px Arial';
-            ctx.fillText('F = ' + force + ' N', arrowX - arrowLength * Math.cos(radians) - 30, 
-                        arrowY - arrowLength * Math.sin(radians) - 10);
+            ctx.fillText('F = ' + force + ' N', arrowX - arrowLength * Math.cos(forceRadians) - 30, 
+                        arrowY - arrowLength * Math.sin(forceRadians) - 10);
             ctx.fillText('Fy = ' + verticalComponent.toFixed(2) + ' N', arrowX, 
                         arrowY - verticalComponent * 2 - 10);
             ctx.fillText('Fx = ' + horizontalComponent.toFixed(2) + ' N', 
                         arrowX - horizontalComponent * 2 - 30, arrowY + 15);
         }
+        
+        function startAnimation(leverLength, force, angle) {
+            if (isAnimating) {
+                cancelAnimationFrame(animationId);
+            }
+            isAnimating = true;
+            let rotation = 0;
+            let direction = 1;
+            
+            function animate() {
+                rotation += direction * 2;
+                if (Math.abs(rotation) >= 30) {
+                    direction *= -1;
+                }
+                
+                drawLever(leverLength, force, angle, rotation);
+                animationId = requestAnimationFrame(animate);
+            }
+            
+            drawLever(leverLength, force, angle, rotation);
+            animationId = requestAnimationFrame(animate);
+        }
 
-        // 当页面加载时绘制杠杆
-        window.onload = function() {
-            const leverLength = parseFloat([[${leverLength}]] || 2);
-            const force = parseFloat([[${force}]] || 50);
-            const angle = parseFloat([[${angle}]] || 30);
-            drawLever(leverLength, force, angle);
-        };
+        // 计算物理量
+        function calculatePhysics(leverLength, force, angle) {
+            const radians = Math.PI * angle / 180;
+            const effectiveLeverLength = leverLength * Math.sin(radians);
+            const torque = force * effectiveLeverLength;
+            const verticalForce = force * Math.sin(radians);
+            const horizontalForce = force * Math.cos(radians);
+            
+            return {
+                torque: torque,
+                effectiveLeverLength: effectiveLeverLength,
+                verticalForce: verticalForce,
+                horizontalForce: horizontalForce
+            };
+        }
 
-        // 当表单提交后重新绘制
-        document.querySelector('form').addEventListener('submit', function() {
-            const leverLength = parseFloat(document.querySelector('input[name="leverLength"]').value);
-            const force = parseFloat(document.querySelector('input[name="force"]').value);
-            const angle = parseFloat(document.querySelector('input[name="angle"]').value);
-            drawLever(leverLength, force, angle);
+        // 事件监听
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            const leverLength = parseFloat(document.getElementById('leverLength').value);
+            const force = parseFloat(document.getElementById('force').value);
+            const angle = parseFloat(document.getElementById('angle').value);
+            
+            const results = calculatePhysics(leverLength, force, angle);
+            
+            document.getElementById('torqueResult').textContent = results.torque.toFixed(2);
+            document.getElementById('effectiveLeverResult').textContent = results.effectiveLeverLength.toFixed(2);
+            document.getElementById('verticalForceResult').textContent = results.verticalForce.toFixed(2);
+            document.getElementById('horizontalForceResult').textContent = results.horizontalForce.toFixed(2);
+            
+            document.getElementById('resultContainer').style.display = 'block';
+            
+            currentLeverLength = leverLength;
+            currentForce = force;
+            currentAngle = angle;
         });
+
+        document.getElementById('animateBtn').addEventListener('click', function() {
+            startAnimation(currentLeverLength, currentForce, currentAngle);
+        });
+
+        // 初始绘制
+        const initialLeverLength = /*[[${leverLength}]]*/ 2;
+        const initialForce = /*[[${force}]]*/ 50;
+        const initialAngle = /*[[${angle}]]*/ 30;
+        drawLever(initialLeverLength, initialForce, initialAngle);
     </script>
 </body>
 </html> 
