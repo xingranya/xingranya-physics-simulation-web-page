@@ -12,6 +12,11 @@ public class PhysicsController {
     @Autowired
     private PhysicsService physicsService;
 
+    @GetMapping("/")
+    public String showHomePage() {
+        return "index";
+    }
+
     @GetMapping("/ramp")
     public String showRampPage(Model model) {
         model.addAttribute("angle", 30.0);
@@ -34,33 +39,32 @@ public class PhysicsController {
     }
 
     @GetMapping("/lever")
-public String showLeverPage(Model model) {
-    model.addAttribute("leverLength", 2.0);
-    model.addAttribute("force", 50.0);
-    return "lever";
-}
+    public String showLeverPage(Model model) {
+        model.addAttribute("leverLength", 2.0);
+        model.addAttribute("force", 50.0);
+        return "lever";
+    }
 
-@PostMapping("/calculateLever")
-public String calculateLever(@RequestParam double leverLength,
-                           @RequestParam double force,
-                           Model model) {
-    double torque = physicsService.calculateLever(leverLength, force);
-    model.addAttribute("torque", torque);
-    return "lever";
-}
-
-@GetMapping("/freefall")
-public String showFreefallPage(Model model) {
-    model.addAttribute("height", 10.0);
-    return "freefall";
-}
-
-@PostMapping("/calculateFreefall")
-public String calculateFreefall(@RequestParam double height,
+    @PostMapping("/calculateLever")
+    public String calculateLever(@RequestParam double leverLength,
+                               @RequestParam double force,
                                Model model) {
-    double velocity = physicsService.calculateFreefall(height);
-    model.addAttribute("velocity", velocity);
-    return "freefall";
-}
+        double torque = physicsService.calculateLever(leverLength, force);
+        model.addAttribute("torque", torque);
+        return "lever";
+    }
 
+    @GetMapping("/freefall")
+    public String showFreefallPage(Model model) {
+        model.addAttribute("height", 10.0);
+        return "freefall";
+    }
+
+    @PostMapping("/calculateFreefall")
+    public String calculateFreefall(@RequestParam double height,
+                                   Model model) {
+        double velocity = physicsService.calculateFreefall(height);
+        model.addAttribute("velocity", velocity);
+        return "freefall";
+    }
 }
