@@ -152,7 +152,7 @@
         }
 
         .result-container h3 {
-            font-size: by: 1.25rem;
+            font-size: 1.25rem;
             font-weight: 500;
             color: var(--md-sys-color-on-surface);
             margin-bottom: 1rem;
@@ -272,6 +272,11 @@
     </div>
 
     <script th:inline="javascript">
+        // 获取CSS变量
+        const getColor = (varName) => {
+            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        };
+
         const canvas = document.getElementById('leverCanvas');
         const ctx = canvas.getContext('2d');
         let animationId = null;
@@ -282,10 +287,11 @@
         let rotationAngle = 0;
         let timeScale = 0.5;
 
+        // 确保画布尺寸适合容器
         function resizeCanvas() {
             const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
+            canvas.width = container.clientWidth - 20; // 减去padding
+            canvas.height = container.clientHeight - 20;
         }
 
         function drawLever(rotation = 0) {
@@ -306,13 +312,13 @@
             ctx.rotate(rotation);
             
             // 绘制杠杆
-            ctx.fillStyle = var(--md-sys-color-primary);
+            ctx.fillStyle = getColor('--md-sys-color-primary');
             ctx.fillRect(-leverLength / 2, -leverHeight / 2, leverLength, leverHeight);
             
             // 绘制支点
             ctx.beginPath();
             ctx.arc(0, 0, 8, 0, Math.PI * 2);
-            ctx.fillStyle = var(--md-sys-color-outline);
+            ctx.fillStyle = getColor('--md-sys-color-outline');
             ctx.fill();
             
             // 绘制刻度
@@ -320,11 +326,11 @@
                 ctx.beginPath();
                 ctx.moveTo(i, -leverHeight / 2 - 5);
                 ctx.lineTo(i, -leverHeight / 2);
-                ctx.strokeStyle = var(--md-sys-color-on-surface-variant);
+                ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
                 ctx.stroke();
                 
                 if (i % (leverLength / 5) === 0) {
-                    ctx.fillStyle = var(--md-sys-color-on-surface-variant);
+                    ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
                     ctx.font = '12px Roboto';
                     ctx.fillText((i / (leverLength / 2) * currentLeverLength / 2).toFixed(1) + 'm', i - 10, -leverHeight / 2 - 10);
                 }
@@ -375,7 +381,7 @@
             ctx.beginPath();
             ctx.moveTo(forceX, forceY);
             ctx.lineTo(
-                forceX + forceLength * Math.cos(forceAngle) * Math.cos(angleRad),
+                forceX + forceLength * Math.cos(angleRad),
                 forceY
             );
             ctx.strokeStyle = '#2196F3'; // 水平分力颜色
@@ -387,7 +393,7 @@
             ctx.moveTo(forceX, forceY);
             ctx.lineTo(
                 forceX,
-                forceY + forceLength * Math.sin(forceAngle) * Math.sin(angleRad)
+                forceY + forceLength * Math.sin(angleRad)
             );
             ctx.strokeStyle = '#4CAF50'; // 垂直分力颜色
             ctx.lineWidth = 2;
@@ -396,13 +402,13 @@
             // 绘制角度
             ctx.beginPath();
             ctx.arc(forceX, forceY, 20, rotation, forceAngle);
-            ctx.strokeStyle = var(--md-sys-color-outline);
+            ctx.strokeStyle = getColor('--md-sys-color-outline');
             ctx.stroke();
             
             // 绘制角度值
             const angleLabelX = forceX + 25 * Math.cos(rotation + angleRad / 2);
             const angleLabelY = forceY + 25 * Math.sin(rotation + angleRad / 2);
-            ctx.fillStyle = var(--md-sys-color-on-surface-variant);
+            ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
             ctx.font = '14px Roboto';
             ctx.fillText(currentAngle + '°', angleLabelX, angleLabelY);
             
@@ -419,13 +425,19 @@
         function startAnimation() {
             if (isAnimating) {
                 cancelAnimationFrame(animationId);
+                isAnimating = false;
+                document.getElementById('animateBtn').textContent = '播放动画';
+                return;
             }
             
             isAnimating = true;
+            document.getElementById('animateBtn').textContent = '停止动画';
             const startTime = Date.now();
             const maxRotation = 0.2;
             
             function animate() {
+                if (!isAnimating) return;
+                
                 const elapsedTime = (Date.now() - startTime) / 1000;
                 const rotation = maxRotation * Math.sin(elapsedTime * 2);
                 
@@ -452,8 +464,37 @@
             };
         }
 
+        // 监听页面加载和窗口大小变化
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            drawLever(0);
+            
+            // 设置初始值
+            const leverLengthInput = document.getElementById('leverLength');
+            const forceInput = document.getElementById('force');
+            const angleInput = document.getElementById('angle');
+            
+            if (!leverLengthInput.value) leverLengthInput.value = currentLeverLength;
+            if (!forceInput.value) forceInput.value = currentForce;
+            if (!angleInput.value) angleInput.value = currentAngle;
+            
+            // 实时更新预览
+            [leverLengthInput, forceInput, angleInput].forEach(input => {
+                input.addEventListener('input', function() {
+                    const leverLength = parseFloat(leverLengthInput.value) || currentLeverLength;
+                    const force = parseFloat(forceInput.value) || currentForce;
+                    const angle = parseFloat(angleInput.value) || currentAngle;
+                    
+                    currentLeverLength = leverLength;
+                    currentForce = force;
+                    currentAngle = angle;
+                    
+                    drawLever(0);
+                });
+            });
+        });
+        
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
         document.getElementById('calculateBtn').addEventListener('click', function() {
             const leverLength = parseFloat(document.getElementById('leverLength').value);
@@ -489,7 +530,16 @@
         currentForce = initialForce;
         currentAngle = initialAngle;
         
-        drawLever(0);
+        // 页面加载时自动调整画布大小
+        if (document.readyState === 'complete') {
+            resizeCanvas();
+            drawLever(0);
+        } else {
+            window.addEventListener('load', function() {
+                resizeCanvas();
+                drawLever(0);
+            });
+        }
     </script>
 </body>
 </html> 
