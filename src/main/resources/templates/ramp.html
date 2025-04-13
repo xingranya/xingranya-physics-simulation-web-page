@@ -339,8 +339,46 @@
             const boxX = padding + boxSize;
             const boxY = groundY - boxSize * Math.sin(angleRad);
             
+            // 保存当前状态
+            ctx.save();
+            
+            // 旋转坐标系以匹配斜面角度
+            ctx.translate(boxX, boxY);
+            ctx.rotate(angleRad);
+            
+            // 绘制物体（现在会沿着斜面放置）
             ctx.fillStyle = getColor('--md-sys-color-primary');
-            ctx.fillRect(boxX, boxY, boxSize, boxSize);
+            ctx.fillRect(-boxSize/2, -boxSize/2, boxSize, boxSize);
+            
+            // 绘制力分解
+            const forceLength = 50;
+            
+            // 重力（向下）
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, forceLength);
+            ctx.strokeStyle = getColor('--md-sys-color-error');
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 法向力（垂直于斜面）
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-forceLength * Math.sin(angleRad), -forceLength * Math.cos(angleRad));
+            ctx.strokeStyle = getColor('--md-sys-color-success');
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 摩擦力（沿着斜面向上）
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(forceLength, 0);
+            ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // 恢复状态
+            ctx.restore();
             
             // 绘制文字标签
             ctx.fillStyle = getColor('--md-sys-color-on-surface');
@@ -417,41 +455,50 @@
                 ctx.textAlign = 'center';
                 ctx.fillText(currentAngle + '°', padding + 20, groundY - 20);
                 
-                // 绘制物体当前位置
+                // 计算物体位置
                 const boxX = padding + boxSize + progress * (rampLength - boxSize) * Math.cos(angleRad);
                 const boxY = groundY - boxSize * Math.sin(angleRad) - progress * (rampLength - boxSize) * Math.sin(angleRad);
                 
+                // 保存当前状态
+                ctx.save();
+                
+                // 旋转坐标系以匹配斜面角度
+                ctx.translate(boxX, boxY);
+                ctx.rotate(angleRad);
+                
+                // 绘制物体
                 ctx.fillStyle = getColor('--md-sys-color-primary');
-                ctx.fillRect(boxX, boxY, boxSize, boxSize);
+                ctx.fillRect(-boxSize/2, -boxSize/2, boxSize, boxSize);
                 
                 // 绘制力分解
                 const forceLength = 50;
-                const forceX = boxX + boxSize / 2;
-                const forceY = boxY + boxSize / 2;
                 
-                // 重力分量
+                // 重力（向下）
                 ctx.beginPath();
-                ctx.moveTo(forceX, forceY);
-                ctx.lineTo(forceX, forceY + forceLength * Math.sin(angleRad));
+                ctx.moveTo(0, 0);
+                ctx.lineTo(0, forceLength);
                 ctx.strokeStyle = getColor('--md-sys-color-error');
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 
-                // 法向力
+                // 法向力（垂直于斜面）
                 ctx.beginPath();
-                ctx.moveTo(forceX, forceY);
-                ctx.lineTo(forceX - forceLength * Math.sin(angleRad), forceY - forceLength * Math.cos(angleRad));
+                ctx.moveTo(0, 0);
+                ctx.lineTo(-forceLength * Math.sin(angleRad), -forceLength * Math.cos(angleRad));
                 ctx.strokeStyle = getColor('--md-sys-color-success');
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 
-                // 摩擦力
+                // 摩擦力（沿着斜面向上）
                 ctx.beginPath();
-                ctx.moveTo(forceX, forceY);
-                ctx.lineTo(forceX + forceLength * Math.cos(angleRad), forceY + forceLength * Math.sin(angleRad));
+                ctx.moveTo(0, 0);
+                ctx.lineTo(forceLength, 0);
                 ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
                 ctx.lineWidth = 2;
                 ctx.stroke();
+                
+                // 恢复状态
+                ctx.restore();
                 
                 // 绘制文字标签
                 ctx.fillStyle = getColor('--md-sys-color-on-surface');
