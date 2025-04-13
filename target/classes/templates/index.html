@@ -16,6 +16,7 @@
             --md-sys-color-on-surface: #1D1B20;
             --md-sys-color-surface-variant: #E7E0EC;
             --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
         }
 
         body {
@@ -24,43 +25,57 @@
             padding: 0;
             background-color: var(--md-sys-color-surface);
             color: var(--md-sys-color-on-surface);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 4rem 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         header {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 4rem;
+            max-width: 800px;
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 3.5rem;
             font-weight: 500;
             color: var(--md-sys-color-on-surface);
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             color: var(--md-sys-color-on-surface-variant);
             margin-bottom: 2rem;
+            line-height: 1.6;
+            font-weight: 400;
         }
 
         .experiments-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .experiment-card {
             background-color: var(--md-sys-color-surface);
-            border-radius: 1rem;
-            padding: 1.5rem;
+            border-radius: 1.5rem;
+            padding: 2rem;
             text-decoration: none;
             color: var(--md-sys-color-on-surface);
             transition: all 0.3s ease;
@@ -70,40 +85,46 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
+            height: 100%;
         }
 
         .experiment-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
         .experiment-card:active {
             transform: translateY(0);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .experiment-icon {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 1rem;
+            width: 72px;
+            height: 72px;
+            margin-bottom: 1.5rem;
             background-color: var(--md-sys-color-primary-container);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--md-sys-color-on-primary-container);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .experiment-title {
-            font-size: 1.25rem;
+            font-size: 1.5rem;
             font-weight: 500;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--md-sys-color-on-surface);
+            letter-spacing: -0.25px;
         }
 
         .experiment-description {
-            font-size: 0.875rem;
+            font-size: 1rem;
             color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            flex-grow: 1;
         }
 
         .experiment-button {
@@ -111,32 +132,48 @@
             color: var(--md-sys-color-on-primary);
             border: none;
             border-radius: 1.5rem;
-            padding: 0.75rem 1.5rem;
+            padding: 0.875rem 2rem;
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .experiment-button:hover {
             background-color: var(--md-sys-color-primary);
             opacity: 0.9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         .experiment-button:active {
             background-color: var(--md-sys-color-primary);
             opacity: 0.8;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 1rem;
+                padding: 2rem 1rem;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.1rem;
             }
 
             .experiments-grid {
                 grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .experiment-card {
+                padding: 1.5rem;
             }
         }
     </style>
@@ -145,38 +182,38 @@
     <div class="container">
         <header>
             <h1>物理模拟实验</h1>
-            <p class="subtitle">探索物理世界的奥秘，通过交互式模拟实验学习物理原理</p>
+            <p class="subtitle">探索物理世界的奥秘，通过交互式模拟实验学习物理原理。每个实验都经过精心设计，让您直观地理解物理现象背后的科学原理。</p>
         </header>
 
         <div class="experiments-grid">
             <a href="/freefall" class="experiment-card">
                 <div class="experiment-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="10"/>
                         <path d="M12 2v20"/>
                     </svg>
                 </div>
                 <h2 class="experiment-title">自由落体实验</h2>
-                <p class="experiment-description">研究物体在重力作用下的运动规律，探索下落时间与高度的关系</p>
+                <p class="experiment-description">研究物体在重力作用下的运动规律，探索下落时间与高度的关系。通过改变初始高度，观察物体下落过程中的速度变化。</p>
                 <button class="experiment-button">开始实验</button>
             </a>
 
             <a href="/ramp" class="experiment-card">
                 <div class="experiment-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M2 20h20"/>
                         <path d="M2 20l5-10"/>
                         <path d="M17 20l-5-10"/>
                     </svg>
                 </div>
                 <h2 class="experiment-title">斜面运动实验</h2>
-                <p class="experiment-description">分析物体在斜面上的运动，研究摩擦力、重力和加速度的关系</p>
+                <p class="experiment-description">分析物体在斜面上的运动，研究摩擦力、重力和加速度的关系。通过调整斜面角度和摩擦系数，观察物体的运动状态变化。</p>
                 <button class="experiment-button">开始实验</button>
             </a>
 
             <a href="/lever" class="experiment-card">
                 <div class="experiment-icon">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M12 2v20"/>
                         <path d="M2 12h20"/>
                         <path d="M12 2l5 5"/>
@@ -184,7 +221,7 @@
                     </svg>
                 </div>
                 <h2 class="experiment-title">杠杆原理实验</h2>
-                <p class="experiment-description">探索杠杆原理，研究力矩、力臂和力的分解</p>
+                <p class="experiment-description">探索杠杆原理，研究力矩、力臂和力的分解。通过改变力的大小、方向和位置，理解杠杆的平衡条件。</p>
                 <button class="experiment-button">开始实验</button>
             </a>
         </div>
