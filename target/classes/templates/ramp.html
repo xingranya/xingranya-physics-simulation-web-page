@@ -17,6 +17,8 @@
             --md-sys-color-surface-variant: #E7E0EC;
             --md-sys-color-on-surface-variant: #49454F;
             --md-sys-color-outline: #79747E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-success: #4CAF50;
         }
 
         body {
@@ -216,7 +218,7 @@
     <div class="container">
         <div class="header">
             <h1>斜面运动实验</h1>
-            <p>分析物体在斜面上的运动，研究摩擦力、重力和加速度的关系</p>
+            <p>研究物体在斜面上的运动规律，探索重力、摩擦力和加速度的关系</p>
         </div>
 
         <div class="content">
@@ -224,15 +226,15 @@
                 <form id="rampForm">
                     <div class="form-group">
                         <label for="angle">斜面角度 (°)</label>
-                        <input type="number" id="angle" name="angle" th:value="${angle}" min="0" max="90" step="1" required>
+                        <input type="number" id="angle" name="angle" th:value="${angle}" min="0" max="90" step="1" value="30" required>
                     </div>
                     <div class="form-group">
                         <label for="mass">物体质量 (kg)</label>
-                        <input type="number" id="mass" name="mass" th:value="${mass}" min="0.1" step="0.1" required>
+                        <input type="number" id="mass" name="mass" th:value="${mass}" min="0.1" max="100" step="0.1" value="1.0" required>
                     </div>
                     <div class="form-group">
                         <label for="friction">摩擦系数</label>
-                        <input type="number" id="friction" name="friction" th:value="${friction}" min="0" max="1" step="0.01" required>
+                        <input type="number" id="friction" name="friction" th:value="${friction}" min="0" max="1" step="0.01" value="0.1" required>
                     </div>
                     <div class="buttons">
                         <button type="button" id="calculateBtn" class="button button-primary">计算加速度</button>
@@ -270,163 +272,290 @@
     </div>
 
     <script th:inline="javascript">
+        // 获取CSS变量
+        const getColor = (varName) => {
+            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        };
+
         const canvas = document.getElementById('rampCanvas');
         const ctx = canvas.getContext('2d');
         let animationId = null;
         let isAnimating = false;
         let currentAngle = 30;
-        let currentMass = 1;
-        let currentFriction = 0.2;
-        let boxX = 0;
-        let boxY = 0;
-        let boxWidth = 40;
-        let boxHeight = 30;
-        let rampLength = 300;
+        let currentMass = 1.0;
+        let currentFriction = 0.1;
+        const g = 9.8; // 重力加速度 m/s²
         let timeScale = 0.5;
 
+        // 确保画布尺寸适合容器
         function resizeCanvas() {
             const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            rampLength = Math.min(canvas.width * 0.8, canvas.height * 0.8);
+            canvas.width = container.clientWidth - 20; // 减去padding
+            canvas.height = container.clientHeight - 20;
         }
 
-        function drawScene(angle) {
+        function drawScene() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制背景
-            ctx.fillStyle = var(--md-sys-color-surface);
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const padding = 40;
+            const groundY = canvas.height - padding;
+            const rampLength = Math.min(canvas.width - 2 * padding, canvas.height - 2 * padding);
+            const angleRad = currentAngle * Math.PI / 180;
             
-            // 计算斜面位置
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radians = angle * Math.PI / 180;
+            // 绘制背景
+            ctx.fillStyle = getColor('--md-sys-color-surface');
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // 绘制斜面
             ctx.beginPath();
-            ctx.moveTo(centerX - rampLength/2, centerY + rampLength/2 * Math.sin(radians));
-            ctx.lineTo(centerX + rampLength/2, centerY - rampLength/2 * Math.sin(radians));
-            ctx.strokeStyle = var(--md-sys-color-outline);
+            ctx.moveTo(padding, groundY);
+            ctx.lineTo(padding + rampLength * Math.cos(angleRad), groundY - rampLength * Math.sin(angleRad));
             ctx.lineWidth = 2;
+            ctx.strokeStyle = getColor('--md-sys-color-outline');
             ctx.stroke();
             
             // 绘制地面
             ctx.beginPath();
-            ctx.moveTo(centerX - rampLength/2, centerY + rampLength/2 * Math.sin(radians));
-            ctx.lineTo(centerX - rampLength/2, canvas.height);
+            ctx.moveTo(padding, groundY);
+            ctx.lineTo(canvas.width - padding, groundY);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getColor('--md-sys-color-outline');
             ctx.stroke();
             
             // 绘制角度标记
             ctx.beginPath();
-            ctx.arc(centerX - rampLength/2, centerY + rampLength/2 * Math.sin(radians), 30, 0, radians);
+            ctx.arc(padding, groundY, 30, -angleRad, 0);
+            ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
             ctx.stroke();
             
             // 绘制角度值
-            ctx.fillStyle = var(--md-sys-color-on-surface-variant);
-            ctx.font = '14px Roboto';
-            ctx.fillText(angle + '°', centerX - rampLength/2 + 40, centerY + rampLength/2 * Math.sin(radians) - 10);
+            ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
+            ctx.font = '12px Roboto';
+            ctx.textAlign = 'center';
+            ctx.fillText(currentAngle + '°', padding + 20, groundY - 20);
             
             // 绘制物体
-            const boxX = centerX - rampLength/2 + boxWidth/2;
-            const boxY = centerY + rampLength/2 * Math.sin(radians) - boxHeight/2;
+            const boxSize = 30;
+            const boxX = padding + boxSize;
+            const boxY = groundY - boxSize * Math.sin(angleRad);
             
-            ctx.save();
-            ctx.translate(boxX, boxY);
-            ctx.rotate(radians);
-            ctx.fillStyle = var(--md-sys-color-primary);
-            ctx.fillRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight);
-            ctx.restore();
+            ctx.fillStyle = getColor('--md-sys-color-primary');
+            ctx.fillRect(boxX, boxY, boxSize, boxSize);
             
-            // 绘制力的分解
-            const forceLength = 50;
-            const gravityForce = currentMass * 9.8;
-            
-            // 重力
-            ctx.beginPath();
-            ctx.moveTo(boxX, boxY);
-            ctx.lineTo(boxX, boxY + forceLength);
-            ctx.strokeStyle = '#FF5722';
-            ctx.stroke();
-            
-            // 法向力
-            ctx.beginPath();
-            ctx.moveTo(boxX, boxY);
-            ctx.lineTo(boxX - forceLength * Math.sin(radians), boxY - forceLength * Math.cos(radians));
-            ctx.strokeStyle = '#4CAF50';
-            ctx.stroke();
-            
-            // 摩擦力
-            ctx.beginPath();
-            ctx.moveTo(boxX, boxY);
-            ctx.lineTo(boxX + forceLength * Math.cos(radians), boxY + forceLength * Math.sin(radians));
-            ctx.strokeStyle = '#2196F3';
-            ctx.stroke();
+            // 绘制文字标签
+            ctx.fillStyle = getColor('--md-sys-color-on-surface');
+            ctx.font = '16px Roboto';
+            ctx.textAlign = 'center';
+            ctx.fillText('角度: ' + currentAngle + '°', canvas.width / 2, padding - 20);
+            ctx.fillText('质量: ' + currentMass + ' kg', canvas.width / 2, padding);
+            ctx.fillText('摩擦系数: ' + currentFriction, canvas.width / 2, padding + 20);
         }
 
-        function animateBox(angle, mass, friction) {
+        function animateMotion() {
             if (isAnimating) {
                 cancelAnimationFrame(animationId);
+                isAnimating = false;
+                document.getElementById('animateBtn').textContent = '播放动画';
+                drawScene();
+                return;
             }
             
             isAnimating = true;
-            const startTime = Date.now();
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            const radians = angle * Math.PI / 180;
+            document.getElementById('animateBtn').textContent = '停止动画';
             
-            // 计算加速度
-            const g = 9.8;
-            const acceleration = g * (Math.sin(radians) - friction * Math.cos(radians));
+            // 计算物理参数
+            const angleRad = currentAngle * Math.PI / 180;
+            const gParallel = g * Math.sin(angleRad);
+            const gPerpendicular = g * Math.cos(angleRad);
+            const frictionForce = currentFriction * currentMass * gPerpendicular;
+            const acceleration = (gParallel - frictionForce / currentMass);
+            
+            const padding = 40;
+            const groundY = canvas.height - padding;
+            const rampLength = Math.min(canvas.width - 2 * padding, canvas.height - 2 * padding);
+            const startTime = Date.now();
+            const boxSize = 30;
             
             function animate() {
+                if (!isAnimating) return;
+                
                 const elapsedTime = (Date.now() - startTime) / 1000 * timeScale;
-                const distance = 0.5 * acceleration * elapsedTime * elapsedTime;
+                const distance = 0.5 * acceleration * Math.pow(elapsedTime, 2);
+                const progress = Math.min(distance / (rampLength - boxSize), 1);
                 
-                if (distance >= rampLength - boxWidth) {
-                    isAnimating = false;
-                    return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制背景
+                ctx.fillStyle = getColor('--md-sys-color-surface');
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制斜面
+                ctx.beginPath();
+                ctx.moveTo(padding, groundY);
+                ctx.lineTo(padding + rampLength * Math.cos(angleRad), groundY - rampLength * Math.sin(angleRad));
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = getColor('--md-sys-color-outline');
+                ctx.stroke();
+                
+                // 绘制地面
+                ctx.beginPath();
+                ctx.moveTo(padding, groundY);
+                ctx.lineTo(canvas.width - padding, groundY);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = getColor('--md-sys-color-outline');
+                ctx.stroke();
+                
+                // 绘制角度标记
+                ctx.beginPath();
+                ctx.arc(padding, groundY, 30, -angleRad, 0);
+                ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
+                ctx.stroke();
+                
+                // 绘制角度值
+                ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
+                ctx.font = '12px Roboto';
+                ctx.textAlign = 'center';
+                ctx.fillText(currentAngle + '°', padding + 20, groundY - 20);
+                
+                // 绘制物体当前位置
+                const boxX = padding + boxSize + progress * (rampLength - boxSize) * Math.cos(angleRad);
+                const boxY = groundY - boxSize * Math.sin(angleRad) - progress * (rampLength - boxSize) * Math.sin(angleRad);
+                
+                ctx.fillStyle = getColor('--md-sys-color-primary');
+                ctx.fillRect(boxX, boxY, boxSize, boxSize);
+                
+                // 绘制力分解
+                const forceLength = 50;
+                const forceX = boxX + boxSize / 2;
+                const forceY = boxY + boxSize / 2;
+                
+                // 重力分量
+                ctx.beginPath();
+                ctx.moveTo(forceX, forceY);
+                ctx.lineTo(forceX, forceY + forceLength * Math.sin(angleRad));
+                ctx.strokeStyle = getColor('--md-sys-color-error');
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 法向力
+                ctx.beginPath();
+                ctx.moveTo(forceX, forceY);
+                ctx.lineTo(forceX - forceLength * Math.sin(angleRad), forceY - forceLength * Math.cos(angleRad));
+                ctx.strokeStyle = getColor('--md-sys-color-success');
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 摩擦力
+                ctx.beginPath();
+                ctx.moveTo(forceX, forceY);
+                ctx.lineTo(forceX + forceLength * Math.cos(angleRad), forceY + forceLength * Math.sin(angleRad));
+                ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // 绘制文字标签
+                ctx.fillStyle = getColor('--md-sys-color-on-surface');
+                ctx.font = '16px Roboto';
+                ctx.textAlign = 'center';
+                ctx.fillText('加速度: ' + acceleration.toFixed(2) + ' m/s²', canvas.width / 2, padding - 20);
+                ctx.fillText('速度: ' + (acceleration * elapsedTime).toFixed(2) + ' m/s', canvas.width / 2, padding);
+                
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    // 添加落地效果
+                    setTimeout(() => {
+                        // 小弹跳
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        
+                        // 重新绘制背景和地面
+                        ctx.fillStyle = getColor('--md-sys-color-surface');
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // 绘制斜面
+                        ctx.beginPath();
+                        ctx.moveTo(padding, groundY);
+                        ctx.lineTo(padding + rampLength * Math.cos(angleRad), groundY - rampLength * Math.sin(angleRad));
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = getColor('--md-sys-color-outline');
+                        ctx.stroke();
+                        
+                        // 绘制地面
+                        ctx.beginPath();
+                        ctx.moveTo(padding, groundY);
+                        ctx.lineTo(canvas.width - padding, groundY);
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = getColor('--md-sys-color-outline');
+                        ctx.stroke();
+                        
+                        // 绘制物体（稍微压扁）
+                        ctx.fillStyle = getColor('--md-sys-color-primary');
+                        ctx.fillRect(boxX, groundY - boxSize * 0.8, boxSize, boxSize * 0.8);
+                        
+                        setTimeout(() => {
+                            // 恢复
+                            drawScene();
+                            isAnimating = false;
+                            document.getElementById('animateBtn').textContent = '播放动画';
+                        }, 300);
+                    }, 100);
                 }
-                
-                drawScene(angle);
-                
-                // 更新物体位置
-                const boxX = centerX - rampLength/2 + boxWidth/2 + distance * Math.cos(radians);
-                const boxY = centerY + rampLength/2 * Math.sin(radians) - boxHeight/2 - distance * Math.sin(radians);
-                
-                ctx.save();
-                ctx.translate(boxX, boxY);
-                ctx.rotate(radians);
-                ctx.fillStyle = var(--md-sys-color-primary);
-                ctx.fillRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight);
-                ctx.restore();
-                
-                animationId = requestAnimationFrame(animate);
             }
             
-            drawScene(angle);
-            animationId = requestAnimationFrame(animate);
+            animate();
         }
 
         function calculatePhysics(angle, mass, friction) {
-            const g = 9.8;
-            const radians = angle * Math.PI / 180;
-            
-            const gravityComponent = mass * g * Math.sin(radians);
-            const normalForce = mass * g * Math.cos(radians);
+            const angleRad = angle * Math.PI / 180;
+            const gParallel = g * Math.sin(angleRad);
+            const gPerpendicular = g * Math.cos(angleRad);
+            const normalForce = mass * gPerpendicular;
             const frictionForce = friction * normalForce;
-            const acceleration = g * (Math.sin(radians) - friction * Math.cos(radians));
+            const acceleration = (gParallel - frictionForce / mass);
             
             return {
                 acceleration: acceleration,
-                gravityComponent: gravityComponent,
+                gravityComponent: mass * gParallel,
                 frictionForce: frictionForce,
                 normalForce: normalForce
             };
         }
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        // 监听页面加载和窗口大小变化
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            drawScene();
+            
+            // 设置初始值
+            const angleInput = document.getElementById('angle');
+            const massInput = document.getElementById('mass');
+            const frictionInput = document.getElementById('friction');
+            
+            if (!angleInput.value) angleInput.value = currentAngle;
+            if (!massInput.value) massInput.value = currentMass;
+            if (!frictionInput.value) frictionInput.value = currentFriction;
+            
+            // 实时更新预览
+            angleInput.addEventListener('input', function() {
+                currentAngle = parseFloat(angleInput.value) || currentAngle;
+                drawScene();
+            });
+            
+            massInput.addEventListener('input', function() {
+                currentMass = parseFloat(massInput.value) || currentMass;
+                drawScene();
+            });
+            
+            frictionInput.addEventListener('input', function() {
+                currentFriction = parseFloat(frictionInput.value) || currentFriction;
+                drawScene();
+            });
+        });
+        
+        window.addEventListener('resize', function() {
+            resizeCanvas();
+            drawScene();
+        });
 
         document.getElementById('calculateBtn').addEventListener('click', function() {
             const angle = parseFloat(document.getElementById('angle').value);
@@ -446,18 +575,32 @@
             currentMass = mass;
             currentFriction = friction;
             
-            drawScene(angle);
+            drawScene();
         });
 
         document.getElementById('animateBtn').addEventListener('click', function() {
-            animateBox(currentAngle, currentMass, currentFriction);
+            animateMotion();
         });
 
         // 初始绘制
         const initialAngle = /*[[${angle}]]*/ 30;
-        const initialMass = /*[[${mass}]]*/ 1;
-        const initialFriction = /*[[${friction}]]*/ 0.2;
-        drawScene(initialAngle);
+        const initialMass = /*[[${mass}]]*/ 1.0;
+        const initialFriction = /*[[${friction}]]*/ 0.1;
+        
+        currentAngle = initialAngle;
+        currentMass = initialMass;
+        currentFriction = initialFriction;
+        
+        // 页面加载时自动调整画布大小
+        if (document.readyState === 'complete') {
+            resizeCanvas();
+            drawScene();
+        } else {
+            window.addEventListener('load', function() {
+                resizeCanvas();
+                drawScene();
+            });
+        }
     </script>
 </body>
 </html>
