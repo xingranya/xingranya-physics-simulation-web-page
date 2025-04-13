@@ -2,201 +2,380 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自由落体</title>
+    <title>自由落体实验</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        .animation-container {
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            position: relative;
-            height: 400px;
-            overflow: hidden;
-            background-color: #f0f8ff;
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005E;
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1D1B20;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
         }
 
-        .result-container {
-            background-color: #e8f4fc;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            min-height: 100vh;
         }
 
-        .back-button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
-        .back-button:hover {
-            background-color: #2980b9;
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--md-sys-color-on-surface-variant);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            color: var(--md-sys-color-on-surface);
+            background-color: var(--md-sys-color-surface);
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
         }
 
         .buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 1rem;
+            margin-top: 2rem;
         }
 
-        .buttons button {
+        .button {
             flex: 1;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .button-primary {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-secondary {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .result-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            margin-top: 2rem;
+        }
+
+        .result-container h3 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 1rem;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--md-sys-color-surface-variant);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .result-value {
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .animation-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            aspect-ratio: 16/9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            background-color: var(--md-sys-color-surface);
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.875rem 1.5rem;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            text-decoration: none;
+            border-radius: 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: var(--md-sys-color-surface-variant);
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <h1>自由落体运动计算</h1>
-    <form id="freefallForm">
-        <label for="height">下落高度 (m):</label>
-        <input type="number" id="height" name="height" th:value="${height}" step="0.1" required><br><br>
-        
-        <div class="buttons">
-            <button type="button" id="calculateBtn">计算下落时间</button>
-            <button type="button" id="animateBtn">播放动画</button>
+    <div class="container">
+        <div class="header">
+            <h1>自由落体实验</h1>
+            <p>研究物体在重力作用下的运动规律，探索下落时间与高度的关系</p>
         </div>
-    </form>
 
-    <div class="result-container" id="resultContainer" style="display: none;">
-        <h3>计算结果：</h3>
-        <p>下落时间 = <span id="timeResult">0.0</span> 秒</p>
-        <p>终端速度 = 53 m/s</p>
-        <p>空气阻力系数 = 0.5</p>
-        <p>空气密度 = 1.2 kg/m³</p>
-        <p>物体横截面积 = 0.04 m²</p>
+        <div class="content">
+            <div class="form-container">
+                <form id="freefallForm">
+                    <div class="form-group">
+                        <label for="height">下落高度 (m)</label>
+                        <input type="number" id="height" name="height" th:value="${height}" step="0.1" required>
+                    </div>
+                    <div class="buttons">
+                        <button type="button" id="calculateBtn" class="button button-primary">计算下落时间</button>
+                        <button type="button" id="animateBtn" class="button button-secondary">播放动画</button>
+                    </div>
+                </form>
+
+                <div class="result-container" id="resultContainer" style="display: none;">
+                    <h3>计算结果</h3>
+                    <div class="result-item">
+                        <span class="result-label">下落时间</span>
+                        <span class="result-value" id="timeResult">0.0 s</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">最终速度</span>
+                        <span class="result-value" id="velocityResult">0.0 m/s</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">动能</span>
+                        <span class="result-value" id="energyResult">0.0 J</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="animation-container">
+                <canvas id="freefallCanvas"></canvas>
+            </div>
+        </div>
+
+        <a href="/" class="back-button">返回主页</a>
     </div>
-
-    <div class="animation-container">
-        <canvas id="freefallCanvas" width="400" height="400"></canvas>
-    </div>
-
-    <a href="/" class="back-button">返回主页</a>
 
     <script th:inline="javascript">
         const canvas = document.getElementById('freefallCanvas');
         const ctx = canvas.getContext('2d');
-        let ball = {
-            x: 200,
-            y: 50,
-            radius: 15,
-            vy: 0,
-            scale: 50 // 像素/米的比例
-        };
         let animationId = null;
         let isAnimating = false;
-    
-        function drawBall() {
+        let currentHeight = 10;
+        let ballY = 0;
+        let startTime = 0;
+        let groundY = canvas.height - 50;
+        let ballRadius = 20;
+        let gravity = 9.8;
+        let timeScale = 0.5;
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            groundY = canvas.height - 50;
+        }
+
+        function drawScene(height) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制天空背景
-            ctx.fillStyle = '#f0f8ff';
+            // 绘制背景
+            ctx.fillStyle = var(--md-sys-color-surface);
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // 绘制地面
-            ctx.beginPath();
-            ctx.rect(0, 380, canvas.width, 20);
-            ctx.fillStyle = '#8B4513';
-            ctx.fill();
+            ctx.fillStyle = var(--md-sys-color-surface-variant);
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
             
-            // 绘制球体阴影
+            // 绘制高度标记
+            ctx.strokeStyle = var(--md-sys-color-outline);
+            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.ellipse(ball.x, 380, ball.radius*0.8, ball.radius*0.3, 0, 0, Math.PI*2);
-            ctx.fillStyle = 'rgba(0,0,0,0.2)';
-            ctx.fill();
-            
-            // 绘制球体
-            ctx.beginPath();
-            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-            ctx.fillStyle = '#FF5722';
-            ctx.fill();
-            ctx.strokeStyle = '#E64A19';
-            ctx.lineWidth = 2;
+            ctx.moveTo(50, 50);
+            ctx.lineTo(50, groundY);
             ctx.stroke();
+            
+            // 绘制刻度
+            for (let i = 0; i <= height; i += 5) {
+                const y = groundY - (i / height) * (groundY - 50);
+                ctx.beginPath();
+                ctx.moveTo(45, y);
+                ctx.lineTo(55, y);
+                ctx.stroke();
+                ctx.fillStyle = var(--md-sys-color-on-surface-variant);
+                ctx.font = '12px Roboto';
+                ctx.fillText(i + 'm', 60, y + 4);
+            }
+            
+            // 绘制小球
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = var(--md-sys-color-primary);
+            ctx.fill();
         }
-    
-        function startAnimation(height) {
+
+        function animateFall(height) {
             if (isAnimating) {
                 cancelAnimationFrame(animationId);
             }
+            
             isAnimating = true;
-            let startTime;
-            const groundY = 380 - ball.radius;
-            ball.y = 50;
-            ball.vy = 0;
-            const scaledHeight = height * ball.scale;
-    
-            function animate(timestamp) {
-                if (!startTime) startTime = timestamp;
-                const elapsed = (timestamp - startTime) / 1000;
+            startTime = Date.now();
+            ballY = 50;
+            
+            function animate() {
+                const elapsedTime = (Date.now() - startTime) / 1000 * timeScale;
+                const distance = 0.5 * gravity * elapsedTime * elapsedTime;
+                ballY = 50 + (distance / height) * (groundY - 50 - ballRadius * 2);
                 
-                // 更真实的物理模拟
-                const airResistance = 0.001 * ball.vy * ball.vy * (ball.vy > 0 ? 1 : -1);
-                ball.vy += (9.80665 - airResistance) * 0.05;
-                ball.y += ball.vy;
-                
-                if (ball.y >= groundY) {
-                    ball.y = groundY;
-                    ball.vy = -ball.vy * 0.6; // 反弹系数
-                    
-                    // 添加多次反弹效果
-                    if (Math.abs(ball.vy) < 1) {
-                        ball.vy = 0;
-                        isAnimating = false;
-                        cancelAnimationFrame(animationId);
-                    }
+                if (ballY >= groundY - ballRadius) {
+                    ballY = groundY - ballRadius;
+                    isAnimating = false;
                 }
                 
-                drawBall();
+                drawScene(height);
                 animationId = requestAnimationFrame(animate);
             }
-    
-            drawBall();
+            
+            drawScene(height);
             animationId = requestAnimationFrame(animate);
         }
 
-        // 计算下落时间
-        function calculateFreefall(height) {
-            let time = 0;
-            let velocity = 0;
-            let distance = 0;
-            const deltaT = 0.01;
-            const terminalVelocity = 53;
+        function calculatePhysics(height) {
+            const time = Math.sqrt(2 * height / gravity);
+            const velocity = gravity * time;
+            const energy = 0.5 * 1 * velocity * velocity; // 假设质量为1kg
             
-            while (distance < height) {
-                const airResistance = 0.5 * 1.2 * 0.04 * velocity * velocity;
-                const netForce = 9.80665 - airResistance;
-                const acceleration = netForce;
-                
-                velocity += acceleration * deltaT;
-                distance += velocity * deltaT;
-                time += deltaT;
-                
-                if (velocity >= terminalVelocity) {
-                    time += (height - distance) / terminalVelocity;
-                    break;
-                }
-            }
-            
-            return time;
+            return {
+                time: time,
+                velocity: velocity,
+                energy: energy
+            };
         }
 
-        // 事件监听
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
         document.getElementById('calculateBtn').addEventListener('click', function() {
             const height = parseFloat(document.getElementById('height').value);
-            const time = calculateFreefall(height);
-            document.getElementById('timeResult').textContent = time.toFixed(2);
+            const results = calculatePhysics(height);
+            
+            document.getElementById('timeResult').textContent = results.time.toFixed(2) + ' s';
+            document.getElementById('velocityResult').textContent = results.velocity.toFixed(2) + ' m/s';
+            document.getElementById('energyResult').textContent = results.energy.toFixed(2) + ' J';
+            
             document.getElementById('resultContainer').style.display = 'block';
+            currentHeight = height;
         });
 
         document.getElementById('animateBtn').addEventListener('click', function() {
-            const height = parseFloat(document.getElementById('height').value);
-            startAnimation(height);
+            animateFall(currentHeight);
         });
 
         // 初始绘制
-        drawBall();
+        const initialHeight = /*[[${height}]]*/ 10;
+        drawScene(initialHeight);
     </script>
 </body>
 </html>
