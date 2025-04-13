@@ -17,6 +17,8 @@
             --md-sys-color-surface-variant: #E7E0EC;
             --md-sys-color-on-surface-variant: #49454F;
             --md-sys-color-outline: #79747E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-success: #4CAF50;
         }
 
         body {
@@ -216,18 +218,18 @@
     <div class="container">
         <div class="header">
             <h1>自由落体实验</h1>
-            <p>研究物体在重力作用下的运动规律，探索下落时间与高度的关系</p>
+            <p>研究物体在重力作用下的自由下落运动，计算下落时间、速度和能量变化</p>
         </div>
 
         <div class="content">
             <div class="form-container">
                 <form id="freefallForm">
                     <div class="form-group">
-                        <label for="height">下落高度 (m)</label>
-                        <input type="number" id="height" name="height" th:value="${height}" step="0.1" required>
+                        <label for="height">初始高度 (m)</label>
+                        <input type="number" id="height" name="height" th:value="${height}" min="0.1" max="100" step="0.1" value="10" required>
                     </div>
                     <div class="buttons">
-                        <button type="button" id="calculateBtn" class="button button-primary">计算下落时间</button>
+                        <button type="button" id="calculateBtn" class="button button-primary">计算落体时间</button>
                         <button type="button" id="animateBtn" class="button button-secondary">播放动画</button>
                     </div>
                 </form>
@@ -239,12 +241,16 @@
                         <span class="result-value" id="timeResult">0.0 s</span>
                     </div>
                     <div class="result-item">
-                        <span class="result-label">最终速度</span>
+                        <span class="result-label">落地速度</span>
                         <span class="result-value" id="velocityResult">0.0 m/s</span>
                     </div>
                     <div class="result-item">
+                        <span class="result-label">重力势能</span>
+                        <span class="result-value" id="potentialEnergyResult">0.0 J</span>
+                    </div>
+                    <div class="result-item">
                         <span class="result-label">动能</span>
-                        <span class="result-value" id="energyResult">0.0 J</span>
+                        <span class="result-value" id="kineticEnergyResult">0.0 J</span>
                     </div>
                 </div>
             </div>
@@ -258,124 +264,304 @@
     </div>
 
     <script th:inline="javascript">
+        // 获取CSS变量
+        const getColor = (varName) => {
+            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        };
+
         const canvas = document.getElementById('freefallCanvas');
         const ctx = canvas.getContext('2d');
         let animationId = null;
         let isAnimating = false;
         let currentHeight = 10;
-        let ballY = 0;
-        let startTime = 0;
-        let groundY = canvas.height - 50;
-        let ballRadius = 20;
-        let gravity = 9.8;
+        let mass = 1.0; // kg
+        const g = 9.8; // 重力加速度 m/s²
         let timeScale = 0.5;
 
+        // 确保画布尺寸适合容器
         function resizeCanvas() {
             const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            groundY = canvas.height - 50;
+            canvas.width = container.clientWidth - 20; // 减去padding
+            canvas.height = container.clientHeight - 20;
         }
 
-        function drawScene(height) {
+        function drawScene() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制背景
-            ctx.fillStyle = var(--md-sys-color-surface);
+            const padding = 40;
+            const groundY = canvas.height - padding;
+            const maxHeight = canvas.height - 2 * padding;
+            const scaleFactor = maxHeight / currentHeight;
+            
+            // 绘制背景和地面
+            ctx.fillStyle = getColor('--md-sys-color-surface');
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制地面
-            ctx.fillStyle = var(--md-sys-color-surface-variant);
-            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            // 绘制高度刻度
+            const scaleStep = Math.max(1, Math.ceil(currentHeight / 10));
+            ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
+            ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
+            ctx.font = '12px Roboto';
+            ctx.textAlign = 'right';
             
-            // 绘制高度标记
-            ctx.strokeStyle = var(--md-sys-color-outline);
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(50, 50);
-            ctx.lineTo(50, groundY);
-            ctx.stroke();
-            
-            // 绘制刻度
-            for (let i = 0; i <= height; i += 5) {
-                const y = groundY - (i / height) * (groundY - 50);
-                ctx.beginPath();
-                ctx.moveTo(45, y);
-                ctx.lineTo(55, y);
-                ctx.stroke();
-                ctx.fillStyle = var(--md-sys-color-on-surface-variant);
-                ctx.font = '12px Roboto';
-                ctx.fillText(i + 'm', 60, y + 4);
+            for (let h = 0; h <= currentHeight; h += scaleStep) {
+                const y = groundY - h * scaleFactor;
+                if (y >= padding) {
+                    ctx.beginPath();
+                    ctx.moveTo(padding - 5, y);
+                    ctx.lineTo(padding, y);
+                    ctx.stroke();
+                    ctx.fillText(h + ' m', padding - 10, y + 4);
+                }
             }
             
-            // 绘制小球
+            // 绘制垂直线
             ctx.beginPath();
-            ctx.arc(canvas.width / 2, ballY, ballRadius, 0, Math.PI * 2);
-            ctx.fillStyle = var(--md-sys-color-primary);
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, groundY);
+            ctx.stroke();
+            
+            // 绘制地面
+            ctx.beginPath();
+            ctx.moveTo(0, groundY);
+            ctx.lineTo(canvas.width, groundY);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getColor('--md-sys-color-outline');
+            ctx.stroke();
+            
+            // 绘制球
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, padding, 20, 0, Math.PI * 2);
+            ctx.fillStyle = getColor('--md-sys-color-primary');
             ctx.fill();
+            
+            // 绘制文字标签
+            ctx.fillStyle = getColor('--md-sys-color-on-surface');
+            ctx.font = '16px Roboto';
+            ctx.textAlign = 'center';
+            ctx.fillText('高度: ' + currentHeight.toFixed(1) + ' m', canvas.width / 2, padding - 30);
         }
 
-        function animateFall(height) {
+        function animateFall() {
             if (isAnimating) {
                 cancelAnimationFrame(animationId);
+                isAnimating = false;
+                document.getElementById('animateBtn').textContent = '播放动画';
+                drawScene();
+                return;
             }
             
             isAnimating = true;
-            startTime = Date.now();
-            ballY = 50;
+            document.getElementById('animateBtn').textContent = '停止动画';
+            
+            // 计算物理参数
+            const fallTime = Math.sqrt(2 * currentHeight / g);
+            const startTime = Date.now();
+            const padding = 40;
+            const groundY = canvas.height - padding;
+            const maxHeight = canvas.height - 2 * padding;
+            const scaleFactor = maxHeight / currentHeight;
             
             function animate() {
-                const elapsedTime = (Date.now() - startTime) / 1000 * timeScale;
-                const distance = 0.5 * gravity * elapsedTime * elapsedTime;
-                ballY = 50 + (distance / height) * (groundY - 50 - ballRadius * 2);
+                if (!isAnimating) return;
                 
-                if (ballY >= groundY - ballRadius) {
-                    ballY = groundY - ballRadius;
-                    isAnimating = false;
+                const elapsedTime = (Date.now() - startTime) / 1000 * timeScale;
+                const progress = Math.min(elapsedTime / fallTime, 1);
+                
+                // 使用自由落体运动公式: s = 0.5 * g * t^2
+                const fallenDistance = 0.5 * g * Math.pow(elapsedTime, 2);
+                const currentPosition = Math.min(fallenDistance, currentHeight);
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制背景和地面
+                ctx.fillStyle = getColor('--md-sys-color-surface');
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制高度刻度
+                const scaleStep = Math.max(1, Math.ceil(currentHeight / 10));
+                ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
+                ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
+                ctx.font = '12px Roboto';
+                ctx.textAlign = 'right';
+                
+                for (let h = 0; h <= currentHeight; h += scaleStep) {
+                    const y = groundY - h * scaleFactor;
+                    if (y >= padding) {
+                        ctx.beginPath();
+                        ctx.moveTo(padding - 5, y);
+                        ctx.lineTo(padding, y);
+                        ctx.stroke();
+                        ctx.fillText(h + ' m', padding - 10, y + 4);
+                    }
                 }
                 
-                drawScene(height);
-                animationId = requestAnimationFrame(animate);
+                // 绘制垂直线
+                ctx.beginPath();
+                ctx.moveTo(padding, padding);
+                ctx.lineTo(padding, groundY);
+                ctx.stroke();
+                
+                // 绘制地面
+                ctx.beginPath();
+                ctx.moveTo(0, groundY);
+                ctx.lineTo(canvas.width, groundY);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = getColor('--md-sys-color-outline');
+                ctx.stroke();
+                
+                // 绘制物体当前位置
+                const ballY = padding + currentPosition * scaleFactor;
+                
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, ballY, 20, 0, Math.PI * 2);
+                ctx.fillStyle = getColor('--md-sys-color-primary');
+                ctx.fill();
+                
+                // 绘制文字标签
+                const remainingHeight = currentHeight - currentPosition;
+                ctx.fillStyle = getColor('--md-sys-color-on-surface');
+                ctx.font = '16px Roboto';
+                ctx.textAlign = 'center';
+                ctx.fillText('剩余高度: ' + remainingHeight.toFixed(1) + ' m', canvas.width / 2, ballY - 30);
+                
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    // 添加落地后的弹跳效果
+                    setTimeout(() => {
+                        // 小弹跳
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        
+                        // 重新绘制背景和地面
+                        ctx.fillStyle = getColor('--md-sys-color-surface');
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // 绘制高度刻度
+                        const scaleStep = Math.max(1, Math.ceil(currentHeight / 10));
+                        ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
+                        ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
+                        ctx.font = '12px Roboto';
+                        ctx.textAlign = 'right';
+                        
+                        for (let h = 0; h <= currentHeight; h += scaleStep) {
+                            const y = groundY - h * scaleFactor;
+                            if (y >= padding) {
+                                ctx.beginPath();
+                                ctx.moveTo(padding - 5, y);
+                                ctx.lineTo(padding, y);
+                                ctx.stroke();
+                                ctx.fillText(h + ' m', padding - 10, y + 4);
+                            }
+                        }
+                        
+                        // 绘制垂直线
+                        ctx.beginPath();
+                        ctx.moveTo(padding, padding);
+                        ctx.lineTo(padding, groundY);
+                        ctx.stroke();
+                        
+                        // 绘制地面
+                        ctx.beginPath();
+                        ctx.moveTo(0, groundY);
+                        ctx.lineTo(canvas.width, groundY);
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = getColor('--md-sys-color-outline');
+                        ctx.stroke();
+                        
+                        // 绘制球体（稍微压扁）
+                        ctx.beginPath();
+                        ctx.ellipse(canvas.width / 2, groundY - 10, 25, 15, 0, 0, Math.PI * 2);
+                        ctx.fillStyle = getColor('--md-sys-color-primary');
+                        ctx.fill();
+                        
+                        setTimeout(() => {
+                            // 恢复
+                            drawScene();
+                            isAnimating = false;
+                            document.getElementById('animateBtn').textContent = '播放动画';
+                        }, 300);
+                    }, 100);
+                }
             }
             
-            drawScene(height);
-            animationId = requestAnimationFrame(animate);
+            animate();
         }
 
         function calculatePhysics(height) {
-            const time = Math.sqrt(2 * height / gravity);
-            const velocity = gravity * time;
-            const energy = 0.5 * 1 * velocity * velocity; // 假设质量为1kg
+            const fallTime = Math.sqrt(2 * height / g);
+            const finalVelocity = g * fallTime;
+            const potentialEnergy = mass * g * height;
+            const kineticEnergy = 0.5 * mass * Math.pow(finalVelocity, 2);
             
             return {
-                time: time,
-                velocity: velocity,
-                energy: energy
+                time: fallTime,
+                velocity: finalVelocity,
+                potentialEnergy: potentialEnergy,
+                kineticEnergy: kineticEnergy
             };
         }
 
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        // 监听页面加载和窗口大小变化
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            drawScene();
+            
+            // 设置初始值
+            const heightInput = document.getElementById('height');
+            
+            if (!heightInput.value) heightInput.value = currentHeight;
+            
+            // 实时更新预览
+            heightInput.addEventListener('input', function() {
+                const height = parseFloat(heightInput.value) || currentHeight;
+                
+                currentHeight = height;
+                drawScene();
+            });
+        });
+        
+        window.addEventListener('resize', function() {
+            resizeCanvas();
+            drawScene();
+        });
 
         document.getElementById('calculateBtn').addEventListener('click', function() {
             const height = parseFloat(document.getElementById('height').value);
+            
             const results = calculatePhysics(height);
             
             document.getElementById('timeResult').textContent = results.time.toFixed(2) + ' s';
             document.getElementById('velocityResult').textContent = results.velocity.toFixed(2) + ' m/s';
-            document.getElementById('energyResult').textContent = results.energy.toFixed(2) + ' J';
+            document.getElementById('potentialEnergyResult').textContent = results.potentialEnergy.toFixed(2) + ' J';
+            document.getElementById('kineticEnergyResult').textContent = results.kineticEnergy.toFixed(2) + ' J';
             
             document.getElementById('resultContainer').style.display = 'block';
+            
             currentHeight = height;
+            
+            drawScene();
         });
 
         document.getElementById('animateBtn').addEventListener('click', function() {
-            animateFall(currentHeight);
+            animateFall();
         });
 
         // 初始绘制
         const initialHeight = /*[[${height}]]*/ 10;
-        drawScene(initialHeight);
+        
+        currentHeight = initialHeight;
+        
+        // 页面加载时自动调整画布大小
+        if (document.readyState === 'complete') {
+            resizeCanvas();
+            drawScene();
+        } else {
+            window.addEventListener('load', function() {
+                resizeCanvas();
+                drawScene();
+            });
+        }
     </script>
 </body>
 </html>
