@@ -2,220 +2,459 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="/css/style.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>杠杆原理</title>
+    <title>杠杆原理实验</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        .canvas-container {
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            background-color: #f0f8ff;
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005E;
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1D1B20;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-success: #4CAF50;
         }
 
-        .result-container {
-            background-color: #e8f4fc;
-            padding: 15px;
-            border-radius: 4px;
-            margin-top: 20px;
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            min-height: 100vh;
         }
 
-        .back-button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
-        .back-button:hover {
-            background-color: #2980b9;
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--md-sys-color-on-surface-variant);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            color: var(--md-sys-color-on-surface);
+            background-color: var(--md-sys-color-surface);
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--md-sys-color-primary);
         }
 
         .buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 1rem;
+            margin-top: 2rem;
         }
 
-        .buttons button {
+        .button {
             flex: 1;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .button-primary {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-secondary {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .result-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            margin-top: 2rem;
+        }
+
+        .result-container h3 {
+            font-size: by: 1.25rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 1rem;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--md-sys-color-surface-variant);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .result-value {
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+        }
+
+        .animation-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            aspect-ratio: 16/9;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            background-color: var(--md-sys-color-surface);
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.875rem 1.5rem;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            text-decoration: none;
+            border-radius: 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: var(--md-sys-color-surface-variant);
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <h1>杠杆原理计算</h1>
-    <form id="leverForm">
-        <label for="leverLength">杠杆长度 (m):</label>
-        <input type="number" id="leverLength" name="leverLength" th:value="${leverLength}" step="0.1" required><br><br>
-        
-        <label for="force">施加力 (N):</label>
-        <input type="number" id="force" name="force" th:value="${force}" step="0.1" required><br><br>
-        
-        <label for="angle">力的角度 (°):</label>
-        <input type="number" id="angle" name="angle" th:value="${angle}" step="1" required><br><br>
-        
-        <div class="buttons">
-            <button type="button" id="calculateBtn">计算力矩</button>
-            <button type="button" id="animateBtn">播放动画</button>
+    <div class="container">
+        <div class="header">
+            <h1>杠杆原理实验</h1>
+            <p>探索力的矩、扭矩和力的分解原理，研究杠杆的平衡条件</p>
         </div>
-    </form>
 
-    <div class="result-container" id="resultContainer" style="display: none;">
-        <h3>计算结果：</h3>
-        <p>力矩 = <span id="torqueResult">0.0</span> N·m</p>
-        <p>有效力臂 = <span id="effectiveLeverResult">0.0</span> m</p>
-        <p>力的垂直分量 = <span id="verticalForceResult">0.0</span> N</p>
-        <p>力的水平分量 = <span id="horizontalForceResult">0.0</span> N</p>
+        <div class="content">
+            <div class="form-container">
+                <form id="leverForm">
+                    <div class="form-group">
+                        <label for="leverLength">杠杆长度 (m)</label>
+                        <input type="number" id="leverLength" name="leverLength" th:value="${leverLength}" min="0.1" max="10" step="0.1" value="2" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="force">施加力量 (N)</label>
+                        <input type="number" id="force" name="force" th:value="${force}" min="0.1" step="0.1" value="10" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="angle">力的角度 (°)</label>
+                        <input type="number" id="angle" name="angle" th:value="${angle}" min="0" max="180" step="1" value="30" required>
+                    </div>
+                    <div class="buttons">
+                        <button type="button" id="calculateBtn" class="button button-primary">计算扭矩</button>
+                        <button type="button" id="animateBtn" class="button button-secondary">播放动画</button>
+                    </div>
+                </form>
+
+                <div class="result-container" id="resultContainer" style="display: none;">
+                    <h3>计算结果</h3>
+                    <div class="result-item">
+                        <span class="result-label">有效杠杆长度</span>
+                        <span class="result-value" id="effectiveLeverResult">0.0 m</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">水平分力</span>
+                        <span class="result-value" id="horizontalForceResult">0.0 N</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">垂直分力</span>
+                        <span class="result-value" id="verticalForceResult">0.0 N</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">扭矩</span>
+                        <span class="result-value" id="torqueResult">0.0 N·m</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="animation-container">
+                <canvas id="leverCanvas"></canvas>
+            </div>
+        </div>
+
+        <a href="/" class="back-button">返回主页</a>
     </div>
-
-    <div class="canvas-container">
-        <canvas id="leverCanvas" width="400" height="300"></canvas>
-    </div>
-
-    <a href="/" class="back-button">返回主页</a>
 
     <script th:inline="javascript">
         const canvas = document.getElementById('leverCanvas');
         const ctx = canvas.getContext('2d');
         let animationId = null;
         let isAnimating = false;
-        let currentAngle = 30;
-        let currentForce = 50;
         let currentLeverLength = 2;
-        
-        function drawLever(leverLength, force, angle, rotation = 0) {
+        let currentForce = 10;
+        let currentAngle = 30;
+        let rotationAngle = 0;
+        let timeScale = 0.5;
+
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+
+        function drawLever(rotation = 0) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制背景
-            ctx.fillStyle = '#f0f8ff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // 定义杠杆的基本属性
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const leverLength = Math.min(canvas.width * 0.7, 300);
+            const leverHeight = 10;
+            const forceLength = Math.min(currentForce * 3, 100);
             
-            // 绘制支点
-            const pivotX = canvas.width / 2;
-            const pivotY = canvas.height / 2;
-            ctx.beginPath();
-            ctx.arc(pivotX, pivotY, 5, 0, Math.PI * 2);
-            ctx.fillStyle = '#000';
-            ctx.fill();
+            // 保存当前状态
+            ctx.save();
+            
+            // 移动到中心点并旋转
+            ctx.translate(centerX, centerY);
+            ctx.rotate(rotation);
             
             // 绘制杠杆
-            const radians = Math.PI * rotation / 180;
-            ctx.save();
-            ctx.translate(pivotX, pivotY);
-            ctx.rotate(radians);
+            ctx.fillStyle = var(--md-sys-color-primary);
+            ctx.fillRect(-leverLength / 2, -leverHeight / 2, leverLength, leverHeight);
             
+            // 绘制支点
             ctx.beginPath();
-            ctx.moveTo(-leverLength * 50, 0);
-            ctx.lineTo(leverLength * 50, 0);
-            ctx.strokeStyle = '#666';
+            ctx.arc(0, 0, 8, 0, Math.PI * 2);
+            ctx.fillStyle = var(--md-sys-color-outline);
+            ctx.fill();
+            
+            // 绘制刻度
+            for (let i = -leverLength / 2; i <= leverLength / 2; i += leverLength / 10) {
+                ctx.beginPath();
+                ctx.moveTo(i, -leverHeight / 2 - 5);
+                ctx.lineTo(i, -leverHeight / 2);
+                ctx.strokeStyle = var(--md-sys-color-on-surface-variant);
+                ctx.stroke();
+                
+                if (i % (leverLength / 5) === 0) {
+                    ctx.fillStyle = var(--md-sys-color-on-surface-variant);
+                    ctx.font = '12px Roboto';
+                    ctx.fillText((i / (leverLength / 2) * currentLeverLength / 2).toFixed(1) + 'm', i - 10, -leverHeight / 2 - 10);
+                }
+            }
+            
+            // 恢复状态以绘制力矢量
+            ctx.restore();
+            
+            // 计算力的施加点
+            const forceX = centerX + leverLength / 2 * Math.cos(rotation);
+            const forceY = centerY + leverLength / 2 * Math.sin(rotation);
+            
+            // 计算力的分解
+            const angleRad = currentAngle * Math.PI / 180;
+            const forceAngle = rotation + angleRad;
+            
+            // 绘制力矢量
+            ctx.beginPath();
+            ctx.moveTo(forceX, forceY);
+            ctx.lineTo(
+                forceX + forceLength * Math.cos(forceAngle),
+                forceY + forceLength * Math.sin(forceAngle)
+            );
+            ctx.strokeStyle = '#FF5722'; // 力的颜色
             ctx.lineWidth = 3;
             ctx.stroke();
             
-            // 绘制力的箭头
-            const forceRadians = Math.PI * angle / 180;
-            const arrowLength = force * 2;
-            const arrowX = leverLength * 50;
-            const arrowY = 0;
-            
-            // 力的方向线
-            ctx.beginPath();
-            ctx.moveTo(arrowX, arrowY);
-            ctx.lineTo(arrowX - arrowLength * Math.cos(forceRadians), 
-                      arrowY - arrowLength * Math.sin(forceRadians));
-            ctx.strokeStyle = '#FF5722';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // 力的箭头
-            const arrowAngle = Math.atan2(arrowY - (arrowY - arrowLength * Math.sin(forceRadians)),
-                                        arrowX - (arrowX - arrowLength * Math.cos(forceRadians)));
+            // 绘制箭头
             const arrowSize = 10;
-            
             ctx.beginPath();
-            ctx.moveTo(arrowX - arrowLength * Math.cos(forceRadians), 
-                      arrowY - arrowLength * Math.sin(forceRadians));
-            ctx.lineTo(arrowX - arrowLength * Math.cos(forceRadians) + arrowSize * Math.cos(arrowAngle - Math.PI/6),
-                      arrowY - arrowLength * Math.sin(forceRadians) + arrowSize * Math.sin(arrowAngle - Math.PI/6));
-            ctx.lineTo(arrowX - arrowLength * Math.cos(forceRadians) + arrowSize * Math.cos(arrowAngle + Math.PI/6),
-                      arrowY - arrowLength * Math.sin(forceRadians) + arrowSize * Math.sin(arrowAngle + Math.PI/6));
+            ctx.moveTo(
+                forceX + forceLength * Math.cos(forceAngle),
+                forceY + forceLength * Math.sin(forceAngle)
+            );
+            ctx.lineTo(
+                forceX + forceLength * Math.cos(forceAngle) - arrowSize * Math.cos(forceAngle - Math.PI / 6),
+                forceY + forceLength * Math.sin(forceAngle) - arrowSize * Math.sin(forceAngle - Math.PI / 6)
+            );
+            ctx.lineTo(
+                forceX + forceLength * Math.cos(forceAngle) - arrowSize * Math.cos(forceAngle + Math.PI / 6),
+                forceY + forceLength * Math.sin(forceAngle) - arrowSize * Math.sin(forceAngle + Math.PI / 6)
+            );
             ctx.closePath();
             ctx.fillStyle = '#FF5722';
             ctx.fill();
             
-            // 绘制力的分解
-            const verticalComponent = force * Math.sin(forceRadians);
-            const horizontalComponent = force * Math.cos(forceRadians);
-            
-            // 垂直分量
+            // 绘制水平分力
             ctx.beginPath();
-            ctx.moveTo(arrowX, arrowY);
-            ctx.lineTo(arrowX, arrowY - verticalComponent * 2);
-            ctx.strokeStyle = '#4CAF50';
+            ctx.moveTo(forceX, forceY);
+            ctx.lineTo(
+                forceX + forceLength * Math.cos(forceAngle) * Math.cos(angleRad),
+                forceY
+            );
+            ctx.strokeStyle = '#2196F3'; // 水平分力颜色
             ctx.lineWidth = 2;
             ctx.stroke();
             
-            // 水平分量
+            // 绘制垂直分力
             ctx.beginPath();
-            ctx.moveTo(arrowX, arrowY);
-            ctx.lineTo(arrowX - horizontalComponent * 2, arrowY);
-            ctx.strokeStyle = '#2196F3';
+            ctx.moveTo(forceX, forceY);
+            ctx.lineTo(
+                forceX,
+                forceY + forceLength * Math.sin(forceAngle) * Math.sin(angleRad)
+            );
+            ctx.strokeStyle = '#4CAF50'; // 垂直分力颜色
             ctx.lineWidth = 2;
             ctx.stroke();
             
-            ctx.restore();
+            // 绘制角度
+            ctx.beginPath();
+            ctx.arc(forceX, forceY, 20, rotation, forceAngle);
+            ctx.strokeStyle = var(--md-sys-color-outline);
+            ctx.stroke();
             
-            // 添加标签
-            ctx.fillStyle = '#000';
-            ctx.font = '12px Arial';
-            ctx.fillText('F = ' + force + ' N', arrowX - arrowLength * Math.cos(forceRadians) - 30, 
-                        arrowY - arrowLength * Math.sin(forceRadians) - 10);
-            ctx.fillText('Fy = ' + verticalComponent.toFixed(2) + ' N', arrowX, 
-                        arrowY - verticalComponent * 2 - 10);
-            ctx.fillText('Fx = ' + horizontalComponent.toFixed(2) + ' N', 
-                        arrowX - horizontalComponent * 2 - 30, arrowY + 15);
+            // 绘制角度值
+            const angleLabelX = forceX + 25 * Math.cos(rotation + angleRad / 2);
+            const angleLabelY = forceY + 25 * Math.sin(rotation + angleRad / 2);
+            ctx.fillStyle = var(--md-sys-color-on-surface-variant);
+            ctx.font = '14px Roboto';
+            ctx.fillText(currentAngle + '°', angleLabelX, angleLabelY);
+            
+            // 绘制力值标签
+            ctx.fillStyle = '#FF5722';
+            ctx.font = '14px Roboto';
+            ctx.fillText(
+                currentForce + 'N',
+                forceX + forceLength * Math.cos(forceAngle) + 5,
+                forceY + forceLength * Math.sin(forceAngle) + 5
+            );
         }
-        
-        function startAnimation(leverLength, force, angle) {
+
+        function startAnimation() {
             if (isAnimating) {
                 cancelAnimationFrame(animationId);
             }
+            
             isAnimating = true;
-            let rotation = 0;
-            let direction = 1;
+            const startTime = Date.now();
+            const maxRotation = 0.2;
             
             function animate() {
-                rotation += direction * 2;
-                if (Math.abs(rotation) >= 30) {
-                    direction *= -1;
-                }
+                const elapsedTime = (Date.now() - startTime) / 1000;
+                const rotation = maxRotation * Math.sin(elapsedTime * 2);
                 
-                drawLever(leverLength, force, angle, rotation);
+                drawLever(rotation);
+                
                 animationId = requestAnimationFrame(animate);
             }
             
-            drawLever(leverLength, force, angle, rotation);
-            animationId = requestAnimationFrame(animate);
+            animate();
         }
 
-        // 计算物理量
         function calculatePhysics(leverLength, force, angle) {
-            const radians = Math.PI * angle / 180;
-            const effectiveLeverLength = leverLength * Math.sin(radians);
+            const angleRad = angle * Math.PI / 180;
+            const effectiveLeverLength = leverLength * Math.sin(angleRad);
+            const horizontalForce = force * Math.cos(angleRad);
+            const verticalForce = force * Math.sin(angleRad);
             const torque = force * effectiveLeverLength;
-            const verticalForce = force * Math.sin(radians);
-            const horizontalForce = force * Math.cos(radians);
             
             return {
-                torque: torque,
                 effectiveLeverLength: effectiveLeverLength,
+                horizontalForce: horizontalForce,
                 verticalForce: verticalForce,
-                horizontalForce: horizontalForce
+                torque: torque
             };
         }
 
-        // 事件监听
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
         document.getElementById('calculateBtn').addEventListener('click', function() {
             const leverLength = parseFloat(document.getElementById('leverLength').value);
             const force = parseFloat(document.getElementById('force').value);
@@ -223,27 +462,34 @@
             
             const results = calculatePhysics(leverLength, force, angle);
             
-            document.getElementById('torqueResult').textContent = results.torque.toFixed(2);
-            document.getElementById('effectiveLeverResult').textContent = results.effectiveLeverLength.toFixed(2);
-            document.getElementById('verticalForceResult').textContent = results.verticalForce.toFixed(2);
-            document.getElementById('horizontalForceResult').textContent = results.horizontalForce.toFixed(2);
+            document.getElementById('effectiveLeverResult').textContent = results.effectiveLeverLength.toFixed(2) + ' m';
+            document.getElementById('horizontalForceResult').textContent = results.horizontalForce.toFixed(2) + ' N';
+            document.getElementById('verticalForceResult').textContent = results.verticalForce.toFixed(2) + ' N';
+            document.getElementById('torqueResult').textContent = results.torque.toFixed(2) + ' N·m';
             
             document.getElementById('resultContainer').style.display = 'block';
             
             currentLeverLength = leverLength;
             currentForce = force;
             currentAngle = angle;
+            
+            drawLever(0);
         });
 
         document.getElementById('animateBtn').addEventListener('click', function() {
-            startAnimation(currentLeverLength, currentForce, currentAngle);
+            startAnimation();
         });
 
         // 初始绘制
         const initialLeverLength = /*[[${leverLength}]]*/ 2;
-        const initialForce = /*[[${force}]]*/ 50;
+        const initialForce = /*[[${force}]]*/ 10;
         const initialAngle = /*[[${angle}]]*/ 30;
-        drawLever(initialLeverLength, initialForce, initialAngle);
+        
+        currentLeverLength = initialLeverLength;
+        currentForce = initialForce;
+        currentAngle = initialAngle;
+        
+        drawLever(0);
     </script>
 </body>
 </html> 
