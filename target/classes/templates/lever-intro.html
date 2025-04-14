@@ -54,7 +54,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             padding-top: 2rem;
             padding-bottom: 2rem;
         }
@@ -82,40 +82,85 @@
             margin-bottom: 0;
         }
         
-        .content-card {
-            background-color: var(--md-sys-color-surface);
+        .md3-card {
             border-radius: var(--md-sys-shape-corner-large);
-            padding: 24px;
-            margin-bottom: 24px;
             box-shadow: var(--md-sys-elevation-1);
+            border: none;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
         }
         
-        .content-card h2 {
-            color: var(--md-sys-color-primary);
+        .card-header {
             font-weight: 500;
-            margin-bottom: 16px;
-            font-size: 1.75rem;
+            font-size: 1.25rem;
+            padding: 1rem 1.5rem;
+            border-bottom: none;
         }
         
-        .content-card p {
-            color: var(--md-sys-color-on-surface-variant);
-            font-size: 1rem;
-            line-height: 1.6;
-            margin-bottom: 16px;
+        .card-body {
+            padding: 1.5rem;
         }
         
-        .formula-box {
+        .card-primary {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        
+        .card-primary .card-header {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .card-primary .card-body {
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        .card-secondary {
             background-color: var(--md-sys-color-secondary-container);
-            border-radius: var(--md-sys-shape-corner-medium);
-            padding: 16px;
-            margin: 16px 0;
         }
         
-        .formula-box p {
+        .card-secondary .card-header {
+            background-color: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-secondary);
+        }
+        
+        .card-secondary .card-body {
             color: var(--md-sys-color-on-secondary-container);
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1.1rem;
-            margin: 0;
+        }
+        
+        .card-tertiary {
+            background-color: var(--md-sys-color-tertiary-container);
+        }
+        
+        .card-tertiary .card-header {
+            background-color: var(--md-sys-color-tertiary);
+            color: var(--md-sys-color-on-tertiary);
+        }
+        
+        .card-tertiary .card-body {
+            color: var(--md-sys-color-on-tertiary-container);
+        }
+        
+        .card-surface {
+            background-color: var(--md-sys-color-surface);
+        }
+        
+        .card-surface .card-header {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .card-surface .card-body {
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .formula {
+            font-weight: 500;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: var(--md-sys-shape-corner-small);
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1.2rem;
         }
         
         .md3-btn {
@@ -166,11 +211,11 @@
             <p>探索力矩平衡和机械优势，理解简单机械的工作原理</p>
         </div>
         
-        <div class="content-card card-primary">
+        <div class="md3-card card-primary">
             <div class="card-header">实验原理</div>
             <div class="card-body">
                 <p>杠杆是最基本的简单机械之一，它由一个支点和一个刚性杆组成。杠杆的工作原理基于力矩平衡，当杠杆处于平衡状态时，支点两侧的力矩大小相等但方向相反。</p>
-                <div class="formula-box">
+                <div class="formula">
                     <p>力矩 τ = F × r × sin(θ)</p>
                     <p>其中：</p>
                     <p>F = 作用力的大小</p>
@@ -180,18 +225,18 @@
             </div>
         </div>
         
-        <div class="content-card card-secondary">
+        <div class="md3-card card-secondary">
             <div class="card-header">机械优势</div>
             <div class="card-body">
                 <p>杠杆的机械优势是指负载力与施加力之比。通过调整力臂的长度，我们可以获得不同的机械优势，这使得我们能够用较小的力来平衡或举起较大的重物。</p>
-                <div class="formula-box">
+                <div class="formula">
                     <p>机械优势 = 阻力力臂 / 动力力臂</p>
                     <p>机械优势 = 输出力 / 输入力</p>
                 </div>
             </div>
         </div>
         
-        <div class="content-card card-tertiary">
+        <div class="md3-card card-tertiary">
             <div class="card-header">实验要点</div>
             <div class="card-body">
                 <ul class="key-points">
@@ -204,7 +249,7 @@
             </div>
         </div>
         
-        <div class="content-card card-surface">
+        <div class="md3-card card-surface">
             <div class="card-header">实验目标</div>
             <div class="card-body">
                 <p>1. 理解力矩的概念和计算方法</p>
