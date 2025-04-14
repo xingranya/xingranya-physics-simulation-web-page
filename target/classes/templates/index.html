@@ -1,230 +1,82 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <title>物理实验模拟系统</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>物理模拟实验</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root {
-            --md-sys-color-primary: #6750A4;
-            --md-sys-color-on-primary: #FFFFFF;
-            --md-sys-color-primary-container: #EADDFF;
-            --md-sys-color-on-primary-container: #21005E;
-            --md-sys-color-surface: #FEF7FF;
-            --md-sys-color-on-surface: #1D1B20;
-            --md-sys-color-surface-variant: #E7E0EC;
-            --md-sys-color-on-surface-variant: #49454F;
-            --md-sys-color-outline: #79747E;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--md-sys-color-surface);
-            color: var(--md-sys-color-on-surface);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 4rem;
-            max-width: 800px;
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 500;
-            color: var(--md-sys-color-on-surface);
-            margin-bottom: 1.5rem;
-            line-height: 1.2;
-            letter-spacing: -0.5px;
-        }
-
-        .subtitle {
-            font-size: 1.25rem;
-            color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 2rem;
-            line-height: 1.6;
-            font-weight: 400;
-        }
-
-        .experiments-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2.5rem;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
         .experiment-card {
-            background-color: var(--md-sys-color-surface);
-            border-radius: 1.5rem;
-            padding: 2rem;
-            text-decoration: none;
-            color: var(--md-sys-color-on-surface);
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--md-sys-color-surface-variant);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            height: 100%;
+            transition: transform 0.3s ease;
         }
-
         .experiment-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            transform: translateY(-5px);
         }
-
-        .experiment-card:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .experiment-icon {
-            width: 72px;
-            height: 72px;
-            margin-bottom: 1.5rem;
-            background-color: var(--md-sys-color-primary-container);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--md-sys-color-on-primary-container);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .experiment-title {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-            color: var(--md-sys-color-on-surface);
-            letter-spacing: -0.25px;
-        }
-
-        .experiment-description {
-            font-size: 1rem;
-            color: var(--md-sys-color-on-surface-variant);
-            margin-bottom: 2rem;
-            line-height: 1.6;
-            flex-grow: 1;
-        }
-
-        .experiment-button {
-            background-color: var(--md-sys-color-primary);
-            color: var(--md-sys-color-on-primary);
-            border: none;
-            border-radius: 1.5rem;
-            padding: 0.875rem 2rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .experiment-button:hover {
-            background-color: var(--md-sys-color-primary);
-            opacity: 0.9;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .experiment-button:active {
-            background-color: var(--md-sys-color-primary);
-            opacity: 0.8;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 2rem 1rem;
-            }
-
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            .subtitle {
-                font-size: 1.1rem;
-            }
-
-            .experiments-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-
-            .experiment-card {
-                padding: 1.5rem;
-            }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>物理模拟实验</h1>
-            <p class="subtitle">探索物理世界的奥秘，通过交互式模拟实验学习物理原理。每个实验都经过精心设计，让您直观地理解物理现象背后的科学原理。</p>
-        </header>
-
-        <div class="experiments-grid">
-            <a href="/freefall" class="experiment-card">
-                <div class="experiment-icon">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 2v20"/>
-                    </svg>
+    <div class="container mt-5">
+        <h1 class="text-center mb-5">物理实验模拟系统</h1>
+        
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <!-- 动量守恒实验 -->
+            <div class="col">
+                <div class="card h-100 experiment-card">
+                    <img src="https://source.unsplash.com/random/800x600/?collision" class="card-img-top" alt="动量守恒">
+                    <div class="card-body">
+                        <h2 class="card-title">动量守恒实验</h2>
+                        <p class="card-text">探索完全弹性碰撞中的动量守恒定律，通过可视化模拟了解动量在碰撞过程中的传递和守恒。</p>
+                        <a href="/momentum-intro" class="btn btn-primary">开始实验</a>
+                    </div>
                 </div>
-                <h2 class="experiment-title">自由落体实验</h2>
-                <p class="experiment-description">研究物体在重力作用下的运动规律，探索下落时间与高度的关系。通过改变初始高度，观察物体下落过程中的速度变化。</p>
-                <button class="experiment-button">开始实验</button>
-            </a>
+            </div>
 
-            <a href="/ramp" class="experiment-card">
-                <div class="experiment-icon">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M2 20h20"/>
-                        <path d="M2 20l5-10"/>
-                        <path d="M17 20l-5-10"/>
-                    </svg>
+            <!-- 斜坡运动实验 -->
+            <div class="col">
+                <div class="card h-100 experiment-card">
+                    <img src="https://source.unsplash.com/random/800x600/?slope" class="card-img-top" alt="斜坡运动">
+                    <div class="card-body">
+                        <h2 class="card-title">斜坡运动实验</h2>
+                        <p class="card-text">研究物体在斜面上的运动规律，分析重力分量、摩擦力等因素对物体运动的影响。</p>
+                        <a href="/ramp-intro" class="btn btn-primary">开始实验</a>
+                    </div>
                 </div>
-                <h2 class="experiment-title">斜面运动实验</h2>
-                <p class="experiment-description">分析物体在斜面上的运动，研究摩擦力、重力和加速度的关系。通过调整斜面角度和摩擦系数，观察物体的运动状态变化。</p>
-                <button class="experiment-button">开始实验</button>
-            </a>
+            </div>
 
-            <a href="/lever" class="experiment-card">
-                <div class="experiment-icon">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M12 2v20"/>
-                        <path d="M2 12h20"/>
-                        <path d="M12 2l5 5"/>
-                        <path d="M12 2l-5 5"/>
-                    </svg>
+            <!-- 杠杆原理实验 -->
+            <div class="col">
+                <div class="card h-100 experiment-card">
+                    <img src="https://source.unsplash.com/random/800x600/?lever" class="card-img-top" alt="杠杆原理">
+                    <div class="card-body">
+                        <h2 class="card-title">杠杆原理实验</h2>
+                        <p class="card-text">探索杠杆原理和力矩平衡，了解力臂、力矩和机械优势之间的关系。</p>
+                        <a href="/lever-intro" class="btn btn-primary">开始实验</a>
+                    </div>
                 </div>
-                <h2 class="experiment-title">杠杆原理实验</h2>
-                <p class="experiment-description">探索杠杆原理，研究力矩、力臂和力的分解。通过改变力的大小、方向和位置，理解杠杆的平衡条件。</p>
-                <button class="experiment-button">开始实验</button>
-            </a>
+            </div>
+
+            <!-- 自由落体实验 -->
+            <div class="col">
+                <div class="card h-100 experiment-card">
+                    <img src="https://source.unsplash.com/random/800x600/?falling" class="card-img-top" alt="自由落体">
+                    <div class="card-body">
+                        <h2 class="card-title">自由落体实验</h2>
+                        <p class="card-text">研究物体在重力作用下的运动，考虑空气阻力影响下的终端速度现象。</p>
+                        <a href="/freefall-intro" class="btn btn-primary">开始实验</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <p class="text-muted">每个实验都配有详细的原理说明、数学模型和应用场景介绍</p>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

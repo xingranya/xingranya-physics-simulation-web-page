@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>动量守恒实验</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        canvas {
+            border: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        .result {
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">动量守恒实验</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <form action="/calculateMomentum" method="post" class="mb-4">
+                    <div class="mb-3">
+                        <label for="mass1" class="form-label">物体1质量 (kg)</label>
+                        <input type="number" class="form-control" id="mass1" name="mass1" step="0.1" th:value="${mass1}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="velocity1" class="form-label">物体1初速度 (m/s)</label>
+                        <input type="number" class="form-control" id="velocity1" name="velocity1" step="0.1" th:value="${velocity1}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="mass2" class="form-label">物体2质量 (kg)</label>
+                        <input type="number" class="form-control" id="mass2" name="mass2" step="0.1" th:value="${mass2}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="velocity2" class="form-label">物体2初速度 (m/s)</label>
+                        <input type="number" class="form-control" id="velocity2" name="velocity2" step="0.1" th:value="${velocity2}" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">计算碰撞结果</button>
+                </form>
+            </div>
+            
+            <div class="col-md-6">
+                <canvas id="simulationCanvas" width="400" height="300"></canvas>
+                
+                <div class="result" th:if="${finalVelocity1 != null}">
+                    <h3>计算结果：</h3>
+                    <p>碰撞前总动量：<span th:text="${mass1 * velocity1 + mass2 * velocity2}">0</span> kg⋅m/s</p>
+                    <p>碰撞后总动量：<span th:text="${mass1 * finalVelocity1 + mass2 * finalVelocity2}">0</span> kg⋅m/s</p>
+                    <p>物体1碰撞后速度：<span th:text="${finalVelocity1}">0</span> m/s</p>
+                    <p>物体2碰撞后速度：<span th:text="${finalVelocity2}">0</span> m/s</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/momentum-intro" class="btn btn-secondary">返回说明</a>
+            <a href="/" class="btn btn-secondary ms-2">返回首页</a>
+        </div>
+    </div>
+
+    <script>
+        // 获取画布和上下文
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 定义小球的初始位置和大小
+        const ball1 = {
+            x: 100,
+            y: 150,
+            radius: 20,
+            color: '#007bff'
+        };
+        
+        const ball2 = {
+            x: 300,
+            y: 150,
+            radius: 20,
+            color: '#dc3545'
+        };
+        
+        // 绘制函数
+        function draw() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制小球1
+            ctx.beginPath();
+            ctx.arc(ball1.x, ball1.y, ball1.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball1.color;
+            ctx.fill();
+            ctx.closePath();
+            
+            // 绘制小球2
+            ctx.beginPath();
+            ctx.arc(ball2.x, ball2.y, ball2.radius, 0, Math.PI * 2);
+            ctx.fillStyle = ball2.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+        
+        // 初始绘制
+        draw();
+        
+        // 如果有速度值，添加动画
+        const velocity1 = document.getElementById('velocity1')?.value;
+        const velocity2 = document.getElementById('velocity2')?.value;
+        
+        if (velocity1 && velocity2) {
+            let time = 0;
+            const animate = () => {
+                time += 0.02;
+                
+                // 更新位置
+                ball1.x += velocity1 * 0.5;
+                ball2.x += velocity2 * 0.5;
+                
+                // 如果小球移出画布，重置位置
+                if (ball1.x > canvas.width + ball1.radius || ball1.x < -ball1.radius) {
+                    ball1.x = velocity1 > 0 ? -ball1.radius : canvas.width + ball1.radius;
+                }
+                if (ball2.x > canvas.width + ball2.radius || ball2.x < -ball2.radius) {
+                    ball2.x = velocity2 > 0 ? -ball2.radius : canvas.width + ball2.radius;
+                }
+                
+                draw();
+                requestAnimationFrame(animate);
+            };
+            
+            animate();
+        }
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
