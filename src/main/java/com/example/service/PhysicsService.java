@@ -98,4 +98,56 @@ public class PhysicsService {
         
         return new double[] {v1Final, v2Final};
     }
+
+    /**
+     * 计算一维碰撞后的速度
+     * @param m1 第一个物体的质量
+     * @param v1 第一个物体的初速度
+     * @param m2 第二个物体的质量
+     * @param v2 第二个物体的初速度
+     * @param e 恢复系数 (0-1)
+     * @return 包含两个物体碰撞后速度的数组 [v1', v2']
+     */
+    public double[] calculateCollision(double m1, double v1, double m2, double v2, double e) {
+        // 计算碰撞后的速度
+        double v1Prime, v2Prime;
+        
+        if (e == 1) { // 弹性碰撞
+            v1Prime = ((m1 - m2) * v1 + 2 * m2 * v2) / (m1 + m2);
+            v2Prime = (2 * m1 * v1 + (m2 - m1) * v2) / (m1 + m2);
+        } else if (e == 0) { // 完全非弹性碰撞
+            double vCommon = (m1 * v1 + m2 * v2) / (m1 + m2);
+            v1Prime = vCommon;
+            v2Prime = vCommon;
+        } else { // 非弹性碰撞
+            v1Prime = ((m1 - e * m2) * v1 + (1 + e) * m2 * v2) / (m1 + m2);
+            v2Prime = ((1 + e) * m1 * v1 + (m2 - e * m1) * v2) / (m1 + m2);
+        }
+        
+        return new double[]{v1Prime, v2Prime};
+    }
+
+    /**
+     * 计算系统的总动量
+     * @param m1 第一个物体的质量
+     * @param v1 第一个物体的速度
+     * @param m2 第二个物体的质量
+     * @param v2 第二个物体的速度
+     * @return 系统的总动量
+     */
+    public double calculateTotalMomentum(double m1, double v1, double m2, double v2) {
+        return m1 * v1 + m2 * v2;
+    }
+
+    /**
+     * 计算系统的总动能
+     * @param m1 第一个物体的质量
+     * @param v1 第一个物体的速度
+     * @param m2 第二个物体的质量
+     * @param v2 第二个物体的速度
+     * @return 系统的总动能
+     */
+    public double calculateTotalKineticEnergy(double m1, double v1, double m2, double v2) {
+        return 0.5 * (m1 * v1 * v1 + m2 * v2 * v2);
+    }
 }

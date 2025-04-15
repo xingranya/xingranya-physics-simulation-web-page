@@ -6,6 +6,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 物理模拟控制器类
  * 负责处理所有与物理模拟相关的HTTP请求
@@ -172,26 +175,48 @@ public class PhysicsController {
 
     /**
      * 计算碰撞后的速度
-     * @param mass1 物体1质量（kg）
-     * @param velocity1 物体1初速度（m/s）
-     * @param mass2 物体2质量（kg）
-     * @param velocity2 物体2初速度（m/s）
-     * @param model 用于向视图传递数据的模型对象
+     * @param m1 物体1质量（kg）
+     * @param v1 物体1初速度（m/s）
+     * @param m2 物体2质量（kg）
+     * @param v2 物体2初速度（m/s）
+     * @param e 碰撞系数（0-1）
      * @return 返回动量守恒模拟页面视图名称
      */
     @PostMapping("/calculateMomentum")
-    public String calculateMomentum(@RequestParam double mass1,
-                                  @RequestParam double velocity1,
-                                  @RequestParam double mass2,
-                                  @RequestParam double velocity2,
-                                  Model model) {
-        double[] finalVelocities = physicsService.calculateMomentum(mass1, velocity1, mass2, velocity2);
-        model.addAttribute("mass1", mass1);
-        model.addAttribute("velocity1", velocity1);
-        model.addAttribute("mass2", mass2);
-        model.addAttribute("velocity2", velocity2);
-        model.addAttribute("finalVelocity1", finalVelocities[0]);
-        model.addAttribute("finalVelocity2", finalVelocities[1]);
-        return "momentum";
+    @ResponseBody
+    public Map<String, Object> calculateMomentum(
+            @RequestParam double m1,
+            @RequestParam double v1,
+            @RequestParam double m2,
+            @RequestParam double v2,
+            @RequestParam double e) {
+        
+        // 计算碰撞后的速度
+        double[] finalVelocities = physicsService.calculateCollision(m1, v1, m2, v2, e);
+        double v1Prime = finalVelocities[0];
+        double v2Prime = finalVelocities[1];
+        
+        // 计算碰撞前后的动量和动能
+        double initialMomentum = physicsService.calculateTotalMomentum(m1, v1, m2, v2);
+        double finalMomentum = physicsService.calculateTotalMomentum(m1, v1Prime, m2, v2Prime);
+        double initialEnergy = physicsService.calculateTotalKineticEnergy(m1, v1, m2, v2);
+        double finalEnergy = physicsService.calculateTotalKineticEnergy(m1, v1Prime, m2, v2Prime);
+        
+        // 检查动量守恒（允许小的误差）
+        boolean isMomentumConserved = Math.abs(initialMomentum - finalMomentum) < 0.0001;
+        // 检查能量守恒（仅对弹性碰撞）
+        boolean isEnergyConserved = e == 1 && Math.abs(initialEnergy - finalEnergy) < 0.0001;
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("v1Prime", v1Prime);
+        result.put("v2Prime", v2Prime);
+        result.put("initialMomentum", initialMomentum);
+        result.put("finalMomentum", finalMomentum);
+        result.put("initialEnergy", initialEnergy);
+        result.put("finalEnergy", finalEnergy);
+        result.put("isMomentumConserved", isMomentumConserved);
+        result.put("isEnergyConserved", isEnergyConserved);
+        
+        return result;
     }
 }
