@@ -144,16 +144,16 @@
             font-size: 0.875rem;
             color: var(--md3-secondary);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transform: translate(-50%, 0);
+            white-space: nowrap;
         }
 
-        .ball-info.left {
-            top: 20px;
-            left: 20px;
+        .ball-info.top {
+            top: -40px;
         }
 
-        .ball-info.right {
-            top: 20px;
-            right: 20px;
+        .ball-info.bottom {
+            bottom: -40px;
         }
 
         .ball-info .label {
@@ -207,6 +207,7 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .theory-section h3 {
@@ -214,19 +215,19 @@
             font-size: 1.25rem;
             font-weight: 500;
             margin-bottom: 16px;
+            border-bottom: 2px solid var(--md3-primary);
+            padding-bottom: 8px;
         }
 
         .theory-section p {
             font-size: 1rem;
             line-height: 1.6;
             margin-bottom: 16px;
+            color: var(--md3-secondary);
         }
 
         .highlight {
-            background-color: var(--md3-primary);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
+            color: var(--md3-primary);
             font-weight: 500;
         }
 
@@ -238,6 +239,7 @@
             margin: 20px 0;
             font-family: 'Roboto Mono', monospace;
             font-size: 1.1rem;
+            color: var(--md3-secondary);
         }
 
         .formula.highlight {
@@ -365,7 +367,7 @@
                 <div class="theory-section">
                     <h3>动量守恒定律</h3>
                     <p>在不受外力作用的系统中，系统的总动量保持不变。这是物理学中的一个<span class="highlight">基本守恒定律</span>。</p>
-                    <div class="formula highlight">
+                    <div class="formula">
                         m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂'
                     </div>
                 </div>
@@ -383,7 +385,7 @@
                     </div>
 
                     <p><strong>完全非弹性碰撞：</strong>碰撞后两物体粘在一起运动，动能损失最大。这是<span class="highlight">能量损失最多</span>的碰撞类型。</p>
-                    <div class="formula highlight">
+                    <div class="formula">
                         v₁' = v₂' = (m₁v₁ + m₂v₂)/(m₁ + m₂)
                     </div>
                 </div>
@@ -391,8 +393,10 @@
         </div>
 
         <!-- 添加小球信息显示容器 -->
-        <div id="left-ball-info" class="ball-info left"></div>
-        <div id="right-ball-info" class="ball-info right"></div>
+        <div id="left-ball-info-top" class="ball-info top"></div>
+        <div id="left-ball-info-bottom" class="ball-info bottom"></div>
+        <div id="right-ball-info-top" class="ball-info top"></div>
+        <div id="right-ball-info-bottom" class="ball-info bottom"></div>
     </div>
 
     <script>
@@ -449,7 +453,7 @@
                 
                 // 绘制中心线
                 p.stroke(200);
-                p.strokeWeight(2); // 加粗中心线
+                p.strokeWeight(2);
                 p.line(0, p.height/2, p.width, p.height/2);
                 
                 // 更新小球位置
@@ -506,19 +510,32 @@
 
         // 更新小球信息显示
         function updateBallInfo() {
-            const leftInfo = document.getElementById('left-ball-info');
-            const rightInfo = document.getElementById('right-ball-info');
+            const leftInfoTop = document.getElementById('left-ball-info-top');
+            const leftInfoBottom = document.getElementById('left-ball-info-bottom');
+            const rightInfoTop = document.getElementById('right-ball-info-top');
+            const rightInfoBottom = document.getElementById('right-ball-info-bottom');
             
-            leftInfo.innerHTML = `
+            leftInfoTop.style.left = `${ball1.x}px`;
+            leftInfoBottom.style.left = `${ball1.x}px`;
+            rightInfoTop.style.left = `${ball2.x}px`;
+            rightInfoBottom.style.left = `${ball2.x}px`;
+            
+            leftInfoTop.innerHTML = `
                 <div class="label">质量：</div>
                 <div class="value">${ball1.mass.toFixed(1)} kg</div>
+            `;
+            
+            leftInfoBottom.innerHTML = `
                 <div class="label">速度：</div>
                 <div class="value">${ball1.velocity.toFixed(1)} m/s</div>
             `;
             
-            rightInfo.innerHTML = `
+            rightInfoTop.innerHTML = `
                 <div class="label">质量：</div>
                 <div class="value">${ball2.mass.toFixed(1)} kg</div>
+            `;
+            
+            rightInfoBottom.innerHTML = `
                 <div class="label">速度：</div>
                 <div class="value">${ball2.velocity.toFixed(1)} m/s</div>
             `;
