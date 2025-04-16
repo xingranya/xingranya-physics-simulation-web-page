@@ -9,20 +9,37 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
     <style>
         :root {
-            --md3-primary: #6750A4;
-            --md3-secondary: #625B71;
-            --md3-tertiary: #7D5260;
-            --md3-surface: #FFFBFE;
-            --md3-background: #FEF7FF;
-            --md3-error: #B3261E;
-            --md3-success: #4CAF50;
-            --md3-outline: #79747E;
+            /* MD3 颜色系统 - Light主题 (参考 lever.html 和 momentum-intro.html) */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005E;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1E192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #370B1E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #370B1E;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE; /* 与 background 相同 */
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-success: #4CAF50; /* 保留，或使用 MD3 推荐的颜色 */
         }
 
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: var(--md3-background);
-            color: #1C1B1F;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
             margin: 0;
             padding: 20px;
         }
@@ -34,119 +51,160 @@
         }
 
         .md3-card {
-            background-color: var(--md3-surface);
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 20px;
+            background-color: var(--md-sys-color-surface);
+            border-radius: 12px; /* MD3 推荐圆角 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); /* MD3 阴影 */
+            padding: 24px; /* MD3 推荐内边距 */
+            margin-bottom: 24px;
+            border: 1px solid var(--md-sys-color-outline); /* 添加轮廓 */
         }
 
         .card-header {
-            font-size: 1.25rem;
+            font-size: 1.375rem; /* Title Large */
             font-weight: 500;
             margin-bottom: 16px;
-            color: var(--md3-primary);
+            color: var(--md-sys-color-primary);
         }
 
         .card-body {
-            font-size: 1rem;
+            font-size: 1rem; /* Body Large */
             line-height: 1.5;
+            color: var(--md-sys-color-on-surface-variant);
         }
 
         .formula {
-            background-color: rgba(0,0,0,0.05);
-            padding: 12px;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 16px;
             border-radius: 8px;
             text-align: center;
-            margin: 16px 0;
+            margin: 20px 0;
             font-family: 'Roboto Mono', monospace;
+            font-size: 1.1rem;
         }
 
         .btn-primary {
-            background-color: var(--md3-primary);
+            background-color: var(--md-sys-color-primary);
             border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            color: white;
+            padding: 10px 24px; /* MD3 按钮内边距 */
+            border-radius: 20px; /* MD3 推荐圆角 */
+            color: var(--md-sys-color-on-primary);
             font-weight: 500;
+            text-transform: none; /* MD3 通常不用大写 */
+            transition: background-color 0.3s ease;
         }
 
         .btn-primary:hover {
-            background-color: var(--md3-primary);
+            background-color: var(--md-sys-color-primary);
+            /* MD3 通过状态层实现悬停效果，这里简化为透明度 */
             opacity: 0.9;
         }
 
         .slider-container {
-            margin: 16px 0;
+            margin: 20px 0;
         }
 
         .slider-label {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            font-size: 0.875rem; /* Label Medium */
+            color: var(--md-sys-color-on-surface-variant);
         }
 
         input[type="range"] {
             width: 100%;
             height: 4px;
-            background: var(--md3-primary);
+            background: var(--md-sys-color-primary-container);
             border-radius: 2px;
             -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
         }
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
+            appearance: none;
             width: 20px;
             height: 20px;
-            background: var(--md3-primary);
+            background: var(--md-sys-color-primary);
             border-radius: 50%;
             cursor: pointer;
         }
 
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--md-sys-color-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
         .radio-group {
-            margin: 16px 0;
+            margin: 20px 0;
         }
 
         .radio-option {
             display: flex;
             align-items: center;
-            margin: 8px 0;
+            margin: 12px 0;
+            cursor: pointer;
         }
 
         input[type="radio"] {
-            margin-right: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            margin-right: 12px;
             width: 20px;
             height: 20px;
-            border: 2px solid var(--md3-outline);
+            border: 2px solid var(--md-sys-color-outline);
             border-radius: 50%;
-            -webkit-appearance: none;
+            position: relative;
+            cursor: pointer;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
         }
 
         input[type="radio"]:checked {
-            background-color: var(--md3-primary);
-            border-color: var(--md3-primary);
+            border-color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-primary);
+        }
+
+        /* 添加选中时的内部圆点 */
+        input[type="radio"]:checked::after {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-on-primary);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         #canvas-container {
             width: 100%;
             height: 400px;
-            background-color: white;
+            background-color: var(--md-sys-color-surface-variant); /* 使用变体色 */
             border-radius: 12px;
             overflow: hidden;
             position: relative;
+            border: 1px solid var(--md-sys-color-outline);
         }
 
         .ball-info {
             position: absolute;
-            background-color: rgba(255, 255, 255, 0.8);
-            padding: 8px 12px;
-            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.9); /* 增加透明度 */
+            padding: 12px 16px;
+            border-radius: 8px;
             font-size: 0.875rem;
-            color: var(--md3-secondary);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            color: var(--md-sys-color-on-surface-variant);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
             pointer-events: none;
             text-align: left;
-            line-height: 1.4;
+            line-height: 1.5;
         }
 
         .ball-info.left {
@@ -163,45 +221,52 @@
             font-weight: 500;
             margin-right: 8px;
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            color: var(--md-sys-color-secondary);
         }
 
         .ball-info .value {
-            color: var(--md3-primary);
+            color: var(--md-sys-color-primary);
             font-weight: 500;
             display: block;
         }
 
         .data-display {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 20px;
+            grid-template-columns: 1fr 1fr; /* 改为两列 */
+            gap: 20px; /* 增加间距 */
+            margin-top: 24px;
+            justify-content: start; /* 确保项目在容器内左对齐 */
         }
 
         .data-item {
-            background-color: rgba(0,0,0,0.05);
-            padding: 12px;
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 16px;
             border-radius: 8px;
+            text-align: center; /* 文本居中显示 */
         }
 
         .data-label {
-            font-size: 0.875rem;
-            color: var(--md3-secondary);
-            margin-bottom: 4px;
+            font-size: 1rem; /* 增大字体 */
+            font-weight: 500; /* 加粗 */
+            color: var(--md-sys-color-secondary); /* 使用次要颜色 */
+            margin-bottom: 8px; /* 增加与数值的间距 */
+            display: block; /* 确保独占一行 */
         }
 
         .data-value {
-            font-size: 1.25rem;
-            font-weight: 500;
+            font-size: 1.75rem; /* 显著增大字体 */
+            font-weight: 700; /* 加粗 */
+            color: var(--md-sys-color-primary); /* 使用主题色 */
+            line-height: 1.2;
         }
 
         .text-success {
-            color: var(--md3-success);
+            color: var(--md-sys-color-success);
         }
 
         .text-danger {
-            color: var(--md3-error);
+            color: var(--md-sys-color-error);
         }
 
         .hidden {
@@ -209,47 +274,39 @@
         }
 
         .theory-section {
-            background-color: var(--md3-surface);
+            background-color: var(--md-sys-color-surface);
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--md-sys-color-outline);
         }
 
         .theory-section h3 {
-            color: var(--md3-primary);
-            font-size: 1.25rem;
+            color: var(--md-sys-color-primary);
+            font-size: 1.375rem; /* Title Large */
             font-weight: 500;
             margin-bottom: 16px;
         }
 
         .theory-section p {
-            font-size: 1rem;
+            font-size: 1rem; /* Body Large */
             line-height: 1.6;
             margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface-variant);
         }
 
         .highlight {
-            background-color: rgba(103, 80, 164, 0.15);
-            color: var(--md3-primary);
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
             padding: 2px 8px;
             border-radius: 4px;
             font-weight: 500;
         }
 
-        .formula {
-            background-color: rgba(0,0,0,0.05);
-            padding: 16px;
-            border-radius: 8px;
-            text-align: center;
-            margin: 20px 0;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1.1rem;
-        }
-
         .formula.highlight {
-            background-color: rgba(103, 80, 164, 0.15);
-            color: var(--md3-primary);
-            border: 1px solid rgba(103, 80, 164, 0.3);
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: 1px solid var(--md-sys-color-primary);
         }
     </style>
 </head>
@@ -325,6 +382,7 @@
                         <div class="d-flex gap-2 mt-3">
                             <button id="start-btn" class="btn btn-primary">开始模拟</button>
                             <button id="reset-btn" class="btn btn-primary">重置</button>
+                            <a href="/" class="btn btn-primary">返回主页</a>
                         </div>
                     </div>
                 </div>
@@ -465,21 +523,10 @@
                     ball2.x += ball2.velocity;
                     
                     // 检查墙壁碰撞
-                    if (ball1.x - ball1.radius < wallWidth) {
-                        ball1.x = wallWidth + ball1.radius;
-                        ball1.velocity = -ball1.velocity;
-                    }
-                    if (ball1.x + ball1.radius > p.width - wallWidth) {
-                        ball1.x = p.width - wallWidth - ball1.radius;
-                        ball1.velocity = -ball1.velocity;
-                    }
-                    if (ball2.x - ball2.radius < wallWidth) {
-                        ball2.x = wallWidth + ball2.radius;
-                        ball2.velocity = -ball2.velocity;
-                    }
-                    if (ball2.x + ball2.radius > p.width - wallWidth) {
-                        ball2.x = p.width - wallWidth - ball2.radius;
-                        ball2.velocity = -ball2.velocity;
+                    if (ball1.x - ball1.radius < wallWidth || ball1.x + ball1.radius > p.width - wallWidth ||
+                        ball2.x - ball2.radius < wallWidth || ball2.x + ball2.radius > p.width - wallWidth) {
+                        resetSimulation(); // 如果任何一个小球碰到墙壁，则调用重置函数
+                        return; // 重置后退出当前绘制循环
                     }
                     
                     // 检查小球碰撞
@@ -652,4 +699,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
