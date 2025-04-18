@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>杠杆原理实验 - 说明</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* MD3 颜色系统 - Light主题 */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005E;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1E192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #370B1E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #370B1E;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            
+            /* 圆角 */
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            
+            /* 阴影 */
+            --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+            --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+            --md-sys-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        
+        .intro-section {
+            background-color: var(--md-sys-color-primary-container);
+            border-radius: var(--md-sys-shape-corner-large);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--md-sys-elevation-1);
+        }
+        
+        .intro-section h1 {
+            color: var(--md-sys-color-on-primary-container);
+            font-weight: 500;
+            margin-bottom: 16px;
+            font-size: 2.5rem;
+        }
+        
+        .intro-section p {
+            color: var(--md-sys-color-on-primary-container);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.85;
+            margin-bottom: 0;
+        }
+        
+        .md3-card {
+            border-radius: var(--md-sys-shape-corner-large);
+            box-shadow: var(--md-sys-elevation-1);
+            border: none;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            font-weight: 500;
+            font-size: 1.25rem;
+            padding: 1rem 1.5rem;
+            border-bottom: none;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .card-primary {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        
+        .card-primary .card-header {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .card-primary .card-body {
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        .card-secondary {
+            background-color: var(--md-sys-color-secondary-container);
+        }
+        
+        .card-secondary .card-header {
+            background-color: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-secondary);
+        }
+        
+        .card-secondary .card-body {
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        
+        .card-tertiary {
+            background-color: var(--md-sys-color-tertiary-container);
+        }
+        
+        .card-tertiary .card-header {
+            background-color: var(--md-sys-color-tertiary);
+            color: var(--md-sys-color-on-tertiary);
+        }
+        
+        .card-tertiary .card-body {
+            color: var(--md-sys-color-on-tertiary-container);
+        }
+        
+        .card-surface {
+            background-color: var(--md-sys-color-surface);
+        }
+        
+        .card-surface .card-header {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .card-surface .card-body {
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .formula {
+            font-weight: 500;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: var(--md-sys-shape-corner-small);
+            text-align: center;
+            margin: 1rem 0;
+            font-size: 1.2rem;
+        }
+        
+        .md3-btn {
+            display: inline-block;
+            height: 40px;
+            padding: 0 24px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+            text-transform: uppercase;
+            line-height: 40px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.2s;
+            border: none;
+            margin-right: 8px;
+        }
+        
+        .md3-btn-primary {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .md3-btn-primary:hover {
+            background-color: var(--md-sys-color-primary);
+            opacity: 0.9;
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .md3-btn-secondary {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        
+        .md3-btn-secondary:hover {
+            background-color: var(--md-sys-color-secondary-container);
+            opacity: 0.9;
+            color: var(--md-sys-color-on-secondary-container);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="intro-section">
+            <h1>杠杆原理实验</h1>
+            <p>探索力矩平衡和机械优势，理解简单机械的工作原理</p>
+        </div>
+        
+        <div class="md3-card card-primary">
+            <div class="card-header">实验原理</div>
+            <div class="card-body">
+                <p>杠杆是最基本的简单机械之一，它由一个支点和一个刚性杆组成。杠杆的工作原理基于力矩平衡，当杠杆处于平衡状态时，支点两侧的力矩大小相等但方向相反。</p>
+                <div class="formula">
+                    <p>力矩 τ = F × r × sin(θ)</p>
+                    <p>其中：</p>
+                    <p>F = 作用力的大小</p>
+                    <p>r = 力臂（从支点到力的作用线的垂直距离）</p>
+                    <p>θ = 力的方向与杠杆的夹角</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="md3-card card-secondary">
+            <div class="card-header">机械优势</div>
+            <div class="card-body">
+                <p>杠杆的机械优势是指负载力与施加力之比。通过调整力臂的长度，我们可以获得不同的机械优势，这使得我们能够用较小的力来平衡或举起较大的重物。</p>
+                <div class="formula">
+                    <p>机械优势 = 阻力力臂 / 动力力臂</p>
+                    <p>机械优势 = 输出力 / 输入力</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="md3-card card-tertiary">
+            <div class="card-header">实验要点</div>
+            <div class="card-body">
+                <ul class="key-points">
+                    <li>理解力矩的概念和计算方法</li>
+                    <li>验证杠杆平衡条件</li>
+                    <li>探索力臂长度对机械优势的影响</li>
+                    <li>分析力的方向对力矩的影响</li>
+                    <li>掌握杠杆的应用原理</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="md3-card card-surface">
+            <div class="card-header">实验目标</div>
+            <div class="card-body">
+                <p>1. 理解力矩的概念和计算方法</p>
+                <p>2. 验证杠杆平衡条件</p>
+                <p>3. 探索力臂长度、作用力大小和方向对力矩的影响</p>
+                <p>4. 计算和验证不同情况下的机械优势</p>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="/lever" class="md3-btn md3-btn-primary">开始实验</a>
+            <a href="/" class="md3-btn md3-btn-secondary">返回首页</a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

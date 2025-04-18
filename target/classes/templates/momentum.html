@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>动量守恒实验</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <style>
+        :root {
+            /* MD3 颜色系统 - Light主题 (参考 lever.html 和 momentum-intro.html) */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005E;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1E192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #370B1E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #370B1E;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE; /* 与 background 相同 */
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-success: #4CAF50; /* 保留，或使用 MD3 推荐的颜色 */
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .md3-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 12px; /* MD3 推荐圆角 */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); /* MD3 阴影 */
+            padding: 24px; /* MD3 推荐内边距 */
+            margin-bottom: 24px;
+            border: 1px solid var(--md-sys-color-outline); /* 添加轮廓 */
+        }
+
+        .card-header {
+            font-size: 1.375rem; /* Title Large */
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-primary);
+        }
+
+        .card-body {
+            font-size: 1rem; /* Body Large */
+            line-height: 1.5;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .formula {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--md-sys-color-primary);
+            border: none;
+            padding: 10px 24px; /* MD3 按钮内边距 */
+            border-radius: 20px; /* MD3 推荐圆角 */
+            color: var(--md-sys-color-on-primary);
+            font-weight: 500;
+            text-transform: none; /* MD3 通常不用大写 */
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--md-sys-color-primary);
+            /* MD3 通过状态层实现悬停效果，这里简化为透明度 */
+            opacity: 0.9;
+        }
+
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.875rem; /* Label Medium */
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: var(--md-sys-color-primary-container);
+            border-radius: 2px;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--md-sys-color-primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--md-sys-color-primary);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .radio-group {
+            margin: 20px 0;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+
+        input[type="radio"] {
+            -webkit-appearance: none;
+            appearance: none;
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--md-sys-color-outline);
+            border-radius: 50%;
+            position: relative;
+            cursor: pointer;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        input[type="radio"]:checked {
+            border-color: var(--md-sys-color-primary);
+            background-color: var(--md-sys-color-primary);
+        }
+
+        /* 添加选中时的内部圆点 */
+        input[type="radio"]:checked::after {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--md-sys-color-on-primary);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        #canvas-container {
+            width: 100%;
+            height: 400px;
+            background-color: var(--md-sys-color-surface-variant); /* 使用变体色 */
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .ball-info {
+            /* position: absolute; */ /* Removed absolute positioning */
+            background-color: rgba(255, 255, 255, 0.9); /* 增加透明度 */
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: var(--md-sys-color-on-surface-variant);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            pointer-events: none; /* Keep this so they don't interfere with canvas clicks if overlapping */
+            text-align: left;
+            line-height: 1.5;
+            min-width: 150px; /* Add a min-width for better layout */
+        }
+
+
+
+        .ball-info-container {
+            display: flex;
+            justify-content: space-between; /* Align boxes to opposite ends */
+            gap: 10px; /* Space between boxes */
+            margin-top: 10px; /* Space above the boxes */
+            padding: 0 20px; /* Add some padding to align with canvas content */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+
+        .ball-info .label {
+            font-weight: 500;
+            margin-right: 8px;
+            display: block;
+            margin-bottom: 6px;
+            color: var(--md-sys-color-secondary);
+        }
+
+        .ball-info .value {
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            display: block;
+        }
+
+        .data-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 改为两列 */
+            gap: 20px; /* 增加间距 */
+            margin-top: 24px;
+            justify-content: start; /* 确保项目在容器内左对齐 */
+        }
+
+        .data-item {
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center; /* 文本居中显示 */
+        }
+
+        .data-label {
+            font-size: 1rem; /* 增大字体 */
+            font-weight: 500; /* 加粗 */
+            color: var(--md-sys-color-secondary); /* 使用次要颜色 */
+            margin-bottom: 8px; /* 增加与数值的间距 */
+            display: block; /* 确保独占一行 */
+        }
+
+        .data-value {
+            font-size: 1.75rem; /* 显著增大字体 */
+            font-weight: 700; /* 加粗 */
+            color: var(--md-sys-color-primary); /* 使用主题色 */
+            line-height: 1.2;
+        }
+
+        .text-success {
+            color: var(--md-sys-color-success);
+        }
+
+        .text-danger {
+            color: var(--md-sys-color-error);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .theory-section {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--md-sys-color-outline);
+        }
+
+        .theory-section h3 {
+            color: var(--md-sys-color-primary);
+            font-size: 1.375rem; /* Title Large */
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .theory-section p {
+            font-size: 1rem; /* Body Large */
+            line-height: 1.6;
+            margin-bottom: 16px;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .highlight {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .formula.highlight {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: 1px solid var(--md-sys-color-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <!-- 左侧控制面板 -->
+            <div class="col-md-4">
+                <div class="md3-card">
+                    <h2 class="card-header">动量守恒实验</h2>
+                    <div class="card-body">
+                        <!-- 碰撞类型选择 -->
+                        <div class="radio-group">
+                            <label class="card-header">碰撞类型</label>
+                            <div class="radio-option">
+                                <input type="radio" id="elastic" name="collision-type" value="elastic" checked>
+                                <label for="elastic">弹性碰撞 (e=1)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="inelastic" name="collision-type" value="inelastic">
+                                <label for="inelastic">非弹性碰撞 (0&lt;e&lt;1)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="perfectly-inelastic" name="collision-type" value="perfectly-inelastic">
+                                <label for="perfectly-inelastic">完全非弹性碰撞 (e=0)</label>
+                            </div>
+                        </div>
+
+                        <!-- 恢复系数滑块（默认隐藏） -->
+                        <div id="coefficient-container" class="slider-container hidden">
+                            <div class="slider-label">
+                                <label for="coefficient">恢复系数 (e)</label>
+                                <span id="coefficient-value">0.5</span>
+                            </div>
+                            <input type="range" id="coefficient" min="0" max="1" step="0.1" value="0.5">
+                        </div>
+
+                        <!-- 左侧小球参数 -->
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <label for="left-mass">左侧小球质量 (kg)</label>
+                                <span id="left-mass-value">1.0</span>
+                            </div>
+                            <input type="range" id="left-mass" min="0.1" max="5" step="0.1" value="1.0">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <label for="left-velocity">左侧小球初速度 (m/s)</label>
+                                <span id="left-velocity-value">2.0</span>
+                            </div>
+                            <input type="range" id="left-velocity" min="-5" max="5" step="0.1" value="2.0">
+                        </div>
+
+                        <!-- 右侧小球参数 -->
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <label for="right-mass">右侧小球质量 (kg)</label>
+                                <span id="right-mass-value">1.0</span>
+                            </div>
+                            <input type="range" id="right-mass" min="0.1" max="5" step="0.1" value="1.0">
+                        </div>
+
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <label for="right-velocity">右侧小球初速度 (m/s)</label>
+                                <span id="right-velocity-value">-2.0</span>
+                            </div>
+                            <input type="range" id="right-velocity" min="-5" max="5" step="0.1" value="-2.0">
+                        </div>
+
+                        <!-- 控制按钮 -->
+                        <div class="d-flex gap-2 mt-3">
+                            <button id="start-btn" class="btn btn-primary">开始模拟</button>
+                            <button id="reset-btn" class="btn btn-primary">重置</button>
+                            <a href="/" class="btn btn-primary">返回主页</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧模拟区域 -->
+            <div class="col-md-8">
+                <div class="md3-card">
+                    <div id="canvas-container"></div>
+
+                    <!-- 小球实时信息 -->
+                    <div class="ball-info-container">
+                        <div id="left-ball-info" class="ball-info"></div>
+                        <div id="right-ball-info" class="ball-info"></div>
+                    </div>
+
+                    <!-- 数据显示 -->
+                    <div class="data-display">
+                        <div class="data-item">
+                            <div class="data-label">初始动量</div>
+                            <div id="initial-momentum" class="data-value">0 kg·m/s</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">最终动量</div>
+                            <div id="final-momentum" class="data-value">0 kg·m/s</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">初始动能</div>
+                            <div id="initial-energy" class="data-value">0 J</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">最终动能</div>
+                            <div id="final-energy" class="data-value">0 J</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">动量守恒</div>
+                            <div id="momentum-conservation" class="data-value text-success">是</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">能量守恒</div>
+                            <div id="energy-conservation" class="data-value text-success">是</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 理论说明 -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="theory-section">
+                    <h3>动量守恒定律</h3>
+                    <p>在不受外力作用的系统中，系统的总动量保持不变。这是物理学中的一个<span class="highlight">基本守恒定律</span>。</p>
+                    <div class="formula highlight">
+                        m₁v₁ + m₂v₂ = m₁v₁' + m₂v₂'
+                    </div>
+                </div>
+
+                <div class="theory-section">
+                    <h3>碰撞类型</h3>
+                    <p><strong>弹性碰撞：</strong>碰撞前后系统的总动能保持不变。这是<span class="highlight">理想情况</span>下的碰撞。</p>
+                    <div class="formula">
+                        ½m₁v₁² + ½m₂v₂² = ½m₁v₁'² + ½m₂v₂'²
+                    </div>
+
+                    <p><strong>非弹性碰撞：</strong>碰撞前后系统的总动能减少，部分动能转化为其他形式的能量（如热能）。这是<span class="highlight">最常见</span>的碰撞类型。</p>
+                    <div class="formula">
+                        ½m₁v₁² + ½m₂v₂² > ½m₁v₁'² + ½m₂v₂'²
+                    </div>
+
+                    <p><strong>完全非弹性碰撞：</strong>碰撞后两物体粘在一起运动，动能损失最大。这是<span class="highlight">能量损失最多</span>的碰撞类型。</p>
+                    <div class="formula highlight">
+                        v₁' = v₂' = (m₁v₁ + m₂v₂)/(m₁ + m₂)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 小球信息显示容器 移动到 col-md-8 内 -->
+    </div>
+
+    <script>
+        // 全局变量
+        let p5Instance;
+        let simulationRunning = false;
+        let ball1, ball2;
+        let collisionOccurred = false;
+        let finalVelocities = null;
+        let wallWidth = 20; // 墙壁宽度
+
+        // 初始化 p5.js 画布
+        function initSimulation() {
+            const container = document.getElementById('canvas-container');
+            p5Instance = new p5(sketch, container);
+        }
+
+        // p5.js 草图
+        const sketch = (p) => {
+            p.setup = () => {
+                const container = document.getElementById('canvas-container');
+                const canvas = p.createCanvas(container.clientWidth, container.clientHeight);
+                canvas.parent('canvas-container');
+                
+                // 初始化小球
+                ball1 = {
+                    x: wallWidth + 100,
+                    y: p.height * 0.5,
+                    radius: 30,
+                    mass: parseFloat(document.getElementById('left-mass').value),
+                    velocity: parseFloat(document.getElementById('left-velocity').value),
+                    color: p.color('#6750A4') // 使用主题色
+                };
+                
+                ball2 = {
+                    x: p.width - wallWidth - 100,
+                    y: p.height * 0.5,
+                    radius: 30,
+                    mass: parseFloat(document.getElementById('right-mass').value),
+                    velocity: parseFloat(document.getElementById('right-velocity').value),
+                    color: p.color('#7D5260') // 使用第三色
+                };
+            };
+
+            p.draw = () => {
+                // 清空画布
+                p.background(255);
+                
+                // 绘制墙壁
+                p.fill(200);
+                p.noStroke();
+                p.rect(0, 0, wallWidth, p.height); // 左墙
+                p.rect(p.width - wallWidth, 0, wallWidth, p.height); // 右墙
+                
+                // 绘制中心线
+                p.stroke(200);
+                p.strokeWeight(2); // 加粗中心线
+                p.line(0, p.height/2, p.width, p.height/2);
+                
+                // 更新小球位置
+                if (simulationRunning) {
+                    ball1.x += ball1.velocity;
+                    ball2.x += ball2.velocity;
+                    
+                    // 检查墙壁碰撞
+                    if (ball1.x - ball1.radius < wallWidth || ball1.x + ball1.radius > p.width - wallWidth ||
+                        ball2.x - ball2.radius < wallWidth || ball2.x + ball2.radius > p.width - wallWidth) {
+                        resetSimulation(); // 如果任何一个小球碰到墙壁，则调用重置函数
+                        return; // 重置后退出当前绘制循环
+                    }
+                    
+                    // 检查小球碰撞
+                    if (!collisionOccurred && 
+                        Math.abs(ball1.x - ball2.x) < ball1.radius + ball2.radius) {
+                        handleCollision();
+                        collisionOccurred = true;
+                    }
+                }
+                
+                // 绘制小球
+                drawBall(ball1);
+                drawBall(ball2);
+
+                // 更新小球信息显示
+                updateBallInfo();
+            };
+
+            p.windowResized = () => {
+                const container = document.getElementById('canvas-container');
+                p.resizeCanvas(container.clientWidth, container.clientHeight);
+            };
+        };
+
+        // 绘制小球
+        function drawBall(ball) {
+            p5Instance.fill(ball.color);
+            p5Instance.noStroke();
+            p5Instance.ellipse(ball.x, ball.y, ball.radius * 2);
+        }
+
+        // 更新小球信息显示
+        function updateBallInfo() {
+            const leftInfo = document.getElementById('left-ball-info');
+            const rightInfo = document.getElementById('right-ball-info');
+            
+            leftInfo.innerHTML = `
+                <div class="label">左侧小球</div>
+                <div class="value">质量: ${ball1.mass.toFixed(1)} kg</div>
+                <div class="value">速度: ${ball1.velocity.toFixed(1)} m/s</div>
+            `;
+            
+            rightInfo.innerHTML = `
+                <div class="label">右侧小球</div>
+                <div class="value">质量: ${ball2.mass.toFixed(1)} kg</div>
+                <div class="value">速度: ${ball2.velocity.toFixed(1)} m/s</div>
+            `;
+        }
+
+        // 处理碰撞
+        function handleCollision() {
+            const m1 = ball1.mass;
+            const v1 = ball1.velocity;
+            const m2 = ball2.mass;
+            const v2 = ball2.velocity;
+            const e = getCoefficientOfRestitution();
+            
+            // 发送请求到后端计算碰撞结果
+            fetch('/calculateMomentum', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `m1=${m1}&v1=${v1}&m2=${m2}&v2=${v2}&e=${e}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 更新小球速度
+                ball1.velocity = data.v1Prime;
+                ball2.velocity = data.v2Prime;
+                
+                // 更新数据显示
+                updateDataDisplay(data);
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // 获取恢复系数
+        function getCoefficientOfRestitution() {
+            const collisionType = document.querySelector('input[name="collision-type"]:checked').value;
+            if (collisionType === 'elastic') return 1;
+            if (collisionType === 'perfectly-inelastic') return 0;
+            return parseFloat(document.getElementById('coefficient').value);
+        }
+
+        // 更新数据显示
+        function updateDataDisplay(data) {
+            document.getElementById('initial-momentum').textContent = 
+                `${data.initialMomentum.toFixed(2)} kg·m/s`;
+            document.getElementById('final-momentum').textContent = 
+                `${data.finalMomentum.toFixed(2)} kg·m/s`;
+            document.getElementById('initial-energy').textContent = 
+                `${data.initialEnergy.toFixed(2)} J`;
+            document.getElementById('final-energy').textContent = 
+                `${data.finalEnergy.toFixed(2)} J`;
+            
+            const momentumConservation = document.getElementById('momentum-conservation');
+            momentumConservation.textContent = data.isMomentumConserved ? '是' : '否';
+            momentumConservation.className = `data-value ${data.isMomentumConserved ? 'text-success' : 'text-danger'}`;
+            
+            const energyConservation = document.getElementById('energy-conservation');
+            energyConservation.textContent = data.isEnergyConserved ? '是' : '否';
+            energyConservation.className = `data-value ${data.isEnergyConserved ? 'text-success' : 'text-danger'}`;
+        }
+
+        // 重置模拟
+        function resetSimulation() {
+            simulationRunning = false;
+            collisionOccurred = false;
+            finalVelocities = null;
+            
+            // 重置小球位置
+            ball1.x = wallWidth + 100;
+            ball2.x = p5Instance.width - wallWidth - 100;
+            
+            // 重置小球速度
+            ball1.velocity = parseFloat(document.getElementById('left-velocity').value);
+            ball2.velocity = parseFloat(document.getElementById('right-velocity').value);
+            
+            // 重置数据显示
+            document.getElementById('initial-momentum').textContent = '0 kg·m/s';
+            document.getElementById('final-momentum').textContent = '0 kg·m/s';
+            document.getElementById('initial-energy').textContent = '0 J';
+            document.getElementById('final-energy').textContent = '0 J';
+            document.getElementById('momentum-conservation').textContent = '是';
+            document.getElementById('energy-conservation').textContent = '是';
+        }
+
+        // 事件监听器
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化模拟
+            initSimulation();
+            
+            // 开始按钮
+            document.getElementById('start-btn').addEventListener('click', () => {
+                if (!simulationRunning) {
+                    simulationRunning = true;
+                }
+            });
+            
+            // 重置按钮
+            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            
+            // 碰撞类型选择
+            document.querySelectorAll('input[name="collision-type"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const coefficientContainer = document.getElementById('coefficient-container');
+                    if (radio.value === 'inelastic') {
+                        coefficientContainer.classList.remove('hidden');
+                    } else {
+                        coefficientContainer.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // 滑块值更新
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.addEventListener('input', (e) => {
+                    const valueDisplay = document.getElementById(`${e.target.id}-value`);
+                    valueDisplay.textContent = e.target.value;
+                    
+                    // 更新小球质量
+                    if (e.target.id === 'left-mass') {
+                        ball1.mass = parseFloat(e.target.value);
+                    } else if (e.target.id === 'right-mass') {
+                        ball2.mass = parseFloat(e.target.value);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
