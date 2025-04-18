@@ -80,6 +80,9 @@
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
+            height: fit-content; /* 防止表单拉伸 */
+            width: 100%; /* 确保宽度正确 */
+            box-sizing: border-box; /* 包含padding和border */
         }
 
         .form-group {
@@ -201,6 +204,8 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--md-sys-color-surface-variant);
             margin-top: 0;
+            width: 100%; /* 确保宽度正确 */
+            box-sizing: border-box; /* 包含padding和border */
         }
 
         .result-container h3 {
@@ -245,6 +250,8 @@
             position: relative;
             overflow: hidden;
             min-height: 400px;
+            width: 100%; /* 确保宽度正确 */
+            box-sizing: border-box; /* 包含padding和border */
         }
 
         canvas {
@@ -692,12 +699,16 @@
                 cancelAnimationFrame(animationId);
                 isAnimating = false;
                 document.getElementById('animateBtn').textContent = '播放动画';
+                // 重新启用滑块
+                enableSliders(true);
                 drawScene();
                 return;
             }
             
             isAnimating = true;
             document.getElementById('animateBtn').textContent = '停止动画';
+            // 禁用滑块
+            enableSliders(false);
             
             // 计算物理参数
             const angleRad = currentAngle * Math.PI / 180;
@@ -720,6 +731,8 @@
                 setTimeout(() => {
                     isAnimating = false;
                     document.getElementById('animateBtn').textContent = '播放动画';
+                    // 重新启用滑块
+                    enableSliders(true);
                     drawScene();
                 }, 2000);
                 return;
@@ -802,7 +815,7 @@
                 ctx.translate(currentX, currentY);
                 // 不旋转坐标系，保持重力垂直向下
                 const gravityLength = currentMass * g * 3;
-                drawArrow(0, 0, 0, gravityLength, getColor('--md-sys-color-error'), 2, "重力", currentMass * g + " N");
+                drawArrow(0, 0, 0, gravityLength, getColor('--md-sys-color-error'), 2, "重力", (currentMass * g).toFixed(1) + " N");
                 ctx.restore();
                 
                 // 2. 再绘制沿斜面方向的力
@@ -843,6 +856,8 @@
                         drawScene();
                         isAnimating = false;
                         document.getElementById('animateBtn').textContent = '播放动画';
+                        // 重新启用滑块
+                        enableSliders(true);
                     }, 500);
                 }
             }
@@ -933,6 +948,19 @@
         document.getElementById('animateBtn').addEventListener('click', function() {
             animateMotion();
         });
+
+        // 启用或禁用滑块
+        function enableSliders(enabled) {
+            document.getElementById('angle').disabled = !enabled;
+            document.getElementById('mass').disabled = !enabled;
+            document.getElementById('friction').disabled = !enabled;
+            
+            // 改变滑块的外观，使用透明度表示禁用状态
+            const sliders = document.querySelectorAll('input[type="range"]');
+            sliders.forEach(slider => {
+                slider.style.opacity = enabled ? "1" : "0.5";
+            });
+        }
 
         // 初始绘制
         const initialAngle = /*[[${angle}]]*/ 30;
