@@ -59,7 +59,7 @@
 
         .content {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 300px 1fr; /* 固定左列宽度 */
             gap: 2rem;
             align-items: start;
         }
@@ -372,7 +372,7 @@
                             <div class="slider-label">
                                 <span>0°</span>
                                 <span class="slider-value" id="angle-value">30°</span>
-                                <span>90°</span>
+                                <span>89°</span>
                             </div>
                             <input type="range" id="angle" name="angle" min="0" max="89" step="1" value="30">
                         </div>
@@ -460,26 +460,36 @@
         function drawScene() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            const padding = 40;
+            const padding = 50;
             const groundY = canvas.height - padding;
-            const rampLength = Math.min(canvas.width - 2 * padding, canvas.height - 2 * padding);
+            
+            // 确保三角形两边等长
+            const rampHeight = Math.min(canvas.height - 2 * padding, canvas.width - 2 * padding);
+            const rampLength = rampHeight; // 设置为相同的长度
+            
             const angleRad = currentAngle * Math.PI / 180;
             
             // 绘制背景
             ctx.fillStyle = getColor('--md-sys-color-surface');
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            // 计算斜面起点和终点
+            const rampStartX = padding;
+            const rampStartY = groundY;
+            const rampEndX = rampStartX + rampLength * Math.cos(angleRad);
+            const rampEndY = groundY - rampLength * Math.sin(angleRad);
+            
             // 绘制斜面
             ctx.beginPath();
-            ctx.moveTo(padding, groundY);
-            ctx.lineTo(padding + rampLength * Math.cos(angleRad), groundY - rampLength * Math.sin(angleRad));
+            ctx.moveTo(rampStartX, rampStartY);
+            ctx.lineTo(rampEndX, rampEndY);
             ctx.lineWidth = 2;
             ctx.strokeStyle = getColor('--md-sys-color-outline');
             ctx.stroke();
             
             // 绘制地面
             ctx.beginPath();
-            ctx.moveTo(padding, groundY);
+            ctx.moveTo(rampStartX, groundY);
             ctx.lineTo(canvas.width - padding, groundY);
             ctx.lineWidth = 2;
             ctx.strokeStyle = getColor('--md-sys-color-outline');
@@ -487,7 +497,7 @@
             
             // 绘制角度标记
             ctx.beginPath();
-            ctx.arc(padding, groundY, 30, -angleRad, 0);
+            ctx.arc(rampStartX, groundY, 30, -angleRad, 0);
             ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
             ctx.stroke();
             
@@ -495,16 +505,19 @@
             ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
             ctx.font = '12px Roboto';
             ctx.textAlign = 'center';
-            ctx.fillText(currentAngle + '°', padding + 20, groundY - 20);
+            ctx.fillText(currentAngle + '°', rampStartX + 25, groundY - 15);
             
             // 计算斜面顶部位置
-            const topX = padding + rampLength * Math.cos(angleRad);
-            const topY = groundY - rampLength * Math.sin(angleRad);
+            const topX = rampEndX;
+            const topY = rampEndY;
             
-            // 计算物体在斜面上的位置
-            const boxSize = 30;
-            const boxX = padding + rampLength * 0.6 * Math.cos(angleRad); // 放在斜面60%处
-            const boxY = groundY - rampLength * 0.6 * Math.sin(angleRad);
+            // 计算物体在斜面上的位置 (60%处)
+            const positionRatio = 0.6;
+            const boxWidth = 30;
+            const boxHeight = 30;
+            
+            const boxCenterX = rampStartX + positionRatio * (rampEndX - rampStartX);
+            const boxCenterY = groundY - positionRatio * (groundY - rampEndY);
             
             // 计算力的大小
             const scale = 5; // 力的缩放因子
@@ -525,18 +538,19 @@
             const frictionForce = currentFriction * normalForce;
             const frictionLength = frictionForce * scale;
 
-            // 绘制物体
+            // 绘制物体 (底边贴着斜面)
             ctx.save();
-            ctx.translate(boxX, boxY);
+            ctx.translate(boxCenterX, boxCenterY);
             ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
             ctx.fillStyle = getColor('--md-sys-color-primary');
-            ctx.fillRect(-boxSize/2, -boxSize/2, boxSize, boxSize);
+            // 调整绘制位置，使底边贴着斜面
+            ctx.fillRect(-boxWidth/2, -boxHeight/2 + boxHeight/2, boxWidth, boxHeight);
             ctx.restore();
 
             // 开始绘制力 - 在物体中心位置绘制所有力
             // 1. 重力 - 始终垂直向下
             ctx.save();
-            ctx.translate(boxX, boxY);
+            ctx.translate(boxCenterX, boxCenterY);
             // 不旋转坐标系，保持重力垂直向下
             drawArrow(
                 0, 0, 
@@ -550,7 +564,7 @@
 
             // 2. 绘制斜面坐标系下的力
             ctx.save();
-            ctx.translate(boxX, boxY);
+            ctx.translate(boxCenterX, boxCenterY);
             ctx.rotate(-angleRad); // 对齐斜面
 
             // 重力平行分量
@@ -559,7 +573,7 @@
                 gravityParallelLength, 0,
                 getColor('--md-sys-color-primary'),
                 3,
-                "重力平行分量 (mg·sinθ)",
+                "重力平行分量",
                 gravityParallel.toFixed(1) + " N"
             );
             
@@ -569,7 +583,7 @@
                 0, -gravityPerpendicularLength,
                 getColor('--md-sys-color-tertiary'),
                 3,
-                "重力垂直分量 (mg·cosθ)",
+                "重力垂直分量",
                 gravityPerpendicular.toFixed(1) + " N"
             );
             
@@ -579,7 +593,7 @@
                 0, -normalLength,
                 getColor('--md-sys-color-success'),
                 3,
-                "法向力 (N)",
+                "法向力",
                 normalForce.toFixed(1) + " N"
             );
             
@@ -590,7 +604,7 @@
                     -frictionLength, 0,
                     getColor('--md-sys-color-secondary'),
                     3,
-                    "摩擦力 (f)",
+                    "摩擦力",
                     frictionForce.toFixed(1) + " N"
                 );
             }
@@ -711,15 +725,22 @@
                 return;
             }
             
-            const padding = 40;
+            const padding = 50;
             const groundY = canvas.height - padding;
-            const rampLength = Math.min(canvas.width - 2 * padding, canvas.height - 2 * padding);
-            const startTime = Date.now();
-            const boxSize = 30;
             
-            // 计算斜面顶部位置
-            const topX = padding + rampLength * Math.cos(angleRad);
-            const topY = groundY - rampLength * Math.sin(angleRad);
+            // 确保三角形两边等长
+            const rampHeight = Math.min(canvas.height - 2 * padding, canvas.width - 2 * padding);
+            const rampLength = rampHeight; // 设置为相同的长度
+            
+            const startTime = Date.now();
+            const boxWidth = 30;
+            const boxHeight = 30;
+            
+            // 计算斜面起点和终点
+            const rampStartX = padding;
+            const rampStartY = groundY;
+            const rampEndX = rampStartX + rampLength * Math.cos(angleRad);
+            const rampEndY = groundY - rampLength * Math.sin(angleRad);
             
             function animate() {
                 if (!isAnimating) return;
@@ -736,15 +757,15 @@
                 
                 // 绘制斜面
                 ctx.beginPath();
-                ctx.moveTo(padding, groundY);
-                ctx.lineTo(padding + rampLength * Math.cos(angleRad), groundY - rampLength * Math.sin(angleRad));
+                ctx.moveTo(rampStartX, rampStartY);
+                ctx.lineTo(rampEndX, rampEndY);
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = getColor('--md-sys-color-outline');
                 ctx.stroke();
                 
                 // 绘制地面
                 ctx.beginPath();
-                ctx.moveTo(padding, groundY);
+                ctx.moveTo(rampStartX, groundY);
                 ctx.lineTo(canvas.width - padding, groundY);
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = getColor('--md-sys-color-outline');
@@ -752,7 +773,7 @@
                 
                 // 绘制角度标记
                 ctx.beginPath();
-                ctx.arc(padding, groundY, 30, -angleRad, 0);
+                ctx.arc(rampStartX, groundY, 30, -angleRad, 0);
                 ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
                 ctx.stroke();
                 
@@ -760,18 +781,19 @@
                 ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
                 ctx.font = '12px Roboto';
                 ctx.textAlign = 'center';
-                ctx.fillText(currentAngle + '°', padding + 20, groundY - 20);
+                ctx.fillText(currentAngle + '°', rampStartX + 25, groundY - 15);
                 
                 // 计算物体在斜面上的当前位置
-                const currentX = topX - progress * rampLength * Math.cos(angleRad);
-                const currentY = topY + progress * rampLength * Math.sin(angleRad);
+                const currentX = rampEndX - progress * (rampEndX - rampStartX);
+                const currentY = rampEndY + progress * (rampStartY - rampEndY);
                 
-                // 绘制物体
+                // 绘制物体 (底边贴着斜面)
                 ctx.save();
                 ctx.translate(currentX, currentY);
                 ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
                 ctx.fillStyle = getColor('--md-sys-color-primary');
-                ctx.fillRect(-boxSize/2, -boxSize/2, boxSize, boxSize);
+                // 调整绘制位置，使底边贴着斜面
+                ctx.fillRect(-boxWidth/2, -boxHeight/2 + boxHeight/2, boxWidth, boxHeight);
                 ctx.restore();
                 
                 // 绘制力 - 分两个部分，保持重力垂直向下
@@ -780,7 +802,7 @@
                 ctx.translate(currentX, currentY);
                 // 不旋转坐标系，保持重力垂直向下
                 const gravityLength = currentMass * g * 3;
-                drawArrow(0, 0, 0, gravityLength, getColor('--md-sys-color-error'), 2, null, null);
+                drawArrow(0, 0, 0, gravityLength, getColor('--md-sys-color-error'), 2, "重力", currentMass * g + " N");
                 ctx.restore();
                 
                 // 2. 再绘制沿斜面方向的力
@@ -795,12 +817,12 @@
                 
                 // 绘制重力平行分量
                 if (gravityParallel > 0) {
-                    drawArrow(0, 0, scale * gravityParallel, 0, getColor('--md-sys-color-primary'), 2, null, null);
+                    drawArrow(0, 0, scale * gravityParallel, 0, getColor('--md-sys-color-primary'), 2, "平行分量", gravityParallel.toFixed(1) + " N");
                 }
                 
                 // 绘制摩擦力
                 if (frictionForce > 0) {
-                    drawArrow(0, 0, -scale * frictionForce, 0, getColor('--md-sys-color-secondary'), 2, null, null);
+                    drawArrow(0, 0, -scale * frictionForce, 0, getColor('--md-sys-color-secondary'), 2, "摩擦力", frictionForce.toFixed(1) + " N");
                 }
                 
                 ctx.restore();
