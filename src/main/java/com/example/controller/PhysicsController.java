@@ -46,8 +46,8 @@ public class PhysicsController {
     @GetMapping("/ramp")
     public String showRampPage(Model model) {
         model.addAttribute("angle", 30.0);
-        model.addAttribute("mass", 5.0);
-        model.addAttribute("frictionCoefficient", 0.2);
+        model.addAttribute("mass", 1.0);
+        model.addAttribute("friction", 0.1);
         return "ramp";
     }
 
@@ -55,21 +55,77 @@ public class PhysicsController {
      * 计算斜坡上的物体加速度
      * @param angle 斜坡角度（度）
      * @param mass 物体质量（kg）
-     * @param frictionCoefficient 摩擦系数
+     * @param friction 摩擦系数
      * @param model 用于向视图传递数据的模型对象
      * @return 返回斜坡模拟页面视图名称
      */
     @PostMapping("/calculateRamp")
     public String calculateRamp(@RequestParam double angle, 
                                @RequestParam double mass,
-                               @RequestParam double frictionCoefficient,
+                               @RequestParam(name = "friction") double frictionCoefficient,
                                Model model) {
         double acceleration = physicsService.calculateRamp(angle, mass, frictionCoefficient);
+        
+        double gravityParallel = mass * 9.8 * Math.sin(Math.toRadians(angle));
+        double gravityPerpendicular = mass * 9.8 * Math.cos(Math.toRadians(angle));
+        double normalForce = gravityPerpendicular;
+        double frictionForce = frictionCoefficient * normalForce;
+        
         model.addAttribute("acceleration", acceleration);
         model.addAttribute("angle", angle);
         model.addAttribute("mass", mass);
-        model.addAttribute("frictionCoefficient", frictionCoefficient);
+        model.addAttribute("friction", frictionCoefficient);
+        model.addAttribute("gravityParallel", gravityParallel);
+        model.addAttribute("normalForce", normalForce);
+        model.addAttribute("frictionForce", frictionForce);
+        
         return "ramp";
+    }
+
+    /**
+     * 计算斜坡上的物体物理量（AJAX请求）
+     * @param angle 斜坡角度（度）
+     * @param mass 物体质量（kg）
+     * @param friction 摩擦系数
+     * @return 返回包含物理量计算结果的JSON对象
+     */
+    @PostMapping("/calculateRampAjax")
+    @ResponseBody
+    public Map<String, Object> calculateRampAjax(
+            @RequestParam double angle, 
+            @RequestParam double mass,
+            @RequestParam double friction) {
+        
+        double g = 9.8;
+        double radians = Math.toRadians(angle);
+        double gravityParallel = mass * g * Math.sin(radians);
+        double gravityPerpendicular = mass * g * Math.cos(radians);
+        double normalForce = gravityPerpendicular;
+        double frictionForce = friction * normalForce;
+        double netForce = gravityParallel - frictionForce;
+        double acceleration = netForce / mass;
+        
+        boolean isStatic = acceleration <= 0;
+        
+        double maxStaticAngle = Math.toDegrees(Math.atan(friction));
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("acceleration", acceleration);
+        result.put("gravityParallel", gravityParallel);
+        result.put("gravityPerpendicular", gravityPerpendicular);
+        result.put("normalForce", normalForce);
+        result.put("frictionForce", frictionForce);
+        result.put("isStatic", isStatic);
+        result.put("maxStaticAngle", maxStaticAngle);
+        
+        if (!isStatic) {
+            double timeToBottom = Math.sqrt(2 * mass * 9.8 * Math.sin(radians) / netForce);
+            double velocityAtBottom = acceleration * timeToBottom;
+            result.put("timeToBottom", timeToBottom);
+            result.put("velocityAtBottom", velocityAtBottom);
+        }
+        
+        return result;
     }
 
     /**
