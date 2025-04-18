@@ -59,7 +59,7 @@
 
         .content {
             display: grid;
-            grid-template-columns: 300px 1fr; /* 固定左列宽度 */
+            grid-template-columns: 350px 1fr; /* 增加左列宽度 */
             gap: 2rem;
             align-items: start;
         }
@@ -88,7 +88,8 @@
         .form-group {
             margin-bottom: 1.5rem;
             position: relative;
-            z-index: 5;
+            z-index: 5; /* 增加z-index避免遮挡 */
+            width: 100%; /* 确保宽度占满 */
         }
 
         .form-group label {
@@ -114,7 +115,7 @@
         .slider-container {
             margin-top: 0.5rem;
             position: relative;
-            padding-bottom: 10px;
+            padding-bottom: 10px; /* 增加底部间距 */
         }
 
         .slider-label {
@@ -126,6 +127,8 @@
         .slider-value {
             font-weight: 500;
             color: var(--md-sys-color-primary);
+            min-width: 60px; /* 确保值有足够空间 */
+            text-align: right; /* 右对齐 */
         }
 
         input[type="range"] {
@@ -388,9 +391,9 @@
                         <label for="mass">物体质量 (kg)</label>
                         <div class="slider-container">
                             <div class="slider-label">
-                                <span>0.1 kg</span>
+                                <span>0.1</span>
                                 <span class="slider-value" id="mass-value">1.0 kg</span>
-                                <span>10.0 kg</span>
+                                <span>10.0</span>
                             </div>
                             <input type="range" id="mass" name="mass" min="0.1" max="10" step="0.1" value="1.0">
                         </div>
@@ -677,18 +680,37 @@
             ctx.fill();
             
             // 绘制标签
-            ctx.font = '12px Roboto';
-            ctx.fillStyle = color;
-            ctx.textAlign = 'center';
-            
-            // 根据箭头方向调整标签位置
-            let labelX = arrowLength / 2;
-            let labelY = -10;
-            
-            ctx.fillText(label, labelX, labelY);
-            if (value) {
-                ctx.font = '10px Roboto';
-                ctx.fillText(value, labelX, labelY + 15);
+            if (label) {
+                ctx.font = '12px Roboto';
+                ctx.fillStyle = color;
+                ctx.textAlign = 'center';
+                
+                // 根据箭头方向调整标签位置
+                let labelX = arrowLength / 2;
+                let labelY = angle > 0 ? -15 : -15; // 标签位置上移，避免被线条遮挡
+                
+                // 绘制白色背景，增加可读性
+                const labelWidth = ctx.measureText(label).width;
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fillRect(labelX - labelWidth/2 - 2, labelY - 10, labelWidth + 4, 14);
+                
+                // 绘制标签文本
+                ctx.fillStyle = color;
+                ctx.fillText(label, labelX, labelY);
+                
+                // 显示力的数值
+                if (value) {
+                    ctx.font = '10px Roboto';
+                    const valueWidth = ctx.measureText(value).width;
+                    
+                    // 绘制数值背景
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.fillRect(labelX - valueWidth/2 - 2, labelY + 2, valueWidth + 4, 14);
+                    
+                    // 绘制数值文本
+                    ctx.fillStyle = color;
+                    ctx.fillText(value, labelX, labelY + 12);
+                }
             }
             
             ctx.restore();
