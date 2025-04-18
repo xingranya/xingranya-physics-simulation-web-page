@@ -84,6 +84,8 @@
 
         .form-group {
             margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 5;
         }
 
         .form-group label {
@@ -109,6 +111,7 @@
         .slider-container {
             margin-top: 0.5rem;
             position: relative;
+            padding-bottom: 10px;
         }
 
         .slider-label {
@@ -154,8 +157,10 @@
         .buttons {
             display: flex;
             gap: 1rem;
-            margin-top: 0;
+            margin-top: 1rem;
             margin-bottom: 1rem;
+            position: relative;
+            z-index: 5;
         }
 
         .button {
@@ -501,34 +506,38 @@
             const boxX = padding + rampLength * 0.6 * Math.cos(angleRad); // 放在斜面60%处
             const boxY = groundY - rampLength * 0.6 * Math.sin(angleRad);
             
-            // 保存当前状态
-            ctx.save();
-            
-            // 旋转坐标系以匹配斜面角度
-            ctx.translate(boxX, boxY);
-            ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
-            
-            // 绘制物体（垂直于斜面）
-            ctx.fillStyle = getColor('--md-sys-color-primary');
-            ctx.fillRect(-boxSize/2, -boxSize/2, boxSize, boxSize);
-            
             // 计算力的大小
-            const gravityForce = currentMass * g;
-            const gravityLength = gravityForce * 5;
+            const scale = 5; // 力的缩放因子
+            
+            const mass = currentMass;
+            const gravityForce = mass * g;
+            const gravityLength = gravityForce * scale;
             
             const gravityParallel = gravityForce * Math.sin(angleRad);
-            const gravityParallelLength = gravityParallel * 5;
+            const gravityParallelLength = gravityParallel * scale;
             
             const gravityPerpendicular = gravityForce * Math.cos(angleRad);
-            const gravityPerpendicularLength = gravityPerpendicular * 5;
+            const gravityPerpendicularLength = gravityPerpendicular * scale;
             
             const normalForce = gravityPerpendicular;
-            const normalLength = normalForce * 5;
+            const normalLength = normalForce * scale;
             
             const frictionForce = currentFriction * normalForce;
-            const frictionLength = frictionForce * 5;
-            
-            // 绘制重力
+            const frictionLength = frictionForce * scale;
+
+            // 绘制物体
+            ctx.save();
+            ctx.translate(boxX, boxY);
+            ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
+            ctx.fillStyle = getColor('--md-sys-color-primary');
+            ctx.fillRect(-boxSize/2, -boxSize/2, boxSize, boxSize);
+            ctx.restore();
+
+            // 开始绘制力 - 在物体中心位置绘制所有力
+            // 1. 重力 - 始终垂直向下
+            ctx.save();
+            ctx.translate(boxX, boxY);
+            // 不旋转坐标系，保持重力垂直向下
             drawArrow(
                 0, 0, 
                 0, gravityLength, 
@@ -537,8 +546,14 @@
                 "重力 (mg)",
                 gravityForce.toFixed(1) + " N"
             );
-            
-            // 绘制重力平行分量
+            ctx.restore();
+
+            // 2. 绘制斜面坐标系下的力
+            ctx.save();
+            ctx.translate(boxX, boxY);
+            ctx.rotate(-angleRad); // 对齐斜面
+
+            // 重力平行分量
             drawArrow(
                 0, 0,
                 gravityParallelLength, 0,
@@ -548,7 +563,7 @@
                 gravityParallel.toFixed(1) + " N"
             );
             
-            // 绘制重力垂直分量
+            // 重力垂直分量
             drawArrow(
                 0, 0,
                 0, -gravityPerpendicularLength,
@@ -558,7 +573,7 @@
                 gravityPerpendicular.toFixed(1) + " N"
             );
             
-            // 绘制法向力
+            // 法向力
             drawArrow(
                 0, 0,
                 0, -normalLength,
@@ -568,7 +583,7 @@
                 normalForce.toFixed(1) + " N"
             );
             
-            // 绘制摩擦力
+            // 摩擦力
             if (currentFriction > 0) {
                 drawArrow(
                     0, 0,
@@ -592,7 +607,7 @@
             ctx.font = '14px Roboto';
             ctx.textAlign = 'left';
             ctx.fillText('物理量:', padding, padding);
-            ctx.fillText('● 质量: ' + currentMass.toFixed(1) + ' kg', padding, padding + 20);
+            ctx.fillText('● 质量: ' + mass.toFixed(1) + ' kg', padding, padding + 20);
             ctx.fillText('● 重力: ' + gravityForce.toFixed(1) + ' N', padding, padding + 40);
             ctx.fillText('● 平行分量: ' + gravityParallel.toFixed(1) + ' N', padding, padding + 60);
             ctx.fillText('● 垂直分量: ' + gravityPerpendicular.toFixed(1) + ' N', padding, padding + 80);
@@ -751,32 +766,43 @@
                 const currentX = topX - progress * rampLength * Math.cos(angleRad);
                 const currentY = topY + progress * rampLength * Math.sin(angleRad);
                 
-                // 保存当前状态
+                // 绘制物体
                 ctx.save();
-                
-                // 旋转坐标系以匹配斜面角度
                 ctx.translate(currentX, currentY);
                 ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
-                
-                // 绘制物体
                 ctx.fillStyle = getColor('--md-sys-color-primary');
                 ctx.fillRect(-boxSize/2, -boxSize/2, boxSize, boxSize);
+                ctx.restore();
+                
+                // 绘制力 - 分两个部分，保持重力垂直向下
+                // 1. 先绘制垂直向下的重力
+                ctx.save();
+                ctx.translate(currentX, currentY);
+                // 不旋转坐标系，保持重力垂直向下
+                const gravityLength = currentMass * g * 3;
+                drawArrow(0, 0, 0, gravityLength, getColor('--md-sys-color-error'), 2, null, null);
+                ctx.restore();
+                
+                // 2. 再绘制沿斜面方向的力
+                ctx.save();
+                ctx.translate(currentX, currentY);
+                ctx.rotate(-angleRad); // 对齐斜面
                 
                 // 计算力
                 const scale = 3;
                 const gravityParallel = currentMass * g * Math.sin(angleRad);
                 const frictionForce = currentFriction * currentMass * g * Math.cos(angleRad);
                 
-                // 仅绘制沿斜面的力：重力分量和摩擦力
+                // 绘制重力平行分量
                 if (gravityParallel > 0) {
                     drawArrow(0, 0, scale * gravityParallel, 0, getColor('--md-sys-color-primary'), 2, null, null);
                 }
                 
+                // 绘制摩擦力
                 if (frictionForce > 0) {
                     drawArrow(0, 0, -scale * frictionForce, 0, getColor('--md-sys-color-secondary'), 2, null, null);
                 }
                 
-                // 恢复状态
                 ctx.restore();
                 
                 // 绘制运动信息
@@ -840,19 +866,19 @@
             angleInput.addEventListener('input', function() {
                 currentAngle = parseFloat(angleInput.value) || currentAngle;
                 document.getElementById('angle-value').textContent = currentAngle + '°';
-                drawScene();
+                drawScene(); // 立即重绘场景使力的变化实时显示
             });
             
             massInput.addEventListener('input', function() {
                 currentMass = parseFloat(massInput.value) || currentMass;
                 document.getElementById('mass-value').textContent = currentMass + ' kg';
-                drawScene();
+                drawScene(); // 立即重绘场景使力的变化实时显示
             });
             
             frictionInput.addEventListener('input', function() {
                 currentFriction = parseFloat(frictionInput.value) || currentFriction;
                 document.getElementById('friction-value').textContent = currentFriction;
-                drawScene();
+                drawScene(); // 立即重绘场景使力的变化实时显示
             });
         });
         
