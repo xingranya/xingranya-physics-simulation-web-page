@@ -31,7 +31,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1500px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -59,9 +59,16 @@
 
         .content {
             display: grid;
-            grid-template-columns: 500px 1fr; /* 进一步增加左列宽度 */
+            grid-template-columns: 500px 1fr; /* 减小左侧宽度，增加右侧空间 */
             gap: 2rem;
             align-items: start;
+        }
+
+        /* 确保表单垂直排列 */
+        form#rampForm {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
         }
 
         @media (max-width: 768px) {
@@ -259,7 +266,7 @@
             aspect-ratio: 16/9;
             position: relative;
             overflow: hidden;
-            min-height: 400px;
+            min-height: 550px; /* 增加动画区域高度 */
             width: 100%; /* 确保宽度正确 */
             box-sizing: border-box; /* 包含padding和border */
         }
