@@ -101,6 +101,7 @@
 
         .slider-container {
             margin: 20px 0;
+            padding: 8px 0;
         }
 
         .slider-label {
@@ -144,19 +145,25 @@
         .form-check {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 16px;
+            padding: 8px 0;
+            min-height: 40px;
+            position: relative;
         }
+
         .md3-checkbox {
             position: relative;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             margin-right: 12px;
             display: inline-block;
+            cursor: pointer;
         }
+
         .md3-checkbox input[type="checkbox"] {
             opacity: 0;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             margin: 0;
             position: absolute;
             left: 0;
@@ -164,31 +171,73 @@
             cursor: pointer;
             z-index: 2;
         }
+
         .md3-checkbox .md3-checkmark {
             position: absolute;
             left: 0;
             top: 0;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             background: var(--md-sys-color-surface);
             border: 2px solid var(--md-sys-color-outline);
-            border-radius: 6px;
-            transition: border-color 0.2s, background 0.2s;
+            border-radius: 2px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             box-sizing: border-box;
             z-index: 1;
         }
+
         .md3-checkbox input[type="checkbox"]:checked + .md3-checkmark {
             background: var(--md-sys-color-primary);
             border-color: var(--md-sys-color-primary);
         }
+
+        .md3-checkbox input[type="checkbox"]:hover + .md3-checkmark {
+            border-color: var(--md-sys-color-primary);
+        }
+
+        .md3-checkbox input[type="checkbox"]:focus + .md3-checkmark {
+            border-color: var(--md-sys-color-primary);
+            box-shadow: 0 0 0 2px rgba(103, 80, 164, 0.2);
+        }
+
         .md3-checkbox .md3-checkmark svg {
             display: none;
             position: absolute;
             left: 2px;
             top: 2px;
+            width: 14px;
+            height: 14px;
+            stroke: var(--md-sys-color-on-primary);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
         }
+
         .md3-checkbox input[type="checkbox"]:checked + .md3-checkmark svg {
             display: block;
+            animation: checkmark 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes checkmark {
+            0% {
+                stroke-dashoffset: 22;
+            }
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .form-check-label {
+            font-size: 0.875rem;
+            color: var(--md-sys-color-on-surface);
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .md3-checkbox input[type="checkbox"]:hover ~ .form-check-label {
+            color: var(--md-sys-color-primary);
         }
 
         #canvas-container {
@@ -325,7 +374,9 @@
                                 <span class="md3-checkbox">
                                     <input type="checkbox" id="show-velocity" checked>
                                     <span class="md3-checkmark">
-                                        <svg width="20" height="20" viewBox="0 0 20 20"><polyline points="4,11 9,16 16,6" style="fill:none;stroke:white;stroke-width:2"/></svg>
+                                        <svg viewBox="0 0 18 18">
+                                            <path d="M3,9 L7,13 L15,5" stroke-dasharray="22" stroke-dashoffset="22"/>
+                                        </svg>
                                     </span>
                                 </span>
                                 <label class="form-check-label" for="show-velocity">显示速度矢量</label>
@@ -334,7 +385,9 @@
                                 <span class="md3-checkbox">
                                     <input type="checkbox" id="show-acceleration">
                                     <span class="md3-checkmark">
-                                        <svg width="20" height="20" viewBox="0 0 20 20"><polyline points="4,11 9,16 16,6" style="fill:none;stroke:white;stroke-width:2"/></svg>
+                                        <svg viewBox="0 0 18 18">
+                                            <path d="M3,9 L7,13 L15,5" stroke-dasharray="22" stroke-dashoffset="22"/>
+                                        </svg>
                                     </span>
                                 </span>
                                 <label class="form-check-label" for="show-acceleration">显示加速度矢量</label>
@@ -343,7 +396,9 @@
                                 <span class="md3-checkbox">
                                     <input type="checkbox" id="show-trace" checked>
                                     <span class="md3-checkmark">
-                                        <svg width="20" height="20" viewBox="0 0 20 20"><polyline points="4,11 9,16 16,6" style="fill:none;stroke:white;stroke-width:2"/></svg>
+                                        <svg viewBox="0 0 18 18">
+                                            <path d="M3,9 L7,13 L15,5" stroke-dasharray="22" stroke-dashoffset="22"/>
+                                        </svg>
                                     </span>
                                 </span>
                                 <label class="form-check-label" for="show-trace">显示运动轨迹</label>
@@ -352,7 +407,9 @@
                                 <span class="md3-checkbox">
                                     <input type="checkbox" id="show-energy" checked>
                                     <span class="md3-checkmark">
-                                        <svg width="20" height="20" viewBox="0 0 20 20"><polyline points="4,11 9,16 16,6" style="fill:none;stroke:white;stroke-width:2"/></svg>
+                                        <svg viewBox="0 0 18 18">
+                                            <path d="M3,9 L7,13 L15,5" stroke-dasharray="22" stroke-dashoffset="22"/>
+                                        </svg>
                                     </span>
                                 </span>
                                 <label class="form-check-label" for="show-energy">显示能量图表</label>
