@@ -571,18 +571,19 @@
             p.line(0, p.height * 0.5, p.width, p.height * 0.5);
             
             // 绘制弹簧和质量块
-            const centerX = p.width * 0.5;
+            const centerX = p.width * 0.35; // 将中心点向左移动
             const centerY = p.height * 0.5;
             const springLength = 100;
             const massSize = 30;
+            const scaleFactor = 200;
             
             // 绘制弹簧
-            p.stroke(94, 106, 210); // 使用主题色
+            p.stroke(94, 106, 210);
             p.strokeWeight(2);
             p.noFill();
             
             const startX = centerX - springLength;
-            const endX = centerX + xPos * 100;
+            const endX = centerX + xPos * scaleFactor;
             
             // 绘制弹簧螺旋
             const numCoils = 14;
@@ -600,24 +601,28 @@
                 p.vertex(x, y);
             }
             p.endShape();
-            // 绘制质量块为圆形并加阴影
+            
+            // 绘制质量块
             p.fill(94, 106, 210);
             p.noStroke();
             p.drawingContext.shadowColor = 'rgba(94,106,210,0.25)';
             p.drawingContext.shadowBlur = 16;
             p.ellipse(endX + massSize * 0.2, centerY, massSize * 1.2, massSize * 1.2);
             p.drawingContext.shadowBlur = 0;
+            
             // 质量块上的m
             p.fill(255);
             p.textAlign(p.CENTER, p.CENTER);
             p.textSize(massSize * 0.7);
             p.text('m', endX + massSize * 0.2, centerY + 2);
+            
             // 平衡位置虚线
             p.stroke(180);
             p.strokeWeight(1);
             p.drawingContext.setLineDash([6, 6]);
             p.line(centerX, centerY - 60, centerX, centerY + 60);
             p.drawingContext.setLineDash([]);
+            
             // 平衡位置标记
             p.noStroke();
             p.fill(120);
@@ -628,11 +633,12 @@
             p.textSize(16);
             p.textAlign(p.CENTER, p.TOP);
             p.text('平衡位置', centerX, centerY + 52);
+            
             // 位置刻度
             p.stroke(180);
             p.strokeWeight(1);
             for (let dx = -0.4; dx <= 0.4; dx += 0.1) {
-                const x = centerX + dx * 100;
+                const x = centerX + dx * scaleFactor;
                 p.line(x, centerY + 30, x, centerY + 38);
                 if (dx % 0.2 === 0) {
                     p.noStroke();
@@ -643,11 +649,11 @@
                     p.stroke(180);
                 }
             }
+            
+            // 绘制轨迹
             p.noFill();
             p.stroke(94, 106, 210, 150);
             p.strokeWeight(2);
-            p.noFill();
-            
             p.beginShape();
             for (let point of tracePoints) {
                 p.vertex(point.x, point.y);
