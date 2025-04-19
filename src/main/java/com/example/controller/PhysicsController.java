@@ -275,4 +275,27 @@ public class PhysicsController {
         
         return result;
     }
+
+    /**
+     * 显示简谐运动实验说明页面
+     * @return 返回简谐运动实验说明页面
+     */
+    @GetMapping("/shm-intro")
+    public String showSHMIntroPage() {
+        return "shm-intro";
+    }
+
+    /**
+     * 显示简谐运动模拟页面
+     * @param model 用于向视图传递数据的模型对象
+     * @return 返回简谐运动模拟页面视图名称
+     */
+    @GetMapping("/shm")
+    public String showSHMPage(Model model) {
+        model.addAttribute("springConstant", 10.0);
+        model.addAttribute("mass", 1.0);
+        model.addAttribute("amplitude", 0.2);
+        model.addAttribute("damping", 0.0);
+        return "shm";
+    }
 }
