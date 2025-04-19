@@ -1043,14 +1043,14 @@
                 ctx.translate(currentX, currentY);
                 ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
                 ctx.fillStyle = getColor('--md-sys-color-primary');
-                // 调整绘制位置，使底边贴着斜面
-                ctx.fillRect(-boxWidth/2, -boxHeight/2 + boxHeight/2, boxWidth, boxHeight);
+                // 调整绘制位置，使底边贴着斜面上方
+                ctx.fillRect(-boxWidth/2, -boxHeight, boxWidth, boxHeight);
                 ctx.restore();
                 
                 // 绘制力 - 分两个部分，保持重力垂直向下
                 // 1. 先绘制垂直向下的重力
                 ctx.save();
-                ctx.translate(currentX, currentY);
+                ctx.translate(currentX, currentY - boxHeight/2); // 调整力起点位置到物体中心
                 // 不旋转坐标系，保持重力垂直向下
                 const gravityLength = currentMass * g * 3;
                 drawArrow(0, 0, 0, gravityLength, getColor('--md-sys-color-error'), 2, "重力", (currentMass * g).toFixed(1) + " N");
@@ -1058,7 +1058,7 @@
                 
                 // 2. 再绘制沿斜面方向的力
                 ctx.save();
-                ctx.translate(currentX, currentY);
+                ctx.translate(currentX, currentY - boxHeight/2); // 调整力起点位置到物体中心
                 ctx.rotate(-angleRad); // 对齐斜面
                 
                 // 计算力
@@ -1073,7 +1073,9 @@
                 
                 // 绘制摩擦力
                 if (frictionForce > 0) {
-                    drawArrow(0, 0, -scale * frictionForce, 0, getColor('--md-sys-color-secondary'), 2, "摩擦力", frictionForce.toFixed(1) + " N");
+                    // 增强摩擦力的显示效果
+                    const frictionDisplayScale = 5; // 增大摩擦力显示的比例
+                    drawArrow(0, 0, -frictionDisplayScale * frictionForce, 0, "#FF5722", 3, "摩擦力", frictionForce.toFixed(1) + " N");
                 }
                 
                 ctx.restore();
