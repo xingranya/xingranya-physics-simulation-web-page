@@ -378,6 +378,119 @@
         .friction::after {
             border-bottom-color: var(--md-sys-color-secondary);
         }
+
+        /* 知识点部分的样式 */
+        .theory-section {
+            margin-top: 3rem;
+            margin-bottom: 2rem;
+        }
+        
+        .theory-section h3 {
+            font-size: 1.75rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .md3-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            font-size: 1.25rem;
+            font-weight: 500;
+            padding: 16px 20px;
+        }
+        
+        .card-body {
+            padding: 16px 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .card-primary {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        
+        .card-primary .card-header {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .card-primary .card-body {
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        .card-secondary {
+            background-color: var(--md-sys-color-secondary-container);
+        }
+        
+        .card-secondary .card-header {
+            background-color: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-secondary);
+        }
+        
+        .card-secondary .card-body {
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        
+        .card-tertiary {
+            background-color: var(--md-sys-color-tertiary-container);
+        }
+        
+        .card-tertiary .card-header {
+            background-color: var(--md-sys-color-tertiary);
+            color: var(--md-sys-color-on-tertiary);
+        }
+        
+        .card-tertiary .card-body {
+            color: var(--md-sys-color-on-tertiary-container);
+        }
+        
+        .card-surface {
+            background-color: var(--md-sys-color-surface-variant);
+        }
+        
+        .card-surface .card-header {
+            background-color: var(--md-sys-color-outline);
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .card-surface .card-body {
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .formula {
+            display: inline-block;
+            background-color: rgba(0,0,0,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            margin: 0 2px;
+        }
+        
+        .theory-section .formula {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 1.1rem;
+        }
+        
+        .theory-section ul {
+            margin-left: 1.5rem;
+            padding-left: 0;
+        }
+        
+        .theory-section li {
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 <body>
@@ -456,6 +569,57 @@
         </div>
 
         <a href="/" class="back-button">返回主页</a>
+        
+        <!-- 知识点部分 -->
+        <div class="theory-section">
+            <h3>斜面运动的理论知识</h3>
+            
+            <div class="md3-card card-primary">
+                <div class="card-header">重力分解</div>
+                <div class="card-body">
+                    <p>当物体位于斜面上时，重力 (mg) 可分解为两个分量：</p>
+                    <ul>
+                        <li><strong>平行分量</strong>：沿斜面向下的力 <span class="formula">F<sub>平行</sub> = mg·sin(θ)</span></li>
+                        <li><strong>垂直分量</strong>：垂直于斜面的力 <span class="formula">F<sub>垂直</sub> = mg·cos(θ)</span></li>
+                    </ul>
+                    <p>平行分量促使物体沿斜面向下滑动，垂直分量被斜面支持力抵消。</p>
+                </div>
+            </div>
+            
+            <div class="md3-card card-secondary">
+                <div class="card-header">摩擦力</div>
+                <div class="card-body">
+                    <p>斜面上的摩擦力与法向力成正比，方向与物体运动方向相反：</p>
+                    <div class="formula">
+                        F<sub>摩擦</sub> = μF<sub>法向</sub> = μmg·cos(θ)
+                    </div>
+                    <p>其中μ是摩擦系数，表示表面的粗糙程度。</p>
+                </div>
+            </div>
+            
+            <div class="md3-card card-tertiary">
+                <div class="card-header">临界角</div>
+                <div class="card-body">
+                    <p>当斜面角度θ增大到某一临界值时，物体恰好开始滑动，这个角度称为<strong>临界角</strong>。此时：</p>
+                    <div class="formula">
+                        mg·sin(θ<sub>临界</sub>) = μmg·cos(θ<sub>临界</sub>)
+                    </div>
+                    <p>解得 <span class="formula">θ<sub>临界</sub> = tan<sup>-1</sup>(μ)</span></p>
+                    <p>当θ > θ<sub>临界</sub>时，物体开始滑动；当θ < θ<sub>临界</sub>时，物体静止。</p>
+                </div>
+            </div>
+            
+            <div class="md3-card card-surface">
+                <div class="card-header">加速度</div>
+                <div class="card-body">
+                    <p>物体在斜面上的加速度由平行分量与摩擦力的合力决定：</p>
+                    <div class="formula">
+                        a = g·sin(θ) - μg·cos(θ)
+                    </div>
+                    <p>当a > 0时，物体加速下滑；当a = 0时，物体匀速运动；当a < 0时，物体保持静止。</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script th:inline="javascript">
@@ -567,14 +731,14 @@
             ctx.translate(boxCenterX, boxCenterY);
             ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
             ctx.fillStyle = getColor('--md-sys-color-primary');
-            // 调整绘制位置，使底边贴着斜面
-            ctx.fillRect(-boxWidth/2, -boxHeight/2 + boxHeight/2, boxWidth, boxHeight);
+            // 调整绘制位置，使底边贴着斜面上方
+            ctx.fillRect(-boxWidth/2, -boxHeight, boxWidth, boxHeight);
             ctx.restore();
 
             // 开始绘制力 - 在物体中心位置绘制所有力
             // 1. 重力 - 始终垂直向下
             ctx.save();
-            ctx.translate(boxCenterX, boxCenterY);
+            ctx.translate(boxCenterX, boxCenterY - boxHeight/2); // 调整力的起点位置到物体中心
             // 不旋转坐标系，保持重力垂直向下
             drawArrow(
                 0, 0, 
@@ -588,7 +752,7 @@
 
             // 2. 绘制斜面坐标系下的力
             ctx.save();
-            ctx.translate(boxCenterX, boxCenterY);
+            ctx.translate(boxCenterX, boxCenterY - boxHeight/2); // 调整力的起点位置到物体中心
             ctx.rotate(-angleRad); // 对齐斜面
 
             // 重力平行分量
@@ -630,8 +794,8 @@
                 drawArrow(
                     0, 0,
                     -frictionDisplayLength, 0,
-                    getColor('--md-sys-color-secondary'),
-                    4, // 增加线宽，从3变为4
+                    "#FF5722", // 使用高对比度的橙色
+                    5, // 使用更粗的线宽
                     "摩擦力",
                     frictionForce.toFixed(1) + " N"
                 );
