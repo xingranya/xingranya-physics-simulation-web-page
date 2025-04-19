@@ -21,19 +21,28 @@
             --md-sys-color-success: #4CAF50;
         }
 
-        body {
-            font-family: 'Roboto', sans-serif;
+        html, body {
+            height: 100%;
             margin: 0;
             padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
             background-color: var(--md-sys-color-surface);
             color: var(--md-sys-color-on-surface);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
             min-height: 100vh;
         }
 
         .container {
             max-width: 1500px;
-            margin: 0 auto;
+            width: 100%;
             padding: 2rem;
+            margin: 0 auto;
+            box-sizing: border-box;
         }
 
         .header {
@@ -59,9 +68,10 @@
 
         .content {
             display: grid;
-            grid-template-columns: 500px 1fr; /* 减小左侧宽度，增加右侧空间 */
+            grid-template-columns: 400px 1fr; /* 让左侧宽度合适以避免挤压 */
             gap: 2rem;
             align-items: start;
+            justify-content: center;
         }
 
         /* 确保表单垂直排列 */
