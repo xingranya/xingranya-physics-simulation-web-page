@@ -140,6 +140,57 @@
             border: none;
         }
 
+        /* MD3 Checkbox Styles */
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .md3-checkbox {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            display: inline-block;
+        }
+        .md3-checkbox input[type="checkbox"] {
+            opacity: 0;
+            width: 24px;
+            height: 24px;
+            margin: 0;
+            position: absolute;
+            left: 0;
+            top: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .md3-checkbox .md3-checkmark {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 24px;
+            height: 24px;
+            background: var(--md-sys-color-surface);
+            border: 2px solid var(--md-sys-color-outline);
+            border-radius: 6px;
+            transition: border-color 0.2s, background 0.2s;
+            box-sizing: border-box;
+            z-index: 1;
+        }
+        .md3-checkbox input[type="checkbox"]:checked + .md3-checkmark {
+            background: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+        .md3-checkbox .md3-checkmark svg {
+            display: none;
+            position: absolute;
+            left: 2px;
+            top: 2px;
+        }
+        .md3-checkbox input[type="checkbox"]:checked + .md3-checkmark svg {
+            display: block;
+        }
+
         #canvas-container {
             width: 100%;
             height: 400px;
@@ -271,19 +322,39 @@
                         <!-- 显示控制 -->
                         <div class="slider-container">
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="show-velocity" checked>
+                                <span class="md3-checkbox">
+                                    <input type="checkbox" id="show-velocity" checked>
+                                    <span class="md3-checkmark">
+                                        <svg width="20" height="20" viewBox="0 0 20 20"><polyline points="4,11 9,16 16,6" style="fill:none;stroke:white;stroke-width:2"/></svg>
+                                    </span>
+                                </span>
                                 <label class="form-check-label" for="show-velocity">显示速度矢量</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="show-acceleration">
+                                <span class="md3-checkbox">
+                                    <input type="checkbox" id="show-acceleration">
+                                    <span class="md3-checkmark">
+                                        <svg width="20" height="20" viewBox="0 0 20 20"><polyline points="4,11 9,16 16,6" style="fill:none;stroke:white;stroke-width:2"/></svg>
+                                    </span>
+                                </span>
                                 <label class="form-check-label" for="show-acceleration">显示加速度矢量</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="show-trace" checked>
+                                <span class="md3-checkbox">
+                                    <input type="checkbox" id="show-trace" checked>
+                                    <span class="md3-checkmark">
+                                        <svg width="20" height="20" viewBox="0 0 20 20"><polyline points="4,11 9,16 16,6" style="fill:none;stroke:white;stroke-width:2"/></svg>
+                                    </span>
+                                </span>
                                 <label class="form-check-label" for="show-trace">显示运动轨迹</label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="show-energy" checked>
+                                <span class="md3-checkbox">
+                                    <input type="checkbox" id="show-energy" checked>
+                                    <span class="md3-checkmark">
+                                        <svg width="20" height="20" viewBox="0 0 20 20"><polyline points="4,11 9,16 16,6" style="fill:none;stroke:white;stroke-width:2"/></svg>
+                                    </span>
+                                </span>
                                 <label class="form-check-label" for="show-energy">显示能量图表</label>
                             </div>
                         </div>
@@ -514,92 +585,79 @@
             const endX = centerX + xPos * 100;
             
             // 绘制弹簧螺旋
-            const numCoils = 10;
-            const coilHeight = 10;
+            const numCoils = 14;
+            const coilHeight = 14;
             const coilWidth = (endX - startX) / numCoils;
-            
             p.beginShape();
             for (let i = 0; i <= numCoils; i++) {
                 const x = startX + i * coilWidth;
-                const y = centerY + coilHeight * Math.sin(i * Math.PI);
+                let y = centerY;
+                if (i === 0 || i === numCoils) {
+                    y = centerY;
+                } else {
+                    y = centerY + (i % 2 === 0 ? -coilHeight : coilHeight);
+                }
                 p.vertex(x, y);
             }
             p.endShape();
-            
-            // 绘制质量块
+            // 绘制质量块为圆形并加阴影
             p.fill(94, 106, 210);
             p.noStroke();
-            p.rect(endX - massSize * 0.5, centerY - massSize * 0.5, massSize, massSize);
-            
-            // 绘制轨迹
-            if (showTrace && tracePoints.length > 0) {
-                p.stroke(94, 106, 210, 150);
-                p.strokeWeight(2);
-                p.noFill();
-                
-                p.beginShape();
-                for (let point of tracePoints) {
-                    p.vertex(point.x, point.y);
+            p.drawingContext.shadowColor = 'rgba(94,106,210,0.25)';
+            p.drawingContext.shadowBlur = 16;
+            p.ellipse(endX + massSize * 0.2, centerY, massSize * 1.2, massSize * 1.2);
+            p.drawingContext.shadowBlur = 0;
+            // 质量块上的m
+            p.fill(255);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.textSize(massSize * 0.7);
+            p.text('m', endX + massSize * 0.2, centerY + 2);
+            // 平衡位置虚线
+            p.stroke(180);
+            p.strokeWeight(1);
+            p.drawingContext.setLineDash([6, 6]);
+            p.line(centerX, centerY - 60, centerX, centerY + 60);
+            p.drawingContext.setLineDash([]);
+            // 平衡位置标记
+            p.noStroke();
+            p.fill(120);
+            p.ellipse(centerX, centerY + 40, 18, 18);
+            p.fill(255);
+            p.ellipse(centerX, centerY + 40, 10, 10);
+            p.fill(120);
+            p.textSize(16);
+            p.textAlign(p.CENTER, p.TOP);
+            p.text('平衡位置', centerX, centerY + 52);
+            // 位置刻度
+            p.stroke(180);
+            p.strokeWeight(1);
+            for (let dx = -0.4; dx <= 0.4; dx += 0.1) {
+                const x = centerX + dx * 100;
+                p.line(x, centerY + 30, x, centerY + 38);
+                if (dx % 0.2 === 0) {
+                    p.noStroke();
+                    p.fill(120);
+                    p.textSize(13);
+                    p.textAlign(p.CENTER, p.TOP);
+                    p.text((dx >= 0 ? '+' : '') + dx.toFixed(1) + 'm', x, centerY + 44);
+                    p.stroke(180);
                 }
-                p.endShape();
             }
+            p.noFill();
+            p.stroke(94, 106, 210, 150);
+            p.strokeWeight(2);
+            p.noFill();
             
-            // 绘制速度矢量
-            if (showVelocity) {
-                const scale = 20;
-                const arrowEndX = endX + velocity * scale;
-                
-                p.stroke(16, 185, 129); // 绿色
-                p.strokeWeight(3);
-                p.fill(16, 185, 129);
-                
-                p.line(endX, centerY, arrowEndX, centerY);
-                
-                const arrowSize = 8;
-                const arrowDirection = velocity > 0 ? 1 : -1;
-                
-                p.triangle(
-                    arrowEndX, centerY,
-                    arrowEndX - arrowDirection * arrowSize, centerY - arrowSize * 0.5,
-                    arrowEndX - arrowDirection * arrowSize, centerY + arrowSize * 0.5
-                );
-                
-                p.noStroke();
-                p.textAlign(p.CENTER);
-                p.textSize(12);
-                p.text("v", arrowEndX + arrowDirection * 10, centerY - 10);
+            p.beginShape();
+            for (let point of tracePoints) {
+                p.vertex(point.x, point.y);
             }
-            
-            // 绘制加速度矢量
-            if (showAcceleration) {
-                const scale = 5;
-                const arrowEndX = endX + acceleration * scale;
-                
-                p.stroke(245, 158, 11); // 橙色
-                p.strokeWeight(3);
-                p.fill(245, 158, 11);
-                
-                p.line(endX, centerY, arrowEndX, centerY);
-                
-                const arrowSize = 8;
-                const arrowDirection = acceleration > 0 ? 1 : -1;
-                
-                p.triangle(
-                    arrowEndX, centerY,
-                    arrowEndX - arrowDirection * arrowSize, centerY - arrowSize * 0.5,
-                    arrowEndX - arrowDirection * arrowSize, centerY + arrowSize * 0.5
-                );
-                
-                p.noStroke();
-                p.textAlign(p.CENTER);
-                p.textSize(12);
-                p.text("a", arrowEndX + arrowDirection * 10, centerY - 10);
-            }
+            p.endShape();
             
             // 绘制能量图表
             if (showEnergy && energyData.length > 0) {
                 const graphX = p.width * 0.6;
-                const graphY = p.height * 0.2;
+                const graphY = p.height * 0.3;
                 const graphWidth = p.width * 0.35;
                 const graphHeight = 200;
                 
@@ -652,6 +710,19 @@
                     p.vertex(x, y);
                 }
                 p.endShape();
+                
+                // 添加图例
+                p.noStroke();
+                p.fill(147, 51, 234);
+                p.textSize(12);
+                p.textAlign(p.LEFT, p.CENTER);
+                p.text('总能量', graphX + graphWidth + 10, graphY + 20);
+                
+                p.fill(16, 185, 129);
+                p.text('动能', graphX + graphWidth + 10, graphY + 40);
+                
+                p.fill(245, 158, 11);
+                p.text('势能', graphX + graphWidth + 10, graphY + 60);
             }
         }
 
@@ -725,4 +796,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
