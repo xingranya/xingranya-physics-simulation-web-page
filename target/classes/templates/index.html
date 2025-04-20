@@ -183,6 +183,44 @@
             color: var(--md-sys-color-on-surface-variant);
             font-size: 0.875rem;
         }
+        
+        /* 难度和领域标签样式 */
+        .label-container {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .domain-label {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            background-color: var(--md-sys-color-tertiary-container);
+            color: var(--md-sys-color-on-tertiary-container);
+        }
+        
+        .difficulty-label {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .difficulty-basic {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        
+        .difficulty-intermediate {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+        }
     </style>
 </head>
 <body>
@@ -198,6 +236,10 @@
             <div class="col">
                 <div class="card md3-card h-100">
                     <div class="card-body">
+                        <div class="label-container">
+                            <span class="difficulty-label difficulty-intermediate">中级</span>
+                        </div>
+                        <div class="domain-label">力学</div>
                         <div class="experiment-icon-wrapper">
                             <svg class="experiment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
                                 <circle cx="10" cy="16" r="5"/>
@@ -218,6 +260,10 @@
             <div class="col">
                 <div class="card md3-card h-100">
                     <div class="card-body">
+                        <div class="label-container">
+                            <span class="difficulty-label difficulty-basic">初级</span>
+                        </div>
+                        <div class="domain-label">力学</div>
                         <div class="experiment-icon-wrapper">
                             <svg class="experiment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
                                 <path d="M4 24 L28 24 L28 26 L4 26 Z"/> <!-- Base -->
@@ -236,6 +282,10 @@
             <div class="col">
                 <div class="card md3-card h-100">
                     <div class="card-body">
+                        <div class="label-container">
+                            <span class="difficulty-label difficulty-basic">初级</span>
+                        </div>
+                        <div class="domain-label">力学</div>
                         <div class="experiment-icon-wrapper">
                             <svg class="experiment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
                                 <path d="M4 18 L28 18 L28 20 L4 20 Z"/> <!-- Lever bar -->
@@ -255,6 +305,10 @@
             <div class="col">
                 <div class="card md3-card h-100">
                     <div class="card-body">
+                        <div class="label-container">
+                            <span class="difficulty-label difficulty-intermediate">中级</span>
+                        </div>
+                        <div class="domain-label">振动与波动</div>
                         <div class="experiment-icon-wrapper">
                             <svg class="experiment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="currentColor">
                                 <path d="M8 16 L24 16" stroke="currentColor" stroke-width="2" fill="none"/> <!-- Spring base -->
@@ -273,6 +327,10 @@
             <div class="col">
                 <div class="card md3-card h-100">
                     <div class="card-body">
+                        <div class="label-container">
+                            <span class="difficulty-label difficulty-basic">初级</span>
+                        </div>
+                        <div class="domain-label">力学</div>
                         <div class="experiment-icon-wrapper">
                             <svg class="experiment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8 0-4.42 3.58-8 8-8 4.42 0 8 3.58 8 8 0 4.42-3.58 8-8 8z"/>
