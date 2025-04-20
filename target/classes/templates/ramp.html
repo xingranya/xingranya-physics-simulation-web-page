@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>斜面运动实验</title>
+    <!-- 移除外部CSS引用，避免样式冲突 -->
+    <!-- <link rel="stylesheet" href="/css/style.css"> -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005E;
+            --md-sys-color-surface: #FEF7FF;
+            --md-sys-color-on-surface: #1D1B20;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-success: #4CAF50;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            text-align: center; /* 添加文本居中 */
+        }
+
+        .container {
+            max-width: 1400px;
+            width: 100%;
+            padding: 2rem;
+            margin: 0 auto; /* 这是居中的关键 */
+            box-sizing: border-box;
+            text-align: left; /* 容器内部文本恢复左对齐 */
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            width: 100%;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: var(--md-sys-color-on-surface-variant);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 400px 1fr; /* 让左侧宽度合适以避免挤压 */
+            gap: 2rem;
+            align-items: start;
+            justify-content: center;
+            margin: 0 auto;
+            max-width: 100%;
+        }
+
+        /* 确保表单垂直排列 */
+        form#rampForm {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        .form-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem; /* 增加表单项间距 */
+            height: fit-content; /* 防止表单拉伸 */
+            width: 100%; /* 确保宽度正确 */
+            box-sizing: border-box; /* 包含padding和border */
+        }
+
+        .form-group {
+            margin-bottom: 0.5rem; /* 减少底部间距，由容器间距控制 */
+            position: relative;
+            z-index: 5; /* 增加z-index避免遮挡 */
+            width: 100%; /* 确保宽度占满 */
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 1.1rem; /* 增大标签字体 */
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 0.8rem; /* 增加与滑块的间距 */
+        }
+
+        .form-group input[type="number"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--md-sys-color-outline);
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            color: var(--md-sys-color-on-surface);
+            background-color: var(--md-sys-color-surface);
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .slider-container {
+            margin-top: 0.7rem; /* 增加顶部间距 */
+            position: relative;
+            padding-bottom: 20px; /* 增加底部间距 */
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px; /* 增加与滑块的间距 */
+            padding: 0 5px; /* 增加左右内边距 */
+        }
+
+        .slider-value {
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+            min-width: 70px; /* 确保值有足够空间 */
+            text-align: center; /* 中心对齐 */
+            padding: 4px 8px; /* 增加内边距 */
+            background-color: rgba(255, 255, 255, 0.7); /* 添加背景色 */
+            border-radius: 4px; /* 添加圆角 */
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px; /* 增加滑块高度 */
+            background: var(--md-sys-color-primary-container);
+            border-radius: 4px; /* 增加圆角 */
+            outline: none;
+            margin: 10px 0; /* 增加上下边距 */
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column; /* 按钮垂直排列 */
+            gap: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 5;
+        }
+
+        .button {
+            flex: 1;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 1.5rem;
+            font-size: 1rem; /* 增大按钮字体 */
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
+            width: 100%; /* 按钮宽度100% */
+        }
+
+        .button-primary {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-secondary {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .result-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            margin-top: 0;
+            width: 100%; /* 确保宽度正确 */
+            box-sizing: border-box; /* 包含padding和border */
+        }
+
+        .result-container h3 {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 1rem;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--md-sys-color-surface-variant);
+            align-items: center;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--md-sys-color-on-surface-variant);
+            flex: 1;
+        }
+
+        .result-value {
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-left: 1rem;
+            text-align: right;
+            min-width: 100px;
+        }
+
+        .animation-container {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--md-sys-color-surface-variant);
+            aspect-ratio: 16/9;
+            position: relative;
+            overflow: hidden;
+            min-height: 550px; /* 增加动画区域高度 */
+            width: 100%; /* 确保宽度正确 */
+            box-sizing: border-box; /* 包含padding和border */
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            background-color: var(--md-sys-color-surface);
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.875rem 1.5rem;
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            text-decoration: none;
+            border-radius: 1.5rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: var(--md-sys-color-surface-variant);
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1.5rem;
+            }
+
+            .animation-container {
+                min-height: 300px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .button {
+                width: 100%;
+            }
+        }
+
+        .force-arrow {
+            position: absolute;
+            height: 0;
+            border-left: 2px solid;
+            transform-origin: bottom center;
+            z-index: 10;
+        }
+
+        .force-arrow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -4px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 8px solid;
+            transform: rotate(180deg);
+        }
+
+        .force-label {
+            position: absolute;
+            font-size: 12px;
+            font-weight: 500;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 2px 4px;
+            border-radius: 2px;
+            white-space: nowrap;
+        }
+
+        .force-value {
+            display: block;
+            font-size: 10px;
+            font-weight: normal;
+            margin-top: 2px;
+        }
+
+        .gravity {
+            border-left-color: var(--md-sys-color-error);
+        }
+        .gravity::after {
+            border-bottom-color: var(--md-sys-color-error);
+        }
+
+        .normal {
+            border-left-color: var(--md-sys-color-success);
+        }
+        .normal::after {
+            border-bottom-color: var(--md-sys-color-success);
+        }
+
+        .parallel {
+            border-left-color: var(--md-sys-color-primary);
+        }
+        .parallel::after {
+            border-bottom-color: var(--md-sys-color-primary);
+        }
+
+        .friction {
+            border-left-color: var(--md-sys-color-secondary);
+        }
+        .friction::after {
+            border-bottom-color: var(--md-sys-color-secondary);
+        }
+
+        /* 知识点部分的样式 */
+        .theory-section {
+            margin-top: 3rem;
+            margin-bottom: 2rem;
+            width: 100%; /* 确保理论部分使用全宽 */
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .theory-section h3 {
+            font-size: 1.75rem;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .md3-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .card-header {
+            font-size: 1.25rem;
+            font-weight: 500;
+            padding: 16px 20px;
+        }
+        
+        .card-body {
+            padding: 16px 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .card-primary {
+            background-color: var(--md-sys-color-primary-container);
+        }
+        
+        .card-primary .card-header {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .card-primary .card-body {
+            color: var(--md-sys-color-on-primary-container);
+        }
+        
+        .card-secondary {
+            background-color: var(--md-sys-color-secondary-container);
+        }
+        
+        .card-secondary .card-header {
+            background-color: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-secondary);
+        }
+        
+        .card-secondary .card-body {
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        
+        .card-tertiary {
+            background-color: var(--md-sys-color-tertiary-container);
+        }
+        
+        .card-tertiary .card-header {
+            background-color: var(--md-sys-color-tertiary);
+            color: var(--md-sys-color-on-tertiary);
+        }
+        
+        .card-tertiary .card-body {
+            color: var(--md-sys-color-on-tertiary-container);
+        }
+        
+        .card-surface {
+            background-color: var(--md-sys-color-surface-variant);
+        }
+        
+        .card-surface .card-header {
+            background-color: var(--md-sys-color-outline);
+            color: var(--md-sys-color-on-surface);
+        }
+        
+        .card-surface .card-body {
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        .formula {
+            display: inline-block;
+            background-color: rgba(0,0,0,0.05);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            margin: 0 2px;
+        }
+        
+        .theory-section .formula {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            margin: 12px 0;
+            font-size: 1.1rem;
+        }
+        
+        .theory-section ul {
+            margin-left: 1.5rem;
+            padding-left: 0;
+        }
+        
+        .theory-section li {
+            margin-bottom: 0.5rem;
+        }
+
+        .katex-formula {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-small);
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+
+        .katex-formula.highlight {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: 1px solid var(--md-sys-color-primary);
+        }
+
+        /* 确保KaTeX公式在容器中居中 */
+        .katex {
+            display: inline-block;
+            text-align: center;
+        }
+
+        /* 调整KaTeX公式的字体大小 */
+        .katex {
+            font-size: 1.1em;
+        }
+
+        .theory-tips {
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 20px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin: 20px 0;
+        }
+
+        .theory-tips h3 {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 16px;
+        }
+
+        .theory-tips ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .theory-tips li {
+            margin: 8px 0;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>斜面运动实验</h1>
+            <p>研究物体在斜面上的运动规律，探索重力、摩擦力和加速度的关系</p>
+        </div>
+
+        <div class="content">
+            <div class="form-container">
+                <form id="rampForm">
+                    <div class="form-group">
+                        <label for="angle">斜面角度 (°)</label>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>0°</span>
+                                <span class="slider-value" id="angle-value">30°</span>
+                                <span>89°</span>
+                            </div>
+                            <input type="range" id="angle" name="angle" min="0" max="89" step="1" value="30">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mass">物体质量 (kg)</label>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>0.1</span>
+                                <span class="slider-value" id="mass-value">1.0 kg</span>
+                                <span>10.0</span>
+                            </div>
+                            <input type="range" id="mass" name="mass" min="0.1" max="10" step="0.1" value="1.0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="friction">摩擦系数</label>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span>0.0</span>
+                                <span class="slider-value" id="friction-value">0.1</span>
+                                <span>1.0</span>
+                            </div>
+                            <input type="range" id="friction" name="friction" min="0" max="1" step="0.01" value="0.1">
+                        </div>
+                    </div>
+                    <div class="buttons">
+                        <button type="button" id="calculateBtn" class="button button-primary">计算加速度</button>
+                        <button type="button" id="animateBtn" class="button button-secondary">播放动画</button>
+                    </div>
+                </form>
+
+                <div class="result-container" id="resultContainer" style="display: none;">
+                    <h3>计算结果</h3>
+                    <div class="result-item">
+                        <span class="result-label">加速度</span>
+                        <span class="result-value" id="accelerationResult">0.0 m/s²</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">重力分量</span>
+                        <span class="result-value" id="gravityComponentResult">0.0 N</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">摩擦力</span>
+                        <span class="result-value" id="frictionForceResult">0.0 N</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">法向力</span>
+                        <span class="result-value" id="normalForceResult">0.0 N</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="animation-container">
+                <canvas id="rampCanvas"></canvas>
+            </div>
+        </div>
+
+        <a href="/" class="back-button">返回主页</a>
+        
+        <!-- 知识点部分 -->
+        <div class="theory-section">
+            <h3>斜面运动的理论知识</h3>
+            
+            <div class="md3-card card-primary">
+                <div class="card-header">重力分解</div>
+                <div class="card-body">
+                    <p>当物体位于斜面上时，重力 (mg) 可分解为两个分量：</p>
+                    <ul>
+                        <li><strong>平行分量</strong>：沿斜面向下的力 <span class="formula">F<sub>平行</sub> = mg·sin(θ)</span></li>
+                        <li><strong>垂直分量</strong>：垂直于斜面的力 <span class="formula">F<sub>垂直</sub> = mg·cos(θ)</span></li>
+                    </ul>
+                    <p>平行分量促使物体沿斜面向下滑动，垂直分量被斜面支持力抵消。</p>
+                </div>
+            </div>
+            
+            <div class="md3-card card-secondary">
+                <div class="card-header">摩擦力</div>
+                <div class="card-body">
+                    <p>斜面上的摩擦力与法向力成正比，方向与物体运动方向相反：</p>
+                    <div class="formula">
+                        F<sub>摩擦</sub> = μF<sub>法向</sub> = μmg·cos(θ)
+                    </div>
+                    <p>其中μ是摩擦系数，表示表面的粗糙程度。</p>
+                </div>
+            </div>
+            
+            <div class="md3-card card-tertiary">
+                <div class="card-header">临界角</div>
+                <div class="card-body">
+                    <p>当斜面角度θ增大到某一临界值时，物体恰好开始滑动，这个角度称为<strong>临界角</strong>。此时：</p>
+                    <div class="formula">
+                        mg·sin(θ<sub>临界</sub>) = μmg·cos(θ<sub>临界</sub>)
+                    </div>
+                    <p>解得 <span class="formula">θ<sub>临界</sub> = tan<sup>-1</sup>(μ)</span></p>
+                    <p>当θ > θ<sub>临界</sub>时，物体开始滑动；当θ < θ<sub>临界</sub>时，物体静止。</p>
+                </div>
+            </div>
+            
+            <div class="md3-card card-surface">
+                <div class="card-header">加速度</div>
+                <div class="card-body">
+                    <p>物体在斜面上的加速度由平行分量与摩擦力的合力决定：</p>
+                    <div class="formula">
+                        a = g·sin(θ) - μg·cos(θ)
+                    </div>
+                    <p>当a > 0时，物体加速下滑；当a = 0时，物体匀速运动；当a < 0时，物体保持静止。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 理论提示部分 -->
+        <div class="theory-tips">
+            <h3>理论提示</h3>
+            <div class="katex-formula">
+                \[ \text{重力分量：} \quad F_g = mg\sin\theta \quad \text{(平行分量)} \]
+            </div>
+            <div class="katex-formula">
+                \[ \text{压力：} \quad N = mg\cos\theta \quad \text{(垂直分量)} \]
+            </div>
+            <div class="katex-formula">
+                \[ \text{摩擦力：} \quad f = \mu N = \mu mg\cos\theta \]
+            </div>
+            <div class="katex-formula">
+                \[ \text{加速度：} \quad a = g(\sin\theta - \mu\cos\theta) \]
+            </div>
+            <p>运动条件：</p>
+            <ul>
+                <li>开始滑动：\(\sin\theta > \mu\cos\theta\)</li>
+                <li>临界状态：\(\sin\theta = \mu\cos\theta\)</li>
+                <li>静止状态：\(\sin\theta < \mu\cos\theta\)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // 获取CSS变量
+        const getColor = (varName) => {
+            return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+        };
+
+        const canvas = document.getElementById('rampCanvas');
+        const ctx = canvas.getContext('2d');
+        let animationId = null;
+        let isAnimating = false;
+        let currentAngle = 30;
+        let currentMass = 1.0;
+        let currentFriction = 0.1;
+        const g = 9.8; // 重力加速度 m/s²
+        let timeScale = 0.5;
+
+        // 确保画布尺寸适合容器
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth - 20; // 减去padding
+            canvas.height = container.clientHeight - 20;
+        }
+
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const padding = 50;
+            const groundY = canvas.height - padding;
+            
+            // 确保三角形两边等长
+            const rampHeight = Math.min(canvas.height - 2 * padding, canvas.width - 2 * padding);
+            const rampLength = rampHeight; // 设置为相同的长度
+            
+            const angleRad = currentAngle * Math.PI / 180;
+            
+            // 绘制背景
+            ctx.fillStyle = getColor('--md-sys-color-surface');
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 计算斜面起点和终点
+            const rampStartX = padding;
+            const rampStartY = groundY;
+            const rampEndX = rampStartX + rampLength * Math.cos(angleRad);
+            const rampEndY = groundY - rampLength * Math.sin(angleRad);
+            
+            // 绘制斜面
+            ctx.beginPath();
+            ctx.moveTo(rampStartX, rampStartY);
+            ctx.lineTo(rampEndX, rampEndY);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getColor('--md-sys-color-outline');
+            ctx.stroke();
+            
+            // 绘制地面
+            ctx.beginPath();
+            ctx.moveTo(rampStartX, groundY);
+            ctx.lineTo(canvas.width - padding, groundY);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getColor('--md-sys-color-outline');
+            ctx.stroke();
+            
+            // 绘制角度标记
+            ctx.beginPath();
+            ctx.arc(rampStartX, groundY, 30, -angleRad, 0);
+            ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
+            ctx.stroke();
+            
+            // 绘制角度值
+            ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
+            ctx.font = '12px Roboto';
+            ctx.textAlign = 'center';
+            ctx.fillText(currentAngle + '°', rampStartX + 25, groundY - 15);
+            
+            // 计算斜面顶部位置
+            const topX = rampEndX;
+            const topY = rampEndY;
+            
+            // 计算物体在斜面上的位置 (60%处)
+            const positionRatio = 0.6;
+            const boxWidth = 30;
+            const boxHeight = 30;
+            
+            const boxCenterX = rampStartX + positionRatio * (rampEndX - rampStartX);
+            const boxCenterY = groundY - positionRatio * (groundY - rampEndY);
+            
+            // 计算力的大小
+            const scale = 5; // 力的缩放因子
+            
+            const mass = currentMass;
+            const gravityForce = mass * g;
+            const gravityLength = gravityForce * scale;
+            
+            const gravityParallel = gravityForce * Math.sin(angleRad);
+            const gravityParallelLength = gravityParallel * scale;
+            
+            const gravityPerpendicular = gravityForce * Math.cos(angleRad);
+            const gravityPerpendicularLength = gravityPerpendicular * scale;
+            
+            const normalForce = gravityPerpendicular;
+            const normalLength = normalForce * scale;
+            
+            const frictionForce = currentFriction * normalForce;
+            const frictionLength = frictionForce * scale;
+
+            // 绘制物体 (底边贴着斜面)
+            ctx.save();
+            ctx.translate(boxCenterX, boxCenterY);
+            ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
+            ctx.fillStyle = getColor('--md-sys-color-primary');
+            // 调整绘制位置，使底边贴着斜面上方
+            ctx.fillRect(-boxWidth/2, -boxHeight, boxWidth, boxHeight);
+            ctx.restore();
+
+            // 开始绘制力 - 在物体中心位置绘制所有力
+            // 1. 重力 - 始终垂直向下
+            ctx.save();
+            ctx.translate(boxCenterX, boxCenterY - boxHeight/2); // 调整力的起点位置到物体中心
+            // 不旋转坐标系，保持重力垂直向下
+            drawArrow(
+                0, 0, 
+                0, gravityLength, 
+                getColor('--md-sys-color-error'), 
+                3,
+                "重力 (mg)",
+                gravityForce.toFixed(1) + " N"
+            );
+            ctx.restore();
+
+            // 2. 绘制斜面坐标系下的力
+            ctx.save();
+            ctx.translate(boxCenterX, boxCenterY - boxHeight/2); // 调整力的起点位置到物体中心
+            ctx.rotate(-angleRad); // 对齐斜面
+
+            // 重力平行分量
+            drawArrow(
+                0, 0,
+                gravityParallelLength, 0,
+                getColor('--md-sys-color-primary'),
+                3,
+                "重力平行分量",
+                gravityParallel.toFixed(1) + " N"
+            );
+            
+            // 重力垂直分量
+            drawArrow(
+                0, 0,
+                0, -gravityPerpendicularLength,
+                getColor('--md-sys-color-tertiary'),
+                3,
+                "重力垂直分量",
+                gravityPerpendicular.toFixed(1) + " N"
+            );
+            
+            // 法向力
+            drawArrow(
+                0, 0,
+                0, -normalLength,
+                getColor('--md-sys-color-success'),
+                3,
+                "法向力",
+                normalForce.toFixed(1) + " N"
+            );
+            
+            // 摩擦力
+            if (currentFriction > 0) {
+                // 增大摩擦力的显示系数，使其更明显
+                const frictionDisplayScale = 8; // 增大摩擦力显示的比例
+                const frictionDisplayLength = frictionForce * frictionDisplayScale;
+                
+                drawArrow(
+                    0, 0,
+                    -frictionDisplayLength, 0,
+                    "#FF5722", // 使用高对比度的橙色
+                    5, // 使用更粗的线宽
+                    "摩擦力",
+                    frictionForce.toFixed(1) + " N"
+                );
+            }
+            
+            // 恢复状态
+            ctx.restore();
+            
+            // 计算合加速度
+            const netForce = gravityParallel - frictionForce;
+            const acceleration = netForce / currentMass;
+            
+            // 绘制状态信息
+            ctx.fillStyle = getColor('--md-sys-color-on-surface');
+            ctx.font = '14px Roboto';
+            ctx.textAlign = 'left';
+            ctx.fillText('物理量:', padding, padding);
+            ctx.fillText('● 质量: ' + mass.toFixed(1) + ' kg', padding, padding + 20);
+            ctx.fillText('● 重力: ' + gravityForce.toFixed(1) + ' N', padding, padding + 40);
+            ctx.fillText('● 平行分量: ' + gravityParallel.toFixed(1) + ' N', padding, padding + 60);
+            ctx.fillText('● 垂直分量: ' + gravityPerpendicular.toFixed(1) + ' N', padding, padding + 80);
+            ctx.fillText('● 法向力: ' + normalForce.toFixed(1) + ' N', padding, padding + 100);
+            ctx.fillText('● 摩擦力: ' + frictionForce.toFixed(1) + ' N', padding, padding + 120);
+            ctx.fillText('● 合外力: ' + netForce.toFixed(1) + ' N', padding, padding + 140);
+            ctx.fillText('● 加速度: ' + acceleration.toFixed(2) + ' m/s²', padding, padding + 160);
+            
+            // 显示静止/滑动状态
+            ctx.font = 'bold 16px Roboto';
+            if (acceleration <= 0) {
+                ctx.fillStyle = getColor('--md-sys-color-error');
+                ctx.fillText('状态: 静止 (摩擦力足以阻止滑动)', padding, padding + 190);
+            } else {
+                ctx.fillStyle = getColor('--md-sys-color-success');
+                ctx.fillText('状态: 加速滑动', padding, padding + 190);
+            }
+        }
+        
+        // 辅助函数：绘制箭头
+        function drawArrow(x1, y1, xLength, yLength, color, lineWidth, label, value) {
+            const arrowLength = Math.sqrt(xLength * xLength + yLength * yLength);
+            if (arrowLength < 1) return; // 忽略太小的箭头
+            
+            // 如果是摩擦力且长度较小，适当增加显示长度
+            if (label === "摩擦力" && arrowLength < 20) {
+                // 保持原有数值，但增加显示长度以增强可见性
+                xLength = xLength < 0 ? Math.min(xLength * 2, -20) : Math.max(xLength * 2, 20);
+                yLength = yLength < 0 ? Math.min(yLength * 2, -20) : Math.max(yLength * 2, 20);
+            }
+            
+            const angle = Math.atan2(yLength, xLength);
+            
+            ctx.save();
+            ctx.translate(x1, y1);
+            ctx.rotate(angle);
+            
+            // 重新计算实际显示长度
+            const displayLength = Math.sqrt(xLength * xLength + yLength * yLength);
+            
+            // 绘制箭身
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(displayLength, 0);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = lineWidth;
+            ctx.stroke();
+            
+            // 绘制箭头
+            ctx.beginPath();
+            ctx.moveTo(displayLength, 0);
+            ctx.lineTo(displayLength - 10, -5);
+            ctx.lineTo(displayLength - 10, 5);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            
+            // 绘制标签
+            if (label) {
+                ctx.font = '12px Roboto';
+                ctx.fillStyle = color;
+                ctx.textAlign = 'center';
+                
+                // 根据箭头方向调整标签位置
+                let labelX = displayLength / 2;
+                let labelY = angle > 0 ? -15 : -15; // 标签位置上移，避免被线条遮挡
+                
+                // 绘制标签背景，增加对比度
+                const labelWidth = ctx.measureText(label).width;
+                
+                // 使用不同的背景颜色，增加对比度
+                if (label === "摩擦力") {
+                    // 为摩擦力增加更明显的背景
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                    ctx.fillRect(labelX - labelWidth/2 - 4, labelY - 12, labelWidth + 8, 16);
+                    
+                    // 加深边框
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(labelX - labelWidth/2 - 4, labelY - 12, labelWidth + 8, 16);
+                } else {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.fillRect(labelX - labelWidth/2 - 2, labelY - 10, labelWidth + 4, 14);
+                }
+                
+                // 绘制标签文本
+                ctx.fillStyle = color;
+                ctx.fillText(label, labelX, labelY);
+                
+                // 显示力的数值
+                if (value) {
+                    ctx.font = '10px Roboto';
+                    const valueWidth = ctx.measureText(value).width;
+                    
+                    // 绘制数值背景
+                    if (label === "摩擦力") {
+                        // 为摩擦力数值增加更明显的背景
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                        ctx.fillRect(labelX - valueWidth/2 - 4, labelY + 2, valueWidth + 8, 14);
+                        
+                        // 加深边框
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(labelX - valueWidth/2 - 4, labelY + 2, valueWidth + 8, 14);
+                    } else {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.fillRect(labelX - valueWidth/2 - 2, labelY + 2, valueWidth + 4, 14);
+                    }
+                    
+                    // 绘制数值文本
+                    ctx.fillStyle = color;
+                    ctx.fillText(value, labelX, labelY + 12);
+                }
+            }
+            
+            ctx.restore();
+        }
+
+        function animateMotion() {
+            if (isAnimating) {
+                cancelAnimationFrame(animationId);
+                isAnimating = false;
+                document.getElementById('animateBtn').textContent = '播放动画';
+                // 重新启用滑块
+                enableSliders(true);
+                drawScene();
+                return;
+            }
+            
+            isAnimating = true;
+            document.getElementById('animateBtn').textContent = '停止动画';
+            // 禁用滑块
+            enableSliders(false);
+            
+            // 计算物理参数
+            const angleRad = currentAngle * Math.PI / 180;
+            const gParallel = g * Math.sin(angleRad);
+            const gPerpendicular = g * Math.cos(angleRad);
+            const normalForce = currentMass * gPerpendicular;
+            const frictionForce = currentFriction * normalForce;
+            const netForce = currentMass * gParallel - frictionForce;
+            const acceleration = netForce / currentMass;
+            
+            // 如果合加速度小于等于0，则显示静止状态
+            if (acceleration <= 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawScene();
+                ctx.font = 'bold 24px Roboto';
+                ctx.fillStyle = getColor('--md-sys-color-error');
+                ctx.textAlign = 'center';
+                ctx.fillText('物体静止 (摩擦力足以阻止滑动)', canvas.width/2, canvas.height/2);
+                
+                setTimeout(() => {
+                    isAnimating = false;
+                    document.getElementById('animateBtn').textContent = '播放动画';
+                    // 重新启用滑块
+                    enableSliders(true);
+                    drawScene();
+                }, 2000);
+                return;
+            }
+            
+            const padding = 50;
+            const groundY = canvas.height - padding;
+            
+            // 确保三角形两边等长
+            const rampHeight = Math.min(canvas.height - 2 * padding, canvas.width - 2 * padding);
+            const rampLength = rampHeight; // 设置为相同的长度
+            
+            const startTime = Date.now();
+            const boxWidth = 30;
+            const boxHeight = 30;
+            
+            // 计算斜面起点和终点
+            const rampStartX = padding;
+            const rampStartY = groundY;
+            const rampEndX = rampStartX + rampLength * Math.cos(angleRad);
+            const rampEndY = groundY - rampLength * Math.sin(angleRad);
+            
+            function animate() {
+                if (!isAnimating) return;
+                
+                const elapsedTime = (Date.now() - startTime) / 1000 * timeScale;
+                const distance = 0.5 * acceleration * Math.pow(elapsedTime, 2);
+                const progress = Math.min(distance / rampLength, 1);
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制背景
+                ctx.fillStyle = getColor('--md-sys-color-surface');
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 绘制斜面
+                ctx.beginPath();
+                ctx.moveTo(rampStartX, rampStartY);
+                ctx.lineTo(rampEndX, rampEndY);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = getColor('--md-sys-color-outline');
+                ctx.stroke();
+                
+                // 绘制地面
+                ctx.beginPath();
+                ctx.moveTo(rampStartX, groundY);
+                ctx.lineTo(canvas.width - padding, groundY);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = getColor('--md-sys-color-outline');
+                ctx.stroke();
+                
+                // 绘制角度标记
+                ctx.beginPath();
+                ctx.arc(rampStartX, groundY, 30, -angleRad, 0);
+                ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
+                ctx.stroke();
+                
+                // 绘制角度值
+                ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
+                ctx.font = '12px Roboto';
+                ctx.textAlign = 'center';
+                ctx.fillText(currentAngle + '°', rampStartX + 25, groundY - 15);
+                
+                // 计算物体在斜面上的当前位置
+                const currentX = rampEndX - progress * (rampEndX - rampStartX);
+                const currentY = rampEndY + progress * (rampStartY - rampEndY);
+                
+                // 绘制物体 (底边贴着斜面)
+                ctx.save();
+                ctx.translate(currentX, currentY);
+                ctx.rotate(-angleRad); // 负角度使方块垂直于斜面
+                ctx.fillStyle = getColor('--md-sys-color-primary');
+                // 调整绘制位置，使底边贴着斜面上方
+                ctx.fillRect(-boxWidth/2, -boxHeight, boxWidth, boxHeight);
+                ctx.restore();
+                
+                // 绘制力 - 分两个部分，保持重力垂直向下
+                // 1. 先绘制垂直向下的重力
+                ctx.save();
+                ctx.translate(currentX, currentY - boxHeight/2); // 调整力起点位置到物体中心
+                // 不旋转坐标系，保持重力垂直向下
+                const gravityLength = currentMass * g * 3;
+                drawArrow(0, 0, 0, gravityLength, getColor('--md-sys-color-error'), 2, "重力", (currentMass * g).toFixed(1) + " N");
+                ctx.restore();
+                
+                // 2. 再绘制沿斜面方向的力
+                ctx.save();
+                ctx.translate(currentX, currentY - boxHeight/2); // 调整力起点位置到物体中心
+                ctx.rotate(-angleRad); // 对齐斜面
+                
+                // 计算力
+                const scale = 3;
+                const gravityParallel = currentMass * g * Math.sin(angleRad);
+                const frictionForce = currentFriction * currentMass * g * Math.cos(angleRad);
+                
+                // 绘制重力平行分量
+                if (gravityParallel > 0) {
+                    drawArrow(0, 0, scale * gravityParallel, 0, getColor('--md-sys-color-primary'), 2, "平行分量", gravityParallel.toFixed(1) + " N");
+                }
+                
+                // 绘制摩擦力
+                if (frictionForce > 0) {
+                    // 增强摩擦力的显示效果
+                    const frictionDisplayScale = 5; // 增大摩擦力显示的比例
+                    drawArrow(0, 0, -frictionDisplayScale * frictionForce, 0, "#FF5722", 3, "摩擦力", frictionForce.toFixed(1) + " N");
+                }
+                
+                ctx.restore();
+                
+                // 绘制运动信息
+                ctx.fillStyle = getColor('--md-sys-color-on-surface');
+                ctx.font = '16px Roboto';
+                ctx.textAlign = 'left';
+                ctx.fillText('加速度: ' + acceleration.toFixed(2) + ' m/s²', padding, padding);
+                ctx.fillText('瞬时速度: ' + (acceleration * elapsedTime).toFixed(2) + ' m/s', padding, padding + 25);
+                ctx.fillText('位移: ' + distance.toFixed(2) + ' m', padding, padding + 50);
+                
+                if (progress < 1) {
+                    animationId = requestAnimationFrame(animate);
+                } else {
+                    // 物体到达底部
+                    setTimeout(() => {
+                        drawScene();
+                        isAnimating = false;
+                        document.getElementById('animateBtn').textContent = '播放动画';
+                        // 重新启用滑块
+                        enableSliders(true);
+                    }, 500);
+                }
+            }
+            
+            animate();
+        }
+
+        function calculatePhysics(angle, mass, friction) {
+            const angleRad = angle * Math.PI / 180;
+            const gParallel = g * Math.sin(angleRad);
+            const gPerpendicular = g * Math.cos(angleRad);
+            const normalForce = mass * gPerpendicular;
+            const frictionForce = friction * normalForce;
+            const acceleration = (gParallel - frictionForce / mass);
+            
+            return {
+                acceleration: acceleration,
+                gravityComponent: mass * gParallel,
+                frictionForce: frictionForce,
+                normalForce: normalForce
+            };
+        }
+
+        // 监听页面加载和窗口大小变化
+        window.addEventListener('load', function() {
+            resizeCanvas();
+            drawScene();
+            
+            // 设置初始值
+            const angleInput = document.getElementById('angle');
+            const massInput = document.getElementById('mass');
+            const frictionInput = document.getElementById('friction');
+            
+            angleInput.value = currentAngle;
+            massInput.value = currentMass;
+            frictionInput.value = currentFriction;
+            
+            document.getElementById('angle-value').textContent = currentAngle + '°';
+            document.getElementById('mass-value').textContent = currentMass + ' kg';
+            document.getElementById('friction-value').textContent = currentFriction;
+            
+            // 实时更新预览
+            angleInput.addEventListener('input', function() {
+                currentAngle = parseFloat(angleInput.value) || currentAngle;
+                document.getElementById('angle-value').textContent = currentAngle + '°';
+                drawScene(); // 立即重绘场景使力的变化实时显示
+            });
+            
+            massInput.addEventListener('input', function() {
+                currentMass = parseFloat(massInput.value) || currentMass;
+                document.getElementById('mass-value').textContent = currentMass + ' kg';
+                drawScene(); // 立即重绘场景使力的变化实时显示
+            });
+            
+            frictionInput.addEventListener('input', function() {
+                currentFriction = parseFloat(frictionInput.value) || currentFriction;
+                document.getElementById('friction-value').textContent = currentFriction;
+                drawScene(); // 立即重绘场景使力的变化实时显示
+            });
+        });
+        
+        window.addEventListener('resize', function() {
+            resizeCanvas();
+            drawScene();
+        });
+
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            const angle = parseFloat(document.getElementById('angle').value);
+            const mass = parseFloat(document.getElementById('mass').value);
+            const friction = parseFloat(document.getElementById('friction').value);
+            
+            const results = calculatePhysics(angle, mass, friction);
+            
+            document.getElementById('accelerationResult').textContent = results.acceleration.toFixed(2) + ' m/s²';
+            document.getElementById('gravityComponentResult').textContent = results.gravityComponent.toFixed(2) + ' N';
+            document.getElementById('frictionForceResult').textContent = results.frictionForce.toFixed(2) + ' N';
+            document.getElementById('normalForceResult').textContent = results.normalForce.toFixed(2) + ' N';
+            
+            document.getElementById('resultContainer').style.display = 'block';
+            
+            currentAngle = angle;
+            currentMass = mass;
+            currentFriction = friction;
+            
+            drawScene();
+        });
+
+        document.getElementById('animateBtn').addEventListener('click', function() {
+            animateMotion();
+        });
+
+        // 启用或禁用滑块
+        function enableSliders(enabled) {
+            document.getElementById('angle').disabled = !enabled;
+            document.getElementById('mass').disabled = !enabled;
+            document.getElementById('friction').disabled = !enabled;
+            
+            // 改变滑块的外观，使用透明度表示禁用状态
+            const sliders = document.querySelectorAll('input[type="range"]');
+            sliders.forEach(slider => {
+                slider.style.opacity = enabled ? "1" : "0.5";
+            });
+        }
+
+        // 初始绘制
+        const initialAngle = /*[[${angle}]]*/ 30;
+        const initialMass = /*[[${mass}]]*/ 1.0;
+        const initialFriction = /*[[${friction}]]*/ 0.1;
+        
+        currentAngle = initialAngle;
+        currentMass = initialMass;
+        currentFriction = initialFriction;
+        
+        // 页面加载时自动调整画布大小
+        if (document.readyState === 'complete') {
+            resizeCanvas();
+            drawScene();
+        } else {
+            window.addEventListener('load', function() {
+                resizeCanvas();
+                drawScene();
+            });
+        }
+    </script>
+
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 配置 KaTeX 自动渲染
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "\\[", right: "\\]", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ],
+                throwOnError: false,
+                strict: false,
+                trust: true,
+                macros: {
+                    "\\theta": "\\theta"
+                }
+            });
+        });
+    </script>
+</body>
+</html>
