@@ -36,6 +36,40 @@
             --md-sys-color-success: #4CAF50; /* 保留，或使用 MD3 推荐的颜色 */
         }
 
+        .modal {
+            display: none; /* 默认隐藏 */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4); /* 半透明背景 */
+        }
+
+        .modal-content {
+            background-color: var(--md-sys-color-surface);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid var(--md-sys-color-outline);
+            width: 80%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .modal-content h4 {
+            color: var(--md-sys-color-primary);
+            margin-bottom: 16px;
+        }
+
+        .modal-content p {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 24px;
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
             background-color: var(--md-sys-color-background);
@@ -313,6 +347,15 @@
     </style>
 </head>
 <body>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h4>实验结束</h4>
+            <p>本次实验结束</p>
+            <button id="close-modal" class="btn btn-primary">关闭</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="row">
             <!-- 左侧控制面板 -->
@@ -475,6 +518,17 @@
         let finalVelocities = null;
         let wallWidth = 20; // 墙壁宽度
 
+        function showModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'block';
+        }
+
+        // 隐藏模态对话框
+        function hideModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+        }
+
         // 初始化 p5.js 画布
         function initSimulation() {
             const container = document.getElementById('canvas-container');
@@ -529,10 +583,11 @@
                     ball2.x += ball2.velocity;
                     
                     // 检查墙壁碰撞
-                    if (ball1.x - ball1.radius < wallWidth || ball1.x + ball1.radius > p.width - wallWidth ||
-                        ball2.x - ball2.radius < wallWidth || ball2.x + ball2.radius > p.width - wallWidth) {
-                        resetSimulation(); // 如果任何一个小球碰到墙壁，则调用重置函数
-                        return; // 重置后退出当前绘制循环
+                    if (ball1.x - ball1.radius < wallWidth || ball1.x + ball1.radius > p.width - wallWidth) {
+                        ball1.velocity *= -1; // 反弹
+                    }
+                    if (ball2.x - ball2.radius < wallWidth || ball2.x + ball2.radius > p.width - wallWidth) {
+                        ball2.velocity *= -1; // 反弹
                     }
                     
                     // 检查小球碰撞
@@ -582,6 +637,37 @@
             `;
         }
 
+        function showModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'block';
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+
+            // 重置小球状态
+            simulationRunning = false;
+            collisionOccurred = false;
+            finalVelocities = null;
+
+            // 重置小球位置
+            ball1.x = wallWidth + 100;
+            ball2.x = p5Instance.width - wallWidth - 100;
+
+            // 重置小球速度
+            ball1.velocity = parseFloat(document.getElementById('left-velocity').value);
+            ball2.velocity = parseFloat(document.getElementById('right-velocity').value);
+
+            // 重置数据显示
+            document.getElementById('initial-momentum').textContent = '0 kg·m/s';
+            document.getElementById('final-momentum').textContent = '0 kg·m/s';
+            document.getElementById('initial-energy').textContent = '0 J';
+            document.getElementById('final-energy').textContent = '0 J';
+            document.getElementById('momentum-conservation').textContent = '是';
+            document.getElementById('energy-conservation').textContent = '是';
+        }
+
         // 处理碰撞
         function handleCollision() {
             const m1 = ball1.mass;
@@ -590,24 +676,27 @@
             const v2 = ball2.velocity;
             const e = getCoefficientOfRestitution();
             
-            // 发送请求到后端计算碰撞结果
-            fetch('/calculateMomentum', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `m1=${m1}&v1=${v1}&m2=${m2}&v2=${v2}&e=${e}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                // 更新小球速度
-                ball1.velocity = data.v1Prime;
-                ball2.velocity = data.v2Prime;
-                
-                // 更新数据显示
-                updateDataDisplay(data);
-            })
-            .catch(error => console.error('Error:', error));
+            // 计算碰撞后的速度
+            const v1Prime = ((m1 - e * m2) * v1 + (1 + e) * m2 * v2) / (m1 + m2);
+            const v2Prime = ((m2 - e * m1) * v2 + (1 + e) * m1 * v1) / (m1 + m2);
+    
+            // 更新小球速度
+            ball1.velocity = v1Prime;
+            ball2.velocity = v2Prime;
+    
+            // 更新数据显示
+            updateDataDisplay({
+                v1Prime: v1Prime,
+                v2Prime: v2Prime,
+                initialMomentum: m1 * v1 + m2 * v2,
+                finalMomentum: m1 * v1Prime + m2 * v2Prime,
+                initialEnergy: 0.5 * m1 * v1 * v1 + 0.5 * m2 * v2 * v2,
+                finalEnergy: 0.5 * m1 * v1Prime * v1Prime + 0.5 * m2 * v2Prime * v2Prime,
+                isMomentumConserved: Math.abs((m1 * v1 + m2 * v2) - (m1 * v1Prime + m2 * v2Prime)) < 0.01,
+                isEnergyConserved: Math.abs((0.5 * m1 * v1 * v1 + 0.5 * m2 * v2 * v2) - (0.5 * m1 * v1Prime * v1Prime + 0.5 * m2 * v2Prime * v2Prime)) < 0.01
+            });
+
+            setTimeout(resetSimulation, 1000); // 延迟1秒后重置
         }
 
         // 获取恢复系数
@@ -659,6 +748,8 @@
             document.getElementById('final-energy').textContent = '0 J';
             document.getElementById('momentum-conservation').textContent = '是';
             document.getElementById('energy-conservation').textContent = '是';
+
+            showModal();
         }
 
         // 事件监听器
@@ -675,6 +766,8 @@
             
             // 重置按钮
             document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+
+            document.getElementById('close-modal').addEventListener('click', hideModal);
             
             // 碰撞类型选择
             document.querySelectorAll('input[name="collision-type"]').forEach(radio => {
