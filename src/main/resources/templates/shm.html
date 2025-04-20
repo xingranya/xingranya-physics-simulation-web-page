@@ -637,9 +637,12 @@
                     
                     // 添加到轨迹
                     if (showTrace) {
+                        const traceX = p.width * 0.35 + xPos * 200; // 使用与弹簧相同的缩放因子
+                        const traceY = p.height * 0.5;
+                        
                         tracePoints.push({
-                            x: p.width * 0.5 + xPos * 100,
-                            y: p.height * 0.5
+                            x: traceX,
+                            y: traceY
                         });
                         
                         if (tracePoints.length > maxTracePoints) {
@@ -824,14 +827,16 @@
             }
             
             // 绘制轨迹
-            p.noFill();
-            p.stroke(94, 106, 210, 150);
-            p.strokeWeight(2);
-            p.beginShape();
-            for (let point of tracePoints) {
-                p.vertex(point.x, point.y);
+            if (showTrace && tracePoints.length > 1) {
+                p.noFill();
+                p.stroke(94, 106, 210, 150);
+                p.strokeWeight(2);
+                p.beginShape();
+                for (let point of tracePoints) {
+                    p.vertex(point.x, point.y);
+                }
+                p.endShape();
             }
-            p.endShape();
             
             // 绘制能量图表
             if (showEnergy && energyData.length > 0) {

@@ -492,7 +492,7 @@
                 ball1 = {
                     x: wallWidth + 100,
                     y: p.height * 0.5,
-                    radius: 30,
+                    radius: 20 + parseFloat(document.getElementById('left-mass').value) * 5, // 基础半径20，每kg增加5
                     mass: parseFloat(document.getElementById('left-mass').value),
                     velocity: parseFloat(document.getElementById('left-velocity').value),
                     color: p.color('#6750A4') // 使用主题色
@@ -501,7 +501,7 @@
                 ball2 = {
                     x: p.width - wallWidth - 100,
                     y: p.height * 0.5,
-                    radius: 30,
+                    radius: 20 + parseFloat(document.getElementById('right-mass').value) * 5, // 基础半径20，每kg增加5
                     mass: parseFloat(document.getElementById('right-mass').value),
                     velocity: parseFloat(document.getElementById('right-velocity').value),
                     color: p.color('#7D5260') // 使用第三色
@@ -697,8 +697,10 @@
                     // 更新小球质量
                     if (e.target.id === 'left-mass') {
                         ball1.mass = parseFloat(e.target.value);
+                        ball1.radius = 20 + ball1.mass * 5; // 更新半径
                     } else if (e.target.id === 'right-mass') {
                         ball2.mass = parseFloat(e.target.value);
+                        ball2.radius = 20 + ball2.mass * 5; // 更新半径
                     }
                 });
             });
