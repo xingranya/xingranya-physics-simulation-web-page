@@ -514,6 +514,56 @@
         .theory-section li {
             margin-bottom: 0.5rem;
         }
+
+        .katex-formula {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-small);
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+
+        .katex-formula.highlight {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: 1px solid var(--md-sys-color-primary);
+        }
+
+        /* 确保KaTeX公式在容器中居中 */
+        .katex {
+            display: inline-block;
+            text-align: center;
+        }
+
+        /* 调整KaTeX公式的字体大小 */
+        .katex {
+            font-size: 1.1em;
+        }
+
+        .theory-tips {
+            background-color: var(--md-sys-color-surface-variant);
+            padding: 20px;
+            border-radius: var(--md-sys-shape-corner-medium);
+            margin: 20px 0;
+        }
+
+        .theory-tips h3 {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 16px;
+        }
+
+        .theory-tips ul {
+            list-style: none;
+            padding-left: 20px;
+        }
+
+        .theory-tips li {
+            margin: 8px 0;
+            color: var(--md-sys-color-on-surface-variant);
+        }
     </style>
 </head>
 <body>
@@ -642,6 +692,29 @@
                     <p>当a > 0时，物体加速下滑；当a = 0时，物体匀速运动；当a < 0时，物体保持静止。</p>
                 </div>
             </div>
+        </div>
+
+        <!-- 理论提示部分 -->
+        <div class="theory-tips">
+            <h3>理论提示</h3>
+            <div class="katex-formula">
+                \[ \text{重力分量：} \quad F_g = mg\sin\theta \quad \text{(平行分量)} \]
+            </div>
+            <div class="katex-formula">
+                \[ \text{压力：} \quad N = mg\cos\theta \quad \text{(垂直分量)} \]
+            </div>
+            <div class="katex-formula">
+                \[ \text{摩擦力：} \quad f = \mu N = \mu mg\cos\theta \]
+            </div>
+            <div class="katex-formula">
+                \[ \text{加速度：} \quad a = g(\sin\theta - \mu\cos\theta) \]
+            </div>
+            <p>运动条件：</p>
+            <ul>
+                <li>开始滑动：\(\sin\theta > \mu\cos\theta\)</li>
+                <li>临界状态：\(\sin\theta = \mu\cos\theta\)</li>
+                <li>静止状态：\(\sin\theta < \mu\cos\theta\)</li>
+            </ul>
         </div>
     </div>
 
@@ -1244,6 +1317,27 @@
                 drawScene();
             });
         }
+    </script>
+
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 配置 KaTeX 自动渲染
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "\\[", right: "\\]", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ],
+                throwOnError: false,
+                strict: false,
+                trust: true,
+                macros: {
+                    "\\theta": "\\theta"
+                }
+            });
+        });
     </script>
 </body>
 </html>

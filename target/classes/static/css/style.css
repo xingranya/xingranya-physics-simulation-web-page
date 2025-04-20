@@ -137,3 +137,37 @@ button:hover {
     color: #666;
     font-size: 1.1em;
 }
+
+/* KaTeX 公式样式 */
+.katex-formula {
+    background-color: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface-variant);
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 20px 0;
+    font-size: 1.1rem;
+    overflow-x: auto;
+}
+
+.katex-formula.highlight {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border: 1px solid var(--md-sys-color-primary);
+}
+
+/* 确保KaTeX公式在容器中居中 */
+.katex {
+    display: inline-block;
+    text-align: center;
+}
+
+/* 调整KaTeX公式的字体大小 */
+.katex {
+    font-size: 1.1em;
+}
+
+/* 移除旧的公式样式 */
+.formula, .formula-box {
+    display: none;
+}
