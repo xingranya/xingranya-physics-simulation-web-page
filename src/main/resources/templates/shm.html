@@ -723,11 +723,71 @@
             p.ellipse(endX + massSize * 0.2, centerY, massSize * 1.2, massSize * 1.2);
             p.drawingContext.shadowBlur = 0;
             
-            // 质量块上的m
+            // 绘制质量块上的m
             p.fill(255);
             p.textAlign(p.CENTER, p.CENTER);
             p.textSize(massSize * 0.7);
             p.text('m', endX + massSize * 0.2, centerY + 2);
+            
+            // 绘制速度矢量
+            if (showVelocity) {
+                const velocityScale = 20; // 速度矢量的缩放因子
+                const velocityX = endX + massSize * 0.2;
+                const velocityY = centerY;
+                const velocityEndX = velocityX + velocity * velocityScale;
+                const velocityEndY = velocityY;
+                
+                p.stroke(16, 185, 129); // 绿色
+                p.strokeWeight(2);
+                p.line(velocityX, velocityY, velocityEndX, velocityEndY);
+                
+                // 绘制箭头
+                const arrowSize = 8;
+                const angle = Math.atan2(velocityEndY - velocityY, velocityEndX - velocityX);
+                p.push();
+                p.translate(velocityEndX, velocityEndY);
+                p.rotate(angle);
+                p.line(0, 0, -arrowSize, -arrowSize);
+                p.line(0, 0, -arrowSize, arrowSize);
+                p.pop();
+                
+                // 添加标签
+                p.noStroke();
+                p.fill(16, 185, 129);
+                p.textSize(12);
+                p.textAlign(p.CENTER, p.BOTTOM);
+                p.text('v', velocityEndX, velocityEndY - 5);
+            }
+            
+            // 绘制加速度矢量
+            if (showAcceleration) {
+                const accelerationScale = 100; // 加速度矢量的缩放因子
+                const accelerationX = endX + massSize * 0.2;
+                const accelerationY = centerY;
+                const accelerationEndX = accelerationX + acceleration * accelerationScale;
+                const accelerationEndY = accelerationY;
+                
+                p.stroke(245, 158, 11); // 橙色
+                p.strokeWeight(2);
+                p.line(accelerationX, accelerationY, accelerationEndX, accelerationEndY);
+                
+                // 绘制箭头
+                const arrowSize = 8;
+                const angle = Math.atan2(accelerationEndY - accelerationY, accelerationEndX - accelerationX);
+                p.push();
+                p.translate(accelerationEndX, accelerationEndY);
+                p.rotate(angle);
+                p.line(0, 0, -arrowSize, -arrowSize);
+                p.line(0, 0, -arrowSize, arrowSize);
+                p.pop();
+                
+                // 添加标签
+                p.noStroke();
+                p.fill(245, 158, 11);
+                p.textSize(12);
+                p.textAlign(p.CENTER, p.BOTTOM);
+                p.text('a', accelerationEndX, accelerationEndY - 5);
+            }
             
             // 平衡位置虚线
             p.stroke(180);
