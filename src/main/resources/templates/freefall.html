@@ -479,7 +479,7 @@
                 ctx.stroke();
                 
                 // 绘制物体当前位置
-                const ballY = padding + currentPosition * scaleFactor;
+                const ballY = Math.min(padding + currentPosition * scaleFactor, groundY - 20); // 确保小球底部不低于地面
                 
                 ctx.beginPath();
                 ctx.arc(canvas.width / 2, ballY, 20, 0, Math.PI * 2);
@@ -495,63 +495,14 @@
                 
                 // 继续动画或结束
                 if (progress < 1) {
-                animationId = requestAnimationFrame(animate);
+                    animationId = requestAnimationFrame(animate);
                 } else {
-                    // 添加落地后的弹跳效果
+                    // 停止动画并添加延迟
+                    isAnimating = false;
+                    document.getElementById('animateBtn').textContent = '播放动画';
                     setTimeout(() => {
-                        // 小弹跳
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        
-                        // 重新绘制背景和地面
-                        ctx.fillStyle = getColor('--md-sys-color-surface');
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        
-                        // 绘制高度刻度
-                        const scaleStep = Math.max(1, Math.ceil(currentHeight / 10));
-                        ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
-                        ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
-                        ctx.font = '12px Roboto';
-                        ctx.textAlign = 'right';
-                        
-                        // 绘制刻度线和数值
-                        for (let h = 0; h <= currentHeight; h += scaleStep) {
-                            const y = groundY - h * scaleFactor;
-                            if (y >= padding) {
-                                ctx.beginPath();
-                                ctx.moveTo(padding - 5, y);
-                                ctx.lineTo(padding, y);
-                                ctx.stroke();
-                                ctx.fillText(h + ' m', padding - 10, y + 4);
-                            }
-                        }
-                        
-                        // 绘制垂直线
-                        ctx.beginPath();
-                        ctx.moveTo(padding, padding);
-                        ctx.lineTo(padding, groundY);
-                        ctx.stroke();
-                        
-                        // 绘制地面
-                        ctx.beginPath();
-                        ctx.moveTo(0, groundY);
-                        ctx.lineTo(canvas.width, groundY);
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = getColor('--md-sys-color-outline');
-                        ctx.stroke();
-                        
-                        // 绘制球体（稍微压扁）
-                        ctx.beginPath();
-                        ctx.ellipse(canvas.width / 2, groundY - 10, 25, 15, 0, 0, Math.PI * 2);
-                        ctx.fillStyle = getColor('--md-sys-color-primary');
-                        ctx.fill();
-                        
-                        // 恢复原始状态
-                        setTimeout(() => {
-                            drawScene();
-                            isAnimating = false;
-                            document.getElementById('animateBtn').textContent = '播放动画';
-                        }, 300);
-                    }, 100);
+                        drawScene();
+                    }, 500); // 延迟500毫秒再重置场景
                 }
             }
             
