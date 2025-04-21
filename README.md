@@ -1,4 +1,4 @@
-# PhySim Lab
+# PhySim Lab ---- 物理模拟实验室 | 直观、交互式的物理实验学习平台
 
 PhySim Lab（物理模拟实验室）是一个基于 Spring Boot 的物理实验模拟系统，旨在帮助学生更好地理解物理概念和原理。系统采用 Material Design 3 设计规范，提供了直观、美观的用户界面。
 
