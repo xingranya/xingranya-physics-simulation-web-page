@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简谐运动辅助圆 - PhySim Lab ---- 物理模拟实验室 | 直观、交互式的物理实验学习平台</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <!-- p5.js 库 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    <style>
+        :root {
+            /* MD3 颜色系统 - Light主题 */
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005E;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-on-secondary: #FFFFFF;
+            --md-sys-color-secondary-container: #E8DEF8;
+            --md-sys-color-on-secondary-container: #1E192B;
+            --md-sys-color-tertiary: #7D5260;
+            --md-sys-color-on-tertiary: #FFFFFF;
+            --md-sys-color-tertiary-container: #FFD8E4;
+            --md-sys-color-on-tertiary-container: #370B1E;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-on-error: #FFFFFF;
+            --md-sys-color-error-container: #F9DEDC;
+            --md-sys-color-on-error-container: #370B1E;
+            --md-sys-color-background: #FFFBFE;
+            --md-sys-color-on-background: #1C1B1F;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-outline: #79747E;
+            
+            /* 圆角 */
+            --md-sys-shape-corner-small: 8px;
+            --md-sys-shape-corner-medium: 12px;
+            --md-sys-shape-corner-large: 16px;
+            --md-sys-shape-corner-extra-large: 28px;
+            
+            /* 阴影 */
+            --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+            --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,0.3), 0 2px 6px 2px rgba(0,0,0,0.15);
+            --md-sys-elevation-3: 0 4px 8px 3px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--md-sys-color-background);
+            color: var(--md-sys-color-on-background);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+        }
+        
+        .md3-card {
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            box-shadow: var(--md-sys-elevation-1);
+            border: none;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            font-weight: 500;
+            font-size: 1.25rem;
+            padding: 1rem 1.5rem;
+            border-bottom: none;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .md3-btn {
+            display: inline-block;
+            height: 40px;
+            padding: 0 24px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.1px;
+            text-transform: uppercase;
+            line-height: 40px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: background-color 0.2s;
+            border: none;
+            margin-right: 8px;
+        }
+        
+        .md3-btn-primary {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .md3-btn-primary:hover {
+            background-color: var(--md-sys-color-primary);
+            opacity: 0.9;
+            color: var(--md-sys-color-on-primary);
+        }
+        
+        .md3-btn-secondary {
+            background-color: var(--md-sys-color-secondary-container);
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        
+        .md3-btn-secondary:hover {
+            background-color: var(--md-sys-color-secondary-container);
+            opacity: 0.9;
+            color: var(--md-sys-color-on-secondary-container);
+        }
+        
+        /* 滑块自定义样式 */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--md-sys-color-surface-variant);
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--md-sys-color-primary);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        
+        /* Canvas 容器 */
+        #canvas-container {
+            position: relative;
+            background-color: var(--md-sys-color-surface);
+            border-radius: var(--md-sys-shape-corner-large);
+            box-shadow: var(--md-sys-elevation-1);
+            overflow: hidden;
+        }
+        
+        /* 复选框样式 */
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 2px solid var(--md-sys-color-outline);
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        input[type="checkbox"]:checked {
+            background-color: var(--md-sys-color-primary);
+            border-color: var(--md-sys-color-primary);
+        }
+        
+        /* 测量结果样式 */
+        .measurement-value {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        
+        .measurement-label {
+            font-size: 0.875rem;
+            color: var(--md-sys-color-on-surface-variant);
+        }
+        
+        /* 能量条样式 */
+        .energy-bar {
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 4px;
+            transition: width 0.2s;
+        }
+        
+        .kinetic-energy {
+            background-color: var(--md-sys-color-secondary);
+        }
+        
+        .potential-energy {
+            background-color: var(--md-sys-color-tertiary);
+        }
+    </style>
+</head>
+<body>
+    <!-- 主要内容 -->
+    <main class="container">
+        <div class="row">
+            <!-- 左侧控制面板 -->
+            <div class="col-md-4">
+                <div class="md3-card">
+                    <div class="card-header">实验参数控制</div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="measurement-label">振幅 (A)</label>
+                            <input type="range" id="amplitude" min="20" max="150" value="100" class="w-100">
+                            <div class="measurement-value" id="amplitude-value">100</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="measurement-label">角速度 (ω)</label>
+                            <input type="range" id="angular-velocity" min="0.5" max="5" value="2" step="0.1" class="w-100">
+                            <div class="measurement-value" id="angular-velocity-value">2</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="measurement-label">初相位 (φ)</label>
+                            <input type="range" id="initial-phase" min="0" max="360" value="0" class="w-100">
+                            <div class="measurement-value" id="initial-phase-value">0°</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="measurement-label">物体质量 (kg)</label>
+                            <input type="range" id="mass" min="0.2" max="3" value="1.0" step="0.1" class="w-100">
+                            <div class="measurement-value" id="mass-value">1.0</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" id="show-velocity" class="form-check-input" checked>
+                                <label class="form-check-label" for="show-velocity">显示速度矢量</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="show-acceleration" class="form-check-input" checked>
+                                <label class="form-check-label" for="show-acceleration">显示加速度矢量</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="show-trace" class="form-check-input" checked>
+                                <label class="form-check-label" for="show-trace">显示轨迹</label>
+                            </div>
+                            <div class="form-check">
+                                <input type="checkbox" id="show-energy" class="form-check-input" checked>
+                                <label class="form-check-label" for="show-energy">显示能量图</label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button id="reset-btn" class="md3-btn md3-btn-secondary">
+                                <i class="fas fa-redo-alt mr-2"></i>重置
+                            </button>
+                            <button id="pause-btn" class="md3-btn md3-btn-primary">
+                                <i class="fas fa-pause mr-2"></i>暂停
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 测量结果面板 -->
+                <div class="md3-card mt-4">
+                    <div class="card-header">实时测量</div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="measurement-label">位移 (x):</div>
+                                <div class="measurement-value" id="displacement">0.00 m</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="measurement-label">速度 (v):</div>
+                                <div class="measurement-value" id="velocity">0.00 m/s</div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <div class="measurement-label">加速度 (a):</div>
+                                <div class="measurement-value" id="acceleration">0.00 m/s²</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="measurement-label">相位 (θ):</div>
+                                <div class="measurement-value" id="phase">0°</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="measurement-label">动能:</div>
+                            <div class="energy-bar kinetic-energy" id="kinetic-energy-bar" style="width: 50%"></div>
+                        </div>
+                        
+                        <div>
+                            <div class="measurement-label">势能:</div>
+                            <div class="energy-bar potential-energy" id="potential-energy-bar" style="width: 50%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧模拟区域 -->
+            <div class="col-md-8">
+                <!-- 模拟画布 -->
+                <div id="canvas-container" class="mb-4" style="min-height: 500px;">
+                    <!-- p5.js 将在这里绘制 -->
+                </div>
+                
+                <!-- 实验原理说明 -->
+                <div class="md3-card">
+                    <div class="card-header">简谐运动原理</div>
+                    <div class="card-body">
+                        <p class="mb-4">
+                            简谐运动是最基本的振动形式，其特点是质点的加速度与位移成正比且方向相反。在数学上，简谐运动可以通过匀速圆周运动在某一直径上的投影来理解。
+                        </p>
+                        <p class="mb-4">
+                            一个简谐运动的位移方程可以表示为：
+                        </p>
+                        <div class="katex-formula">
+                            \[ x = A \cos(\omega t + \phi) \]
+                        </div>
+                        <p>
+                            其中，A是振幅，ω是角速度，t是时间，φ是初相位。通过辅助圆的演示，可以直观地理解速度、加速度与位移之间的关系，以及动能与势能的转换过程。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 实验JavaScript代码 -->
+    <script>
+        // 全局变量
+        let isPaused = false;
+        let showVelocity = true;
+        let showAcceleration = true;
+        let showTrace = true;
+        let showEnergy = true;
+        
+        // 获取DOM元素
+        const pauseBtn = document.getElementById('pause-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const showVelocityCheck = document.getElementById('show-velocity');
+        const showAccelerationCheck = document.getElementById('show-acceleration');
+        const showTraceCheck = document.getElementById('show-trace');
+        const showEnergyCheck = document.getElementById('show-energy');
+        
+        // 事件监听
+        pauseBtn.addEventListener('click', function() {
+            isPaused = !isPaused;
+            this.innerHTML = isPaused ? 
+                '<i class="fas fa-play mr-2"></i>继续' : 
+                '<i class="fas fa-pause mr-2"></i>暂停';
+        });
+        
+        resetBtn.addEventListener('click', function() {
+            // 重置所有参数到初始值
+            document.getElementById('amplitude').value = 100;
+            document.getElementById('amplitude-value').textContent = 100;
+            
+            document.getElementById('angular-velocity').value = 2;
+            document.getElementById('angular-velocity-value').textContent = 2;
+            
+            document.getElementById('initial-phase').value = 0;
+            document.getElementById('initial-phase-value').textContent = "0°";
+            
+            document.getElementById('mass').value = 1.0;
+            document.getElementById('mass-value').textContent = 1.0;
+            
+            isPaused = false;
+            pauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>暂停';
+        });
+        
+        showVelocityCheck.addEventListener('change', function() {
+            showVelocity = this.checked;
+        });
+        
+        showAccelerationCheck.addEventListener('change', function() {
+            showAcceleration = this.checked;
+        });
+        
+        showTraceCheck.addEventListener('change', function() {
+            showTrace = this.checked;
+        });
+        
+        showEnergyCheck.addEventListener('change', function() {
+            showEnergy = this.checked;
+        });
+        
+        // P5.js 代码
+        let sketch = function(p) {
+            // 模拟参数
+            let canvasWidth, canvasHeight;
+            let amplitude, angularVelocity, initialPhase, mass;
+            let centerX, centerY;
+            let time = 0;
+            
+            // 轨迹记录
+            let tracePoints = [];
+            const maxTracePoints = 100;
+            
+            // 周期记录
+            let periodStartTime = 0;
+            let completedPeriods = 0;
+            let lastPhase = 0;
+            
+            p.setup = function() {
+                // 创建与容器同宽的画布
+                const container = document.getElementById('canvas-container');
+                canvasWidth = container.offsetWidth;
+                canvasHeight = 500; // 固定高度
+                
+                let canvas = p.createCanvas(canvasWidth, canvasHeight);
+                canvas.parent('canvas-container');
+                
+                // 初始化位置
+                centerX = canvasWidth / 2;
+                centerY = canvasHeight / 2;
+                
+                p.frameRate(60);
+            };
+            
+            p.draw = function() {
+                // 获取当前参数
+                amplitude = parseInt(document.getElementById('amplitude').value);
+                angularVelocity = parseFloat(document.getElementById('angular-velocity').value);
+                initialPhase = parseInt(document.getElementById('initial-phase').value) * Math.PI / 180; // 转换为弧度
+                mass = parseFloat(document.getElementById('mass').value);
+                
+                // 更新时间（如果未暂停）
+                if (!isPaused) {
+                    time += 0.016; // 约60帧每秒
+                }
+                
+                // 计算当前相位
+                let phase = (angularVelocity * time + initialPhase) % (Math.PI * 2);
+                
+                // 计算当前位移、速度和加速度
+                let displacement = amplitude * Math.cos(phase);
+                let velocity = -amplitude * angularVelocity * Math.sin(phase);
+                let acceleration = -amplitude * angularVelocity * angularVelocity * Math.cos(phase);
+                
+                // 计算能量
+                let kineticEnergy = 0.5 * mass * velocity * velocity;
+                let potentialEnergy = 0.5 * mass * angularVelocity * angularVelocity * displacement * displacement;
+                let totalEnergy = kineticEnergy + potentialEnergy;
+                
+                // 更新轨迹点
+                if (showTrace && !isPaused) {
+                    updateTracePoints(displacement);
+                }
+                
+                // 检测完成的周期数
+                if (phase < lastPhase) {
+                    completedPeriods++;
+                }
+                lastPhase = phase;
+                
+                // 绘制背景
+                p.background(245, 247, 250);
+                
+                // 绘制坐标轴
+                drawAxes();
+                
+                // 绘制参考圆和投影线
+                drawReferenceCircle(amplitude, phase);
+                
+                // 绘制简谐运动物体
+                drawHarmonicObject(displacement);
+                
+                // 绘制轨迹（如果启用）
+                if (showTrace) {
+                    drawTrace();
+                }
+                
+                // 绘制速度矢量（如果启用）
+                if (showVelocity) {
+                    drawVelocityVector(displacement, velocity);
+                }
+                
+                // 绘制加速度矢量（如果启用）
+                if (showAcceleration) {
+                    drawAccelerationVector(displacement, acceleration);
+                }
+                
+                // 绘制能量图（如果启用）
+                if (showEnergy) {
+                    drawEnergyGraph(kineticEnergy, potentialEnergy, totalEnergy);
+                }
+                
+                // 更新测量结果显示
+                updateMeasurements(displacement, velocity, acceleration, phase, kineticEnergy, potentialEnergy, totalEnergy);
+            };
+            
+            function drawAxes() {
+                // x轴
+                p.stroke(150);
+                p.strokeWeight(1);
+                p.line(centerX - 200, centerY, centerX + 400, centerY);
+                
+                // y轴
+                p.line(centerX, centerY - 200, centerX, centerY + 200);
+                
+                // x轴标签
+                p.noStroke();
+                p.fill(150);
+                p.textAlign(p.CENTER);
+                p.textSize(12);
+                p.text("x", centerX + 410, centerY + 15);
+                
+                // x轴刻度
+                for (let x = -2; x <= 2; x++) {
+                    if (x !== 0) {
+                        let xPos = centerX + x * 100;
+                        p.line(xPos, centerY - 5, xPos, centerY + 5);
+                        p.text(x + "A", xPos, centerY + 20);
+                    }
+                }
+                
+                // 原点标记
+                p.text("O", centerX - 10, centerY + 20);
+            }
+            
+            function drawReferenceCircle(amplitude, phase) {
+                // 辅助圆
+                p.stroke(94, 106, 210, 100);
+                p.strokeWeight(1);
+                p.noFill();
+                p.ellipse(centerX, centerY, amplitude * 2, amplitude * 2);
+                
+                // 旋转半径
+                let circleX = centerX + amplitude * Math.cos(phase);
+                let circleY = centerY + amplitude * Math.sin(phase);
+                
+                p.stroke(94, 106, 210);
+                p.strokeWeight(2);
+                p.line(centerX, centerY, circleX, circleY);
+                
+                // 圆周上的点
+                p.fill(246, 158, 11);
+                p.noStroke();
+                p.ellipse(circleX, circleY, 15, 15);
+                
+                // 水平投影线
+                p.stroke(16, 185, 129, 150);
+                p.strokeWeight(1);
+                p.line(circleX, circleY, centerX + amplitude * Math.cos(phase), centerY);
+                
+                // 角度标记
+                p.noFill();
+                p.stroke(94, 106, 210);
+                p.arc(centerX, centerY, 40, 40, 0, phase);
+                
+                // 角度文本
+                p.fill(94, 106, 210);
+                p.noStroke();
+                p.textAlign(p.CENTER);
+                p.textSize(12);
+                p.text("θ", centerX + 25 * Math.cos(phase / 2), centerY + 25 * Math.sin(phase / 2));
+            }
+            
+            function drawHarmonicObject(displacement) {
+                // 平衡位置指示线
+                p.stroke(150, 100);
+                p.strokeWeight(1);
+                p.line(centerX, centerY + 150, centerX, centerY - 150);
+                
+                // 水平轴
+                let axisY = centerY + 100;
+                p.stroke(150);
+                p.line(centerX - 200, axisY, centerX + 400, axisY);
+                
+                // 简谐运动物体的位置
+                let objectX = centerX + displacement;
+                let objectY = axisY;
+                
+                // 绘制物体
+                p.fill(16, 185, 129);
+                p.noStroke();
+                p.rect(objectX - 20, objectY - 20, 40, 40, 5);
+                
+                // 从平衡位置到物体的距离线
+                p.stroke(16, 185, 129, 150);
+                p.strokeWeight(1);
+                p.line(centerX, objectY, objectX, objectY);
+                
+                // 标记距离
+                if (displacement !== 0) {
+                    p.fill(16, 185, 129);
+                    p.noStroke();
+                    p.textAlign(p.CENTER);
+                    p.textSize(12);
+                    p.text("x", centerX + displacement / 2, objectY - 10);
+                }
+            }
+            
+            function updateTracePoints(displacement) {
+                // 添加新的轨迹点
+                tracePoints.push({
+                    time: time,
+                    x: displacement
+                });
+                
+                // 限制轨迹点数量
+                if (tracePoints.length > maxTracePoints) {
+                    tracePoints.shift();
+                }
+            }
+            
+            function drawTrace() {
+                // 绘制波形图
+                let graphY = centerY - 100;
+                let timeScale = 100; // 时间缩放因子
+                
+                // 波形轴
+                p.stroke(150);
+                p.strokeWeight(1);
+                p.line(centerX - 200, graphY, centerX + 400, graphY);
+                
+                // 绘制波形
+                p.stroke(94, 106, 210);
+                p.strokeWeight(2);
+                p.noFill();
+                p.beginShape();
+                
+                for (let i = 0; i < tracePoints.length; i++) {
+                    let point = tracePoints[i];
+                    let x = centerX + 400 - (time - point.time) * timeScale;
+                    let y = graphY - point.x * 0.5; // 缩小振幅以适应显示
+                    
+                    if (x >= centerX - 200 && x <= centerX + 400) {
+                        p.vertex(x, y);
+                    }
+                }
+                
+                p.endShape();
+                
+                // 波形标签
+                p.fill(94, 106, 210);
+                p.noStroke();
+                p.textAlign(p.LEFT);
+                p.textSize(12);
+                p.text("x(t)", centerX - 220, graphY);
+            }
+            
+            function drawVelocityVector(displacement, velocity) {
+                // 物体位置
+                let objectX = centerX + displacement;
+                let objectY = centerY + 100;
+                
+                // 缩放速度矢量
+                let scaledVelocity = velocity * 0.5;
+                
+                // 绘制速度矢量
+                drawArrow(objectX, objectY, objectX + scaledVelocity, objectY, p.color(16, 185, 129));
+                
+                // 速度标签
+                if (Math.abs(velocity) > 5) {
+                    p.fill(16, 185, 129);
+                    p.noStroke();
+                    p.textAlign(p.CENTER);
+                    p.textSize(12);
+                    p.text("v", objectX + scaledVelocity / 2, objectY - 10);
+                }
+            }
+            
+            function drawAccelerationVector(displacement, acceleration) {
+                // 物体位置
+                let objectX = centerX + displacement;
+                let objectY = centerY + 100;
+                
+                // 缩放加速度矢量
+                let scaledAcceleration = acceleration * 0.1;
+                
+                // 绘制加速度矢量
+                drawArrow(objectX, objectY, objectX + scaledAcceleration, objectY, p.color(246, 158, 11));
+                
+                // 加速度标签
+                if (Math.abs(acceleration) > 50) {
+                    p.fill(246, 158, 11);
+                    p.noStroke();
+                    p.textAlign(p.CENTER);
+                    p.textSize(12);
+                    p.text("a", objectX + scaledAcceleration / 2, objectY + 20);
+                }
+            }
+            
+            function drawArrow(x1, y1, x2, y2, color) {
+                p.stroke(color);
+                p.strokeWeight(2);
+                p.line(x1, y1, x2, y2);
+                
+                // 箭头
+                let angle = Math.atan2(y2 - y1, x2 - x1);
+                let arrowSize = 8;
+                
+                p.fill(color);
+                p.noStroke();
+                p.beginShape();
+                p.vertex(x2, y2);
+                p.vertex(x2 - arrowSize * Math.cos(angle - Math.PI / 6), y2 - arrowSize * Math.sin(angle - Math.PI / 6));
+                p.vertex(x2 - arrowSize * Math.cos(angle + Math.PI / 6), y2 - arrowSize * Math.sin(angle + Math.PI / 6));
+                p.endShape(p.CLOSE);
+            }
+            
+            function drawEnergyGraph(kineticEnergy, potentialEnergy, totalEnergy) {
+                // 能量图表
+                let graphX = centerX + 250;
+                let graphY = centerY - 160;
+                let graphWidth = 120;
+                let graphHeight = 100;
+                
+                // 图表背景
+                p.fill(255);
+                p.stroke(150);
+                p.strokeWeight(1);
+                p.rect(graphX, graphY, graphWidth, graphHeight);
+                
+                // 标题
+                p.fill(100);
+                p.noStroke();
+                p.textAlign(p.CENTER);
+                p.textSize(12);
+                p.text("能量变化", graphX + graphWidth / 2, graphY - 10);
+                
+                // 能量归一化
+                let maxEnergy = totalEnergy;
+                let kineticPercent = kineticEnergy / maxEnergy;
+                let potentialPercent = potentialEnergy / maxEnergy;
+                
+                // 动能柱状图
+                p.fill(16, 185, 129, 150);
+                p.noStroke();
+                let kineticHeight = graphHeight * kineticPercent;
+                p.rect(graphX + 20, graphY + graphHeight - kineticHeight, 30, kineticHeight);
+                
+                // 势能柱状图
+                p.fill(94, 106, 210, 150);
+                p.noStroke();
+                let potentialHeight = graphHeight * potentialPercent;
+                p.rect(graphX + 70, graphY + graphHeight - potentialHeight, 30, potentialHeight);
+                
+                // 标签
+                p.fill(16, 185, 129);
+                p.text("动能", graphX + 35, graphY + graphHeight + 15);
+                
+                p.fill(94, 106, 210);
+                p.text("势能", graphX + 85, graphY + graphHeight + 15);
+            }
+            
+            function updateMeasurements(displacement, velocity, acceleration, phase, kineticEnergy, potentialEnergy, totalEnergy) {
+                // 更新位移、速度、加速度、相位显示
+                document.getElementById('displacement').innerText = (displacement / 100).toFixed(2) + " m";
+                document.getElementById('velocity').innerText = (velocity / 100).toFixed(2) + " m/s";
+                document.getElementById('acceleration').innerText = (acceleration / 100).toFixed(2) + " m/s²";
+                document.getElementById('phase').innerText = Math.round(phase * 180 / Math.PI) + "°";
+                
+                // 更新能量条
+                let kineticPercent = (kineticEnergy / totalEnergy) * 100;
+                let potentialPercent = (potentialEnergy / totalEnergy) * 100;
+                
+                document.getElementById('kinetic-energy-bar').style.width = kineticPercent + "%";
+                document.getElementById('potential-energy-bar').style.width = potentialPercent + "%";
+            }
+            
+            // 窗口大小变化时调整画布
+            p.windowResized = function() {
+                const container = document.getElementById('canvas-container');
+                canvasWidth = container.offsetWidth;
+                p.resizeCanvas(canvasWidth, canvasHeight);
+                
+                // 重新计算位置
+                centerX = canvasWidth / 2;
+                centerY = canvasHeight / 2;
+            }
+        };
+        
+        // 创建p5实例
+        new p5(sketch);
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+    <!-- KaTeX JS -->
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            renderMathInElement(document.body, {
+                delimiters: [
+                    {left: "\\[", right: "\\]", display: true},
+                    {left: "\\(", right: "\\)", display: false}
+                ],
+                throwOnError: false
+            });
+        });
+    </script>
+</body>
+</html> 

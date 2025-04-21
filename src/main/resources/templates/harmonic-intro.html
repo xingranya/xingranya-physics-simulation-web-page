@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>杠杆原理实验 - 说明</title>
-        <!-- Favicon -->
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-        <link rel="icon" type="image/png" href="/favicon.png">
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简谐运动辅助圆实验解析 - PhySim Lab</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- KaTeX CSS -->
@@ -65,27 +65,11 @@
             padding-bottom: 2rem;
         }
         
-        .intro-section {
-            background-color: var(--md-sys-color-primary-container);
-            border-radius: var(--md-sys-shape-corner-large);
-            padding: 32px;
-            margin-bottom: 32px;
-            box-shadow: var(--md-sys-elevation-1);
-        }
-        
-        .intro-section h1 {
-            color: var(--md-sys-color-on-primary-container);
+        h1 {
+            color: var(--md-sys-color-primary);
             font-weight: 500;
-            margin-bottom: 16px;
             font-size: 2.5rem;
-        }
-        
-        .intro-section p {
-            color: var(--md-sys-color-on-primary-container);
-            font-size: 1.1rem;
-            line-height: 1.6;
-            opacity: 0.85;
-            margin-bottom: 0;
+            margin-bottom: 1.5rem;
         }
         
         .md3-card {
@@ -155,8 +139,9 @@
             color: var(--md-sys-color-on-surface-variant);
         }
         
-        .card-surface .card-body {
-            color: var(--md-sys-color-on-surface-variant);
+        .key-concept {
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
         }
         
         .formula {
@@ -167,6 +152,16 @@
             text-align: center;
             margin: 1rem 0;
             font-size: 1.2rem;
+        }
+        
+        .highlight {
+            font-weight: 500;
+            color: var(--md-sys-color-primary);
+        }
+        
+        .highlight-tertiary {
+            font-weight: 500;
+            color: var(--md-sys-color-tertiary);
         }
         
         .md3-btn {
@@ -208,86 +203,113 @@
             opacity: 0.9;
             color: var(--md-sys-color-on-secondary-container);
         }
+
+        .katex-formula {
+            background-color: var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface-variant);
+            padding: 16px;
+            border-radius: var(--md-sys-shape-corner-small);
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+
+        .katex-formula.highlight {
+            background-color: var(--md-sys-color-primary-container);
+            color: var(--md-sys-color-on-primary-container);
+            border: 1px solid var(--md-sys-color-primary);
+        }
+
+        /* 确保KaTeX公式在容器中居中 */
+        .katex {
+            display: inline-block;
+            text-align: center;
+        }
+
+        /* 调整KaTeX公式的字体大小 */
+        .katex {
+            font-size: 1.1em;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="intro-section">
-            <h1>杠杆原理实验</h1>
-            <p>探索力矩平衡和机械优势，理解简单机械的工作原理</p>
-        </div>
+        <h1 class="text-center">简谐运动辅助圆实验解析</h1>
         
-        <div class="md3-card card-primary">
-            <div class="card-header">实验原理</div>
+        <div class="card md3-card card-primary">
+            <div class="card-header">
+                <h2>基本原理</h2>
+            </div>
             <div class="card-body">
-                <p>杠杆是最基本的简单机械之一，它由一个支点和一个刚性杆组成。杠杆的工作原理基于力矩平衡，当杠杆处于平衡状态时，支点两侧的力矩大小相等但方向相反。</p>
-                <div class="formula">
-                    <div class="katex-formula">
-                        \[ \tau = F \times r \times \sin(\theta) \]
-                    </div>
-                    <p>其中：</p>
-                    <div class="katex-formula">
-                        \[ \begin{array}{rcl}
-                        F & = & \text{作用力的大小} \\
-                        r & = & \text{力臂（从支点到力的作用线的垂直距离）} \\
-                        \theta & = & \text{力的方向与杠杆的夹角}
-                        \end{array} \]
-                    </div>
-                </div>
+                <p>简谐运动是一种<span class="highlight">周期性运动</span>，其特点是质点的加速度与位移成正比且方向相反。在数学上，简谐运动可以通过匀速圆周运动在某一直径上的投影来理解。</p>
+                <p>这种运动在自然界中广泛存在，如弹簧振子、单摆、声波等。简谐运动的特点是<span class="highlight">振幅恒定</span>，<span class="highlight">周期固定</span>，且<span class="highlight">能量守恒</span>。</p>
             </div>
         </div>
-        
+
         <div class="card md3-card card-secondary">
             <div class="card-header">
                 <h2>数学表达</h2>
             </div>
             <div class="card-body">
-                <p>杠杆平衡的基本条件（力矩平衡）：</p>
+                <p>简谐运动的位移方程可以表示为：</p>
                 <div class="katex-formula">
-                    \[ F_1d_1 = F_2d_2 \]
+                    \[ x(t) = A\cos(\omega t + \phi) \]
                 </div>
-                <p>其中\(F_1\)、\(F_2\)为作用力，\(d_1\)、\(d_2\)为力臂。</p>
-                <p>机械效率：</p>
+                <p>其中：</p>
+                <ul>
+                    <li>A 是振幅，表示最大位移</li>
+                    <li>ω 是角速度，与周期T的关系为 ω = 2π/T</li>
+                    <li>φ 是初相位，表示t=0时的相位</li>
+                </ul>
+                <p>速度和加速度的表达式：</p>
                 <div class="katex-formula">
-                    \[ \eta = \frac{W_{\text{输出}}}{W_{\text{输入}}} \times 100\% \]
+                    \[ v(t) = -A\omega\sin(\omega t + \phi) \]
                 </div>
-                <p>力的关系：</p>
                 <div class="katex-formula">
-                    \[ \frac{F_1}{F_2} = \frac{d_2}{d_1} \]
+                    \[ a(t) = -A\omega^2\cos(\omega t + \phi) \]
                 </div>
-                <p>功的关系：</p>
-                <div class="katex-formula">
-                    \[ F_1s_1 = F_2s_2 \]
-                </div>
-                <p>其中s<sub>1</sub>、s<sub>2</sub>为位移。</p>
             </div>
         </div>
-        
-        <div class="md3-card card-tertiary">
-            <div class="card-header">实验要点</div>
+
+        <div class="card md3-card card-tertiary">
+            <div class="card-header">
+                <h2>辅助圆方法</h2>
+            </div>
             <div class="card-body">
-                <ul class="key-points">
-                    <li>理解力矩的概念和计算方法</li>
-                    <li>验证杠杆平衡条件</li>
-                    <li>探索力臂长度对机械优势的影响</li>
-                    <li>分析力的方向对力矩的影响</li>
-                    <li>掌握杠杆的应用原理</li>
+                <p>辅助圆方法是一种直观理解简谐运动的方式：</p>
+                <ul>
+                    <li>想象一个质点以角速度ω在半径为A的圆周上做匀速圆周运动</li>
+                    <li>质点在x轴上的投影就是简谐运动</li>
+                    <li>投影点的速度就是简谐运动的速度</li>
+                    <li>投影点的加速度就是简谐运动的加速度</li>
+                </ul>
+                <p>这种方法可以帮助我们直观地理解：</p>
+                <ul>
+                    <li>位移、速度、加速度之间的关系</li>
+                    <li>相位差的概念</li>
+                    <li>能量在动能和势能之间的转换</li>
                 </ul>
             </div>
         </div>
-        
-        <div class="md3-card card-surface">
-            <div class="card-header">实验目标</div>
+
+        <div class="card md3-card card-surface">
+            <div class="card-header">
+                <h2>实验要点</h2>
+            </div>
             <div class="card-body">
-                <p>1. 理解力矩的概念和计算方法</p>
-                <p>2. 验证杠杆平衡条件</p>
-                <p>3. 探索力臂长度、作用力大小和方向对力矩的影响</p>
-                <p>4. 计算和验证不同情况下的机械优势</p>
+                <ul>
+                    <li><span class="key-concept">振幅控制</span>：通过调整振幅A，观察运动范围的变化</li>
+                    <li><span class="key-concept">角速度控制</span>：通过调整角速度ω，观察周期和频率的变化</li>
+                    <li><span class="key-concept">初相位控制</span>：通过调整初相位φ，观察运动起始位置的变化</li>
+                    <li><span class="key-concept">能量分析</span>：观察动能和势能的相互转换，验证能量守恒</li>
+                    <li><span class="key-concept">矢量分析</span>：通过速度矢量和加速度矢量，理解运动状态的变化</li>
+                </ul>
             </div>
         </div>
-        
+
         <div class="text-center mt-4">
-            <a href="/lever" class="md3-btn md3-btn-primary">开始实验</a>
+            <a href="/harmonic" class="md3-btn md3-btn-primary">开始实验</a>
             <a href="/" class="md3-btn md3-btn-secondary">返回首页</a>
         </div>
     </div>
@@ -298,6 +320,7 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // 配置 KaTeX 自动渲染
             renderMathInElement(document.body, {
                 delimiters: [
                     {left: "\\[", right: "\\]", display: true},
@@ -305,7 +328,10 @@
                 ],
                 throwOnError: false,
                 strict: false,
-                trust: true
+                trust: true,
+                macros: {
+                    "\\phi": "\\varphi"  // 使用 varphi 替代 phi
+                }
             });
         });
     </script>
