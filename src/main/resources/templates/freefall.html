@@ -67,8 +67,8 @@
         /* 内容区域布局 */
         .content {
             display: grid;                          /* 使用网格布局 */
-            grid-template-columns: 1fr 1fr;         /* 两列等宽 */
-            gap: 2rem;                              /* 列间距 */
+            grid-template-columns: 2fr 4fr;         /* 两列等宽 */
+            gap: 4rem;                              /* 列间距 */
             align-items: start;                     /* 顶部对齐 */
         }
 
@@ -125,7 +125,7 @@
         .buttons {
             display: flex;                         /* 弹性布局 */
             gap: 1rem;                             /* 按钮间距 */
-            margin-top: 0;                         /* 顶部外边距 */
+            margin-top: 2rem;                         /* 顶部外边距 */
             margin-bottom: 1rem;                   /* 底部外边距 */
         }
 
@@ -209,7 +209,7 @@
             padding: 2rem;                         /* 内边距 */
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* 阴影效果 */
             border: 1px solid var(--md-sys-color-surface-variant); /* 边框 */
-            aspect-ratio: 16/9;                    /* 宽高比 */
+            aspect-ratio: 4/3;                    /* 宽高比 */
             position: relative;                    /* 相对定位 */
             overflow: hidden;                      /* 溢出隐藏 */
             min-height: 400px;                     /* 最小高度 */
@@ -335,27 +335,47 @@
         let mass = 1.0;                           // 物体质量(kg)
         const g = 9.8;                            // 重力加速度(m/s²)
         let timeScale = 0.5;                      // 时间缩放因子
+        const BALL_RADIUS = 20;                   // 小球半径(像素)
 
         // 调整画布大小以适应容器
         function resizeCanvas() {
             const container = canvas.parentElement;
             canvas.width = container.clientWidth - 20;  // 减去padding
-            canvas.height = container.clientHeight - 20;
+            canvas.height = container.clientHeight - 20; // 减去padding;
         }
 
+           // 提取绘制坐标轴的函数 
+        function drawAxes(ctx, padding, groundY,canvasWidth) {   
+            // 绘制垂直线
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);//纵坐标起始点
+            ctx.lineTo(padding, groundY);//纵坐标终点
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getColor('--md-sys-color-outline');
+            ctx.stroke();
+            
+            // 绘制地面（横坐标），修改起始点与纵坐标起始点对齐
+            ctx.beginPath();
+            ctx.moveTo(padding , groundY); // 修改横坐标起始点，与纵坐标起始点对齐
+            ctx.lineTo(canvasWidth, groundY); // 横坐标终点
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = getColor('--md-sys-color-outline');
+            ctx.stroke();
+        }
+        
         // 绘制场景
         function drawScene() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             const padding = 40;                    // 内边距
-            const groundY = canvas.height - padding; // 地面Y坐标
-            const maxHeight = canvas.height - 2 * padding; // 最大高度
+            const groundY = canvas.height-padding ; // 地面Y坐标
+            const maxHeight = canvas.height - 2* padding; // 最大高度
             const scaleFactor = maxHeight / currentHeight; // 缩放因子
             
             // 绘制背景和地面
-            ctx.fillStyle = getColor('--md-sys-color-surface');
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
+            ctx.fillStyle = getColor('--md-sys-color-surface');// 背景颜色
+            ctx.fillRect(0, 0, canvas.width, canvas.height);// 绘制背景
+            drawAxes(ctx, padding, groundY,canvas.width); // 绘制坐标轴
             // 绘制高度刻度
             const scaleStep = Math.max(1, Math.ceil(currentHeight / 10)); // 刻度步长
             ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
@@ -375,31 +395,18 @@
                 }
             }
             
-            // 绘制垂直线
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, groundY);
-            ctx.stroke();
-            
-            // 绘制地面
-            ctx.beginPath();
-            ctx.moveTo(0, groundY);
-            ctx.lineTo(canvas.width, groundY);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = getColor('--md-sys-color-outline');
-            ctx.stroke();
-            
             // 绘制球体
             ctx.beginPath();
-            ctx.arc(canvas.width / 2, padding, 20, 0, Math.PI * 2);
+            // 使用定义的常量作为小球半径
+            ctx.arc(canvas.width / 2, padding- BALL_RADIUS, BALL_RADIUS, 0, Math.PI * 2);
             ctx.fillStyle = getColor('--md-sys-color-primary');
             ctx.fill();
             
             // 绘制文字标签
             ctx.fillStyle = getColor('--md-sys-color-on-surface');
-            ctx.font = '16px Roboto';
+            ctx.font = '12px Roboto';
             ctx.textAlign = 'center';
-            ctx.fillText('高度: ' + currentHeight.toFixed(1) + ' m', canvas.width / 2, padding - 30);
+            ctx.fillText('高度: ' + currentHeight.toFixed(1) + ' m', canvas.width / 2+60, padding -20);
         }
 
         // 动画函数
@@ -437,17 +444,19 @@
                 // 清除画布
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
-                // 绘制背景和地面
-                ctx.fillStyle = getColor('--md-sys-color-surface');
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
+                // // 绘制背景和地面
+                // ctx.fillStyle = getColor('--md-sys-color-surface');
+                // ctx.fillRect(0, 0, canvas.width, canvas.height);
+                 // 绘制背景和地面
+                ctx.fillStyle = getColor('--md-sys-color-surface');// 背景颜色
+                ctx.fillRect(0, 0, canvas.width, canvas.height);// 绘制背景
+                drawAxes(ctx, padding, groundY,canvas.width); // 绘制坐标轴
                 // 绘制高度刻度
-                const scaleStep = Math.max(1, Math.ceil(currentHeight / 10));
+                const scaleStep = Math.max(1, Math.ceil(currentHeight / 10)); // 刻度步长
                 ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
                 ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
                 ctx.font = '12px Roboto';
                 ctx.textAlign = 'right';
-                
                 // 绘制刻度线和数值
                 for (let h = 0; h <= currentHeight; h += scaleStep) {
                     const y = groundY - h * scaleFactor;
@@ -460,34 +469,34 @@
                     }
                 }
                 
-                // 绘制垂直线
-                ctx.beginPath();
-                ctx.moveTo(padding, padding);
-                ctx.lineTo(padding, groundY);
-                ctx.stroke();
+                // // 绘制垂直线
+                // ctx.beginPath();
+                // ctx.moveTo(padding, padding);
+                // ctx.lineTo(padding, groundY);
+                // ctx.stroke();
                 
-                // 绘制地面
-                ctx.beginPath();
-                ctx.moveTo(0, groundY);
-                ctx.lineTo(canvas.width, groundY);
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = getColor('--md-sys-color-outline');
-                ctx.stroke();
+                // // 绘制地面
+                // ctx.beginPath();
+                // ctx.moveTo(0, groundY);
+                // ctx.lineTo(canvas.width, groundY);
+                // ctx.lineWidth = 2;
+                // ctx.strokeStyle = getColor('--md-sys-color-outline');
+                // ctx.stroke();
                 
                 // 绘制物体当前位置
                 const ballY = padding + currentPosition * scaleFactor;
                 
                 ctx.beginPath();
-                ctx.arc(canvas.width / 2, ballY, 20, 0, Math.PI * 2);
+                ctx.arc(canvas.width / 2, ballY-BALL_RADIUS, BALL_RADIUS, 0, Math.PI * 2);
                 ctx.fillStyle = getColor('--md-sys-color-primary');
                 ctx.fill();
                 
                 // 绘制文字标签
                 const remainingHeight = currentHeight - currentPosition;
                 ctx.fillStyle = getColor('--md-sys-color-on-surface');
-                ctx.font = '16px Roboto';
+                ctx.font = '12px Roboto';
                 ctx.textAlign = 'center';
-                ctx.fillText('剩余高度: ' + remainingHeight.toFixed(1) + ' m', canvas.width / 2, ballY - 30);
+                ctx.fillText('剩余高度: ' + remainingHeight.toFixed(1) + ' m', canvas.width / 2+70, ballY -20);
                 
                 // 继续动画或结束
                 if (progress < 1) {
@@ -499,9 +508,9 @@
                         ctx.clearRect(0, 0, canvas.width, canvas.height);
                         
                         // 重新绘制背景和地面
-                        ctx.fillStyle = getColor('--md-sys-color-surface');
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        
+                        ctx.fillStyle = getColor('--md-sys-color-surface');// 背景颜色
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);// 绘制背景
+                        drawAxes(ctx, padding, groundY,canvas.width); // 绘制坐标轴
                         // 绘制高度刻度
                         const scaleStep = Math.max(1, Math.ceil(currentHeight / 10));
                         ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
@@ -521,25 +530,25 @@
                             }
                         }
                         
-                        // 绘制垂直线
-                        ctx.beginPath();
-                        ctx.moveTo(padding, padding);
-                        ctx.lineTo(padding, groundY);
-                        ctx.stroke();
+                        // // 绘制垂直线
+                        // ctx.beginPath();
+                        // ctx.moveTo(padding, padding);
+                        // ctx.lineTo(padding, groundY);
+                        // ctx.stroke();
                         
-                        // 绘制地面
-                        ctx.beginPath();
-                        ctx.moveTo(0, groundY);
-                        ctx.lineTo(canvas.width, groundY);
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = getColor('--md-sys-color-outline');
-                        ctx.stroke();
+                        // // 绘制地面
+                        // ctx.beginPath();
+                        // ctx.moveTo(0, groundY);
+                        // ctx.lineTo(canvas.width, groundY);
+                        // ctx.lineWidth = 2;
+                        // ctx.strokeStyle = getColor('--md-sys-color-outline');
+                        // ctx.stroke();
                         
                         // 绘制球体（稍微压扁）
-                        ctx.beginPath();
-                        ctx.ellipse(canvas.width / 2, groundY - 10, 25, 15, 0, 0, Math.PI * 2);
-                        ctx.fillStyle = getColor('--md-sys-color-primary');
-                        ctx.fill();
+                        // ctx.beginPath();
+                        // ctx.ellipse(canvas.width / 2, groundY - 10, 25, 15, 0, 0, Math.PI * 2);
+                        // ctx.fillStyle = getColor('--md-sys-color-primary');
+                        // ctx.fill();
                         
                         // 恢复原始状态
                         setTimeout(() => {
