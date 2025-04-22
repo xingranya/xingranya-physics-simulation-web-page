@@ -215,7 +215,7 @@ PhySim Lab（物理模拟实验室）是一个基于 Spring Boot 的物理实验
 ## 项目结构
 
 ```
-physics-simulation/
+physics-simulation-web-page/
 ├── src/
 │   ├── main/
 │   │   ├── java/
@@ -259,7 +259,7 @@ physics-simulation/
 2. 克隆项目
 ```bash
 git clone https://github.com/xingranya/xingranya-physics-simulation-web-page.git
-cd physics-simulation
+cd physics-simulation-web-page
 ```
 
 3. 安装依赖
