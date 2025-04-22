@@ -98,6 +98,12 @@
             font-weight: 500;
             text-transform: none;
             transition: background-color 0.3s ease;
+            white-space: nowrap;
+            min-width: 100px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-primary:hover {
@@ -379,9 +385,92 @@
             margin: 8px 0;
             color: var(--md-sys-color-on-surface-variant);
         }
+
+        /* 添加模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: var(--md-sys-color-surface);
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid var(--md-sys-color-outline);
+            width: 80%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .modal-header {
+            color: var(--md-sys-color-primary);
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .modal-body {
+            color: var(--md-sys-color-on-surface-variant);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-footer {
+            text-align: center;
+        }
+
+        .modal-button {
+            background-color: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .modal-button:hover {
+            background-color: var(--md-sys-color-primary);
+            opacity: 0.9;
+        }
+
+        .close {
+            color: var(--md-sys-color-outline);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: var(--md-sys-color-error);
+        }
     </style>
 </head>
 <body>
+    <!-- 添加模态框 -->
+    <div id="energyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">能量过低</div>
+            <div class="modal-body">
+                当前系统的总能量已低于0.001J，后续运动可以忽略不计。<br>
+                请点击下方按钮重置实验。
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" onclick="resetSimulation(); closeModal(); document.getElementById('damping-container').style.display = 'none';">重置实验</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <div class="row">
             <!-- 左侧控制面板 -->
@@ -417,7 +506,7 @@
                         </div>
 
                         <!-- 阻尼系数控制 -->
-                        <div class="slider-container">
+                        <div class="slider-container" id="damping-container" style="display: none;">
                             <div class="slider-label">
                                 <label for="damping">阻尼系数 b</label>
                                 <span id="damping-value">0</span>
@@ -475,7 +564,7 @@
 
                         <!-- 控制按钮 -->
                         <div class="d-flex gap-2 mt-3">
-                            <button id="start-btn" class="btn btn-primary">开始模拟</button>
+                            <button id="toggle-btn" class="btn btn-primary">开始模拟</button>
                             <button id="reset-btn" class="btn btn-primary">重置</button>
                             <a href="/" class="btn btn-primary">返回主页</a>
                         </div>
@@ -560,6 +649,9 @@
         let xPos = 0;
         let velocity = 0;
         let acceleration = 0;
+        let lastXPos = 0;
+        let lastVelocity = 0;
+        let lastAcceleration = 0;
         let omega = 0;
         let amplitude = 0.2;
         let damping = 0;
@@ -571,6 +663,22 @@
         const maxTracePoints = 200;
         let energyData = [];
         const maxEnergyPoints = 200;
+        const ENERGY_THRESHOLD = 0.001;
+        let energyBelowThreshold = false;
+
+        // 显示模态框
+        function showModal() {
+            const modal = document.getElementById('energyModal');
+            modal.style.display = 'block';
+            energyBelowThreshold = true;
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            const modal = document.getElementById('energyModal');
+            modal.style.display = 'none';
+            energyBelowThreshold = false;
+        }
 
         // 初始化 p5.js 画布
         function initSimulation() {
@@ -601,6 +709,7 @@
                 // 清空轨迹和能量数据
                 tracePoints = [];
                 energyData = [];
+                energyBelowThreshold = false;
             };
 
             p.draw = () => {
@@ -616,8 +725,8 @@
                 // 计算角频率
                 omega = Math.sqrt(k / m);
                 
-                // 更新时间和物理量（如果未暂停）
-                if (simulationRunning) {
+                // 更新时间和物理量（如果未暂停且能量未低于阈值）
+                if (simulationRunning && !energyBelowThreshold) {
                     const dt = 0.016; // 假设60fps，约16ms
                     time += dt;
                     
@@ -639,9 +748,19 @@
                     const potentialEnergy = 0.5 * k * xPos * xPos;
                     const totalEnergy = kineticEnergy + potentialEnergy;
                     
+                    // 检查能量是否低于阈值
+                    if (damping > 0 && totalEnergy < ENERGY_THRESHOLD) {
+                        simulationRunning = false;
+                        // 保持最后的位置和速度
+                        lastXPos = xPos;
+                        lastVelocity = velocity;
+                        lastAcceleration = acceleration;
+                        showModal();
+                    }
+                    
                     // 添加到轨迹
                     if (showTrace) {
-                        const traceX = p.width * 0.35 + xPos * 200; // 使用与弹簧相同的缩放因子
+                        const traceX = p.width * 0.35 + xPos * 200;
                         const traceY = p.height * 0.5;
                         
                         tracePoints.push({
@@ -666,12 +785,17 @@
                             energyData.shift();
                         }
                     }
-                    
-                    // 更新显示的物理量
-                    updatePhysicalValues();
+                } else {
+                    // 使用最后的位置和速度
+                    xPos = lastXPos;
+                    velocity = lastVelocity;
+                    acceleration = lastAcceleration;
                 }
                 
-                // 绘制场景
+                // 更新显示的物理量
+                updatePhysicalValues();
+                
+                // 绘制场景（无论是否运行都绘制）
                 drawScene();
             };
 
@@ -691,7 +815,7 @@
             p.line(0, p.height * 0.5, p.width, p.height * 0.5);
             
             // 绘制弹簧和质量块
-            const centerX = p.width * 0.35; // 将中心点向左移动
+            const centerX = p.width * 0.35;
             const centerY = p.height * 0.5;
             const springLength = 100;
             const massSize = 30;
@@ -738,13 +862,13 @@
             
             // 绘制速度矢量
             if (showVelocity) {
-                const velocityScale = 20; // 速度矢量的缩放因子
+                const velocityScale = 20;
                 const velocityX = endX + massSize * 0.2;
                 const velocityY = centerY;
                 const velocityEndX = velocityX + velocity * velocityScale;
                 const velocityEndY = velocityY;
                 
-                p.stroke(16, 185, 129); // 绿色
+                p.stroke(16, 185, 129);
                 p.strokeWeight(2);
                 p.line(velocityX, velocityY, velocityEndX, velocityEndY);
                 
@@ -768,13 +892,13 @@
             
             // 绘制加速度矢量
             if (showAcceleration) {
-                const accelerationScale = 100; // 加速度矢量的缩放因子
+                const accelerationScale = 100;
                 const accelerationX = endX + massSize * 0.2;
                 const accelerationY = centerY;
                 const accelerationEndX = accelerationX + acceleration * accelerationScale;
                 const accelerationEndY = accelerationY;
                 
-                p.stroke(245, 158, 11); // 橙色
+                p.stroke(245, 158, 11);
                 p.strokeWeight(2);
                 p.line(accelerationX, accelerationY, accelerationEndX, accelerationEndY);
                 
@@ -866,7 +990,7 @@
                 const pointSpacing = graphWidth / maxEnergyPoints;
                 
                 // 总能量曲线
-                p.stroke(147, 51, 234); // 紫色
+                p.stroke(147, 51, 234);
                 p.strokeWeight(2);
                 p.noFill();
                 p.beginShape();
@@ -878,7 +1002,7 @@
                 p.endShape();
                 
                 // 动能曲线
-                p.stroke(16, 185, 129); // 绿色
+                p.stroke(16, 185, 129);
                 p.strokeWeight(1.5);
                 p.beginShape();
                 for (let i = 0; i < energyData.length; i++) {
@@ -889,7 +1013,7 @@
                 p.endShape();
                 
                 // 势能曲线
-                p.stroke(245, 158, 11); // 橙色
+                p.stroke(245, 158, 11);
                 p.strokeWeight(1.5);
                 p.beginShape();
                 for (let i = 0; i < energyData.length; i++) {
@@ -931,17 +1055,45 @@
 
         // 重置模拟
         function resetSimulation() {
+            // 停止模拟
             simulationRunning = false;
+            energyBelowThreshold = false;
+            
+            // 重置时间
             time = 0;
             lastTime = 0;
-            xPos = amplitude;
+            
+            // 重置位置和速度到平衡位置
+            xPos = 0;
             velocity = 0;
             acceleration = 0;
+            lastXPos = 0;
+            lastVelocity = 0;
+            lastAcceleration = 0;
+            
+            // 重置阻尼系数
+            const dampingSlider = document.getElementById('damping');
+            dampingSlider.value = 0;
+            document.getElementById('damping-value').textContent = '0';
+            damping = 0;
+            
+            // 清空轨迹和能量数据
             tracePoints = [];
             energyData = [];
             
-            // 重置显示的物理量
-            updatePhysicalValues();
+            // 更新显示的物理量（全部为0）
+            document.getElementById('displacement').textContent = '0.00 m';
+            document.getElementById('velocity').textContent = '0.00 m/s';
+            document.getElementById('acceleration').textContent = '0.00 m/s²';
+            document.getElementById('total-energy').textContent = '0.00 J';
+            
+            // 更新按钮文本
+            document.getElementById('toggle-btn').textContent = '开始模拟';
+            
+            // 重新绘制场景
+            if (p5Instance) {
+                p5Instance.redraw();
+            }
         }
 
         // 事件监听器
@@ -949,37 +1101,86 @@
             // 初始化模拟
             initSimulation();
             
-            // 开始按钮
-            document.getElementById('start-btn').addEventListener('click', () => {
-                simulationRunning = true;
+            // 开始/停止按钮
+            const toggleBtn = document.getElementById('toggle-btn');
+            toggleBtn.addEventListener('click', () => {
+                simulationRunning = !simulationRunning;
+                toggleBtn.textContent = simulationRunning ? '停止模拟' : '开始模拟';
+                
+                // 控制阻尼系数滑块的显示/隐藏
+                const dampingContainer = document.getElementById('damping-container');
+                dampingContainer.style.display = simulationRunning ? 'block' : 'none';
+                
+                // 如果停止模拟，保持当前状态
+                if (!simulationRunning) {
+                    lastXPos = xPos;
+                    lastVelocity = velocity;
+                    lastAcceleration = acceleration;
+                }
             });
             
             // 重置按钮
-            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            document.getElementById('reset-btn').addEventListener('click', () => {
+                resetSimulation();
+                closeModal();
+                
+                // 隐藏阻尼系数滑块
+                const dampingContainer = document.getElementById('damping-container');
+                dampingContainer.style.display = 'none';
+            });
             
             // 滑块值更新
             document.querySelectorAll('input[type="range"]').forEach(slider => {
                 slider.addEventListener('input', (e) => {
                     const valueDisplay = document.getElementById(`${e.target.id}-value`);
                     valueDisplay.textContent = e.target.value;
+                    
+                    // 如果模拟未运行，更新显示的值
+                    if (!simulationRunning) {
+                        document.getElementById('displacement').textContent = '0.00 m';
+                        document.getElementById('velocity').textContent = '0.00 m/s';
+                        document.getElementById('acceleration').textContent = '0.00 m/s²';
+                        document.getElementById('total-energy').textContent = '0.00 J';
+                        
+                        // 更新位置到平衡位置
+                        xPos = 0;
+                        lastXPos = 0;
+                        
+                        // 重新绘制场景
+                        if (p5Instance) {
+                            p5Instance.redraw();
+                        }
+                    }
                 });
             });
             
             // 复选框更新
             document.getElementById('show-velocity').addEventListener('change', (e) => {
                 showVelocity = e.target.checked;
+                if (p5Instance) {
+                    p5Instance.redraw();
+                }
             });
             
             document.getElementById('show-acceleration').addEventListener('change', (e) => {
                 showAcceleration = e.target.checked;
+                if (p5Instance) {
+                    p5Instance.redraw();
+                }
             });
             
             document.getElementById('show-trace').addEventListener('change', (e) => {
                 showTrace = e.target.checked;
+                if (p5Instance) {
+                    p5Instance.redraw();
+                }
             });
             
             document.getElementById('show-energy').addEventListener('change', (e) => {
                 showEnergy = e.target.checked;
+                if (p5Instance) {
+                    p5Instance.redraw();
+                }
             });
         });
 
