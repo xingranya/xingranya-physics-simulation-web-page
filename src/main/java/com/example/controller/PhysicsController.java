@@ -298,4 +298,75 @@ public class PhysicsController {
         model.addAttribute("damping", 0.0);
         return "shm";
     }
+
+    /**
+     * 显示简谐运动辅助圆实验说明页面
+     * @return 返回简谐运动辅助圆实验说明页面
+     */
+    @GetMapping("/harmonic-intro")
+    public String showHarmonicIntroPage() {
+        return "harmonic-intro";
+    }
+
+    /**
+     * 显示简谐运动辅助圆模拟页面
+     * @param model 用于向视图传递数据的模型对象
+     * @return 返回简谐运动辅助圆模拟页面视图名称
+     */
+    @GetMapping("/harmonic")
+    public String showHarmonicPage(Model model) {
+        // 设置默认参数
+        model.addAttribute("amplitude", 100.0);    // 振幅（像素）
+        model.addAttribute("angularVelocity", 2.0); // 角速度（弧度/秒）
+        model.addAttribute("initialPhase", 0.0);   // 初相位（度）
+        model.addAttribute("mass", 1.0);           // 质量（kg）
+        return "harmonic";
+    }
+
+    /**
+     * 计算简谐运动的物理量（AJAX请求）
+     * @param amplitude 振幅（像素）
+     * @param angularVelocity 角速度（弧度/秒）
+     * @param initialPhase 初相位（度）
+     * @param mass 质量（kg）
+     * @return 返回包含物理量计算结果的JSON对象
+     */
+    @PostMapping("/calculateHarmonic")
+    @ResponseBody
+    public Map<String, Object> calculateHarmonic(
+            @RequestParam double amplitude,
+            @RequestParam double angularVelocity,
+            @RequestParam double initialPhase,
+            @RequestParam double mass) {
+        
+        // 将初相位转换为弧度
+        double phaseRadians = Math.toRadians(initialPhase);
+        
+        // 计算当前时间（秒）
+        double time = System.currentTimeMillis() / 1000.0;
+        
+        // 计算当前相位
+        double currentPhase = angularVelocity * time + phaseRadians;
+        
+        // 计算位移、速度和加速度
+        double displacement = amplitude * Math.cos(currentPhase);
+        double velocity = -amplitude * angularVelocity * Math.sin(currentPhase);
+        double acceleration = -amplitude * angularVelocity * angularVelocity * Math.cos(currentPhase);
+        
+        // 计算能量
+        double kineticEnergy = 0.5 * mass * velocity * velocity;
+        double potentialEnergy = 0.5 * mass * angularVelocity * angularVelocity * displacement * displacement;
+        double totalEnergy = kineticEnergy + potentialEnergy;
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("displacement", displacement);
+        result.put("velocity", velocity);
+        result.put("acceleration", acceleration);
+        result.put("phase", Math.toDegrees(currentPhase) % 360);
+        result.put("kineticEnergy", kineticEnergy);
+        result.put("potentialEnergy", potentialEnergy);
+        result.put("totalEnergy", totalEnergy);
+        
+        return result;
+    }
 }
