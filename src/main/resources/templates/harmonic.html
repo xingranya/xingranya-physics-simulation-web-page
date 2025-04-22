@@ -252,7 +252,7 @@
                             </div>
                             <div class="form-check">
                                 <input type="checkbox" id="show-trace" class="form-check-input" checked>
-                                <label class="form-check-label" for="show-trace">显示轨迹</label>
+                                <label class="form-check-label" for="show-trace">显示波形图</label>
                             </div>
                             <div class="form-check">
                                 <input type="checkbox" id="show-energy" class="form-check-input" checked>
@@ -264,6 +264,9 @@
                             <button id="reset-btn" class="md3-btn md3-btn-secondary">
                                 <i class="fas fa-redo-alt mr-2"></i>重置
                             </button>
+                            <a href="/" class="md3-btn md3-btn-primary">
+                                <i class="fas fa-home mr-2"></i>返回主页
+                            </a>
                             <button id="pause-btn" class="md3-btn md3-btn-primary">
                                 <i class="fas fa-pause mr-2"></i>暂停
                             </button>
@@ -380,6 +383,23 @@
             
             isPaused = false;
             pauseBtn.innerHTML = '<i class="fas fa-pause mr-2"></i>暂停';
+        });
+
+        // 添加滑块事件监听器
+        document.getElementById('amplitude').addEventListener('input', function() {
+            document.getElementById('amplitude-value').textContent = this.value;
+        });
+
+        document.getElementById('angular-velocity').addEventListener('input', function() {
+            document.getElementById('angular-velocity-value').textContent = this.value;
+        });
+
+        document.getElementById('initial-phase').addEventListener('input', function() {
+            document.getElementById('initial-phase-value').textContent = this.value + "°";
+        });
+
+        document.getElementById('mass').addEventListener('input', function() {
+            document.getElementById('mass-value').textContent = this.value;
         });
         
         showVelocityCheck.addEventListener('change', function() {
@@ -620,13 +640,14 @@
             
             function drawTrace() {
                 // 绘制波形图
-                let graphY = centerY - 100;
+                let graphY = centerY; // 使用与圆相同的中心线
                 let timeScale = 100; // 时间缩放因子
+                let graphOffset = 200; // 波形图向左偏移量
                 
                 // 波形轴
                 p.stroke(150);
                 p.strokeWeight(1);
-                p.line(centerX - 200, graphY, centerX + 400, graphY);
+                p.line(centerX - graphOffset - 100, graphY, centerX - graphOffset + 1000, graphY); // 延长波形轴
                 
                 // 绘制波形
                 p.stroke(94, 106, 210);
@@ -636,10 +657,10 @@
                 
                 for (let i = 0; i < tracePoints.length; i++) {
                     let point = tracePoints[i];
-                    let x = centerX + 400 - (time - point.time) * timeScale;
-                    let y = graphY - point.x * 0.5; // 缩小振幅以适应显示
+                    let x = centerX - graphOffset + 500 - (time - point.time) * timeScale;
+                    let y = graphY - point.x; // 使用与圆相同的振幅
                     
-                    if (x >= centerX - 200 && x <= centerX + 400) {
+                    if (x >= centerX - graphOffset - 300 && x <= centerX - graphOffset + 500) {
                         p.vertex(x, y);
                     }
                 }
@@ -651,7 +672,7 @@
                 p.noStroke();
                 p.textAlign(p.LEFT);
                 p.textSize(12);
-                p.text("x(t)", centerX - 220, graphY);
+                p.text("x(t)", centerX - graphOffset - 320, graphY - 10);
             }
             
             function drawVelocityVector(displacement, velocity) {
@@ -717,7 +738,7 @@
             function drawEnergyGraph(kineticEnergy, potentialEnergy, totalEnergy) {
                 // 能量图表
                 let graphX = centerX + 250;
-                let graphY = centerY - 160;
+                let graphY = centerY - 250;
                 let graphWidth = 120;
                 let graphHeight = 100;
                 
@@ -726,13 +747,6 @@
                 p.stroke(150);
                 p.strokeWeight(1);
                 p.rect(graphX, graphY, graphWidth, graphHeight);
-                
-                // 标题
-                p.fill(100);
-                p.noStroke();
-                p.textAlign(p.CENTER);
-                p.textSize(12);
-                p.text("能量变化", graphX + graphWidth / 2, graphY - 10);
                 
                 // 能量归一化
                 let maxEnergy = totalEnergy;
@@ -750,6 +764,13 @@
                 p.noStroke();
                 let potentialHeight = graphHeight * potentialPercent;
                 p.rect(graphX + 70, graphY + graphHeight - potentialHeight, 30, potentialHeight);
+                
+                // 标题
+                p.fill(100);
+                p.noStroke();
+                p.textAlign(p.CENTER);
+                p.textSize(12);
+                p.text("能量变化", graphX + graphWidth / 2, graphY + graphHeight + 30);
                 
                 // 标签
                 p.fill(16, 185, 129);

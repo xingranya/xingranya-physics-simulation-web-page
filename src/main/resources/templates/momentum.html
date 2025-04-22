@@ -90,17 +90,22 @@
         .btn-primary {
             background-color: var(--md-sys-color-primary);
             border: none;
-            padding: 10px 24px; /* MD3 按钮内边距 */
-            border-radius: 20px; /* MD3 推荐圆角 */
+            padding: 10px 24px;
+            border-radius: 20px;
             color: var(--md-sys-color-on-primary);
             font-weight: 500;
-            text-transform: none; /* MD3 通常不用大写 */
+            text-transform: none;
             transition: background-color 0.3s ease;
+            white-space: nowrap;
+            min-width: 100px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-primary:hover {
             background-color: var(--md-sys-color-primary);
-            /* MD3 通过状态层实现悬停效果，这里简化为透明度 */
             opacity: 0.9;
         }
 
