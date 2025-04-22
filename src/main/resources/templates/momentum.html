@@ -527,6 +527,22 @@
                 p.strokeWeight(2); // 加粗中心线
                 p.line(0, p.height/2, p.width, p.height/2);
                 
+                // 绘制正方向箭头
+                p.push();
+                p.translate(p.width - 100, 30); // 向左移动30像素
+                p.stroke(0);
+                p.strokeWeight(2);
+                p.fill(0);
+                // 绘制箭头
+                p.line(0, 0, 30, 0); // 箭头线
+                p.triangle(30, 0, 25, -5, 25, 5); // 箭头头
+                // 添加文字
+                p.noStroke();
+                p.textSize(12);
+                p.textAlign(p.LEFT, p.CENTER);
+                p.text("正方向", 35, 0);
+                p.pop();
+                
                 // 更新小球位置
                 if (simulationRunning) {
                     ball1.x += ball1.velocity;
@@ -535,7 +551,26 @@
                     // 检查墙壁碰撞
                     if (ball1.x - ball1.radius < wallWidth || ball1.x + ball1.radius > p.width - wallWidth ||
                         ball2.x - ball2.radius < wallWidth || ball2.x + ball2.radius > p.width - wallWidth) {
-                        resetSimulation(); // 如果任何一个小球碰到墙壁，则调用重置函数
+                        // 只重置小球位置和碰撞状态，不重置滑块参数
+                        simulationRunning = false;
+                        collisionOccurred = false;
+                        finalVelocities = null;
+                        
+                        // 重置小球位置
+                        ball1.x = wallWidth + 100;
+                        ball2.x = p5Instance.width - wallWidth - 100;
+                        
+                        // 重置小球速度（使用当前滑块值）
+                        ball1.velocity = parseFloat(document.getElementById('left-velocity').value);
+                        ball2.velocity = parseFloat(document.getElementById('right-velocity').value);
+                        
+                        // 重置数据显示
+                        document.getElementById('initial-momentum').textContent = '0 kg·m/s';
+                        document.getElementById('final-momentum').textContent = '0 kg·m/s';
+                        document.getElementById('initial-energy').textContent = '0 J';
+                        document.getElementById('final-energy').textContent = '0 J';
+                        document.getElementById('momentum-conservation').textContent = '是';
+                        document.getElementById('energy-conservation').textContent = '是';
                         return; // 重置后退出当前绘制循环
                     }
                     
@@ -648,13 +683,32 @@
             collisionOccurred = false;
             finalVelocities = null;
             
-            // 重置小球位置
+            // 重置滑块到初始值
+            document.getElementById('left-mass').value = '1.0';
+            document.getElementById('left-velocity').value = '2.0';
+            document.getElementById('right-mass').value = '1.0';
+            document.getElementById('right-velocity').value = '-2.0';
+            document.getElementById('coefficient').value = '0.5';
+            
+            // 更新滑块显示值
+            document.getElementById('left-mass-value').textContent = '1.0';
+            document.getElementById('left-velocity-value').textContent = '2.0';
+            document.getElementById('right-mass-value').textContent = '1.0';
+            document.getElementById('right-velocity-value').textContent = '-2.0';
+            document.getElementById('coefficient-value').textContent = '0.5';
+            
+            // 重置小球位置和速度
             ball1.x = wallWidth + 100;
             ball2.x = p5Instance.width - wallWidth - 100;
             
-            // 重置小球速度
-            ball1.velocity = parseFloat(document.getElementById('left-velocity').value);
-            ball2.velocity = parseFloat(document.getElementById('right-velocity').value);
+            ball1.mass = 1.0;
+            ball2.mass = 1.0;
+            ball1.velocity = 2.0;
+            ball2.velocity = -2.0;
+            
+            // 更新小球半径
+            ball1.radius = 20 + ball1.mass * 5;
+            ball2.radius = 20 + ball2.mass * 5;
             
             // 重置数据显示
             document.getElementById('initial-momentum').textContent = '0 kg·m/s';
@@ -663,6 +717,10 @@
             document.getElementById('final-energy').textContent = '0 J';
             document.getElementById('momentum-conservation').textContent = '是';
             document.getElementById('energy-conservation').textContent = '是';
+            
+            // 重置碰撞类型为弹性碰撞
+            document.getElementById('elastic').checked = true;
+            document.getElementById('coefficient-container').classList.add('hidden');
         }
 
         // 事件监听器
@@ -673,6 +731,25 @@
             // 开始按钮
             document.getElementById('start-btn').addEventListener('click', () => {
                 if (!simulationRunning) {
+                    // 更新小球参数
+                    ball1.mass = parseFloat(document.getElementById('left-mass').value);
+                    ball1.velocity = parseFloat(document.getElementById('left-velocity').value);
+                    ball2.mass = parseFloat(document.getElementById('right-mass').value);
+                    ball2.velocity = parseFloat(document.getElementById('right-velocity').value);
+                    
+                    // 更新小球半径
+                    ball1.radius = 20 + ball1.mass * 5;
+                    ball2.radius = 20 + ball2.mass * 5;
+                    
+                    // 重置小球位置
+                    ball1.x = wallWidth + 100;
+                    ball2.x = p5Instance.width - wallWidth - 100;
+                    
+                    // 重置碰撞状态
+                    collisionOccurred = false;
+                    finalVelocities = null;
+                    
+                    // 开始模拟
                     simulationRunning = true;
                 }
             });
