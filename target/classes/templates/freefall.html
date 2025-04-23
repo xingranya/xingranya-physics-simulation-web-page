@@ -85,14 +85,14 @@
 
         /* 表单容器样式 */
         .form-container {
-            background-color: var(--md-sys-color-surface); /* 背景色 */
-            border-radius: 1.5rem;                  /* 圆角 */
-            padding: 2rem;                          /* 内边距 */
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* 阴影效果 */
-            border: 1px solid var(--md-sys-color-surface-variant); /* 边框 */
-            display: flex;                          /* 弹性布局 */
-            flex-direction: column;                 /* 垂直排列 */
-            gap: 1.5rem;                           /* 元素间距 */
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         /* 表单组样式 */
@@ -127,39 +127,42 @@
 
         /* 按钮容器样式 */
         .buttons {
-            display: flex;                         /* 弹性布局 */
-            gap: 1rem;                             /* 按钮间距 */
-            margin-top: 0;                         /* 顶部外边距 */
-            margin-bottom: 1rem;                   /* 底部外边距 */
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+            flex-wrap: wrap;
         }
 
         /* 按钮基础样式 */
         .button {
-            flex: 1;                               /* 等宽分布 */
-            padding: 0.875rem 1.5rem;              /* 内边距 */
-            border: none;                          /* 移除边框 */
-            border-radius: 1.5rem;                 /* 圆角 */
-            font-size: 0.875rem;                   /* 字体大小 */
-            font-weight: 500;                      /* 字体粗细 */
-            cursor: pointer;                       /* 鼠标指针样式 */
-            transition: all 0.3s ease;             /* 过渡效果 */
-            text-transform: uppercase;             /* 大写字母 */
-            letter-spacing: 0.5px;                 /* 字间距 */
-            text-align: center;                    /* 文字居中 */
-            text-decoration: none;                 /* 移除下划线 */
-            box-sizing: border-box;                /* 盒模型计算方式 */
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            min-width: 120px;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
         }
 
         /* 主要按钮样式 */
         .button-primary {
-            background-color: var(--md-sys-color-primary); /* 背景色 */
-            color: var(--md-sys-color-on-primary); /* 文字颜色 */
+            background-color: #6750A4;
+            color: white;
         }
 
         /* 次要按钮样式 */
         .button-secondary {
-            background-color: var(--md-sys-color-surface-variant); /* 背景色 */
-            color: var(--md-sys-color-on-surface-variant); /* 文字颜色 */
+            background-color: #E8DEF8;
+            color: #1D1B20;
         }
 
         /* 按钮悬停效果 */
@@ -264,6 +267,73 @@
                 width: 100%;                       /* 按钮宽度100% */
             }
         }
+
+        /* 滑块样式 - 完全匹配截图效果 */
+        .slider-container {
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .slider-name {
+            font-size: 1rem;
+            color: var(--md-sys-color-on-surface);
+            font-weight: 500;
+        }
+        
+        .slider-value {
+            font-size: 1rem;
+            color: var(--md-sys-color-on-surface);
+            font-weight: 400;
+            text-align: right;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background-color: #E8DEF8; /* 淡紫色背景，对应图片中的颜色 */
+            border-radius: 3px;
+            -webkit-appearance: none;
+            appearance: none;
+            cursor: pointer;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            background: #6750A4; /* 深紫色滑块手柄 */
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            margin-top: -11px; /* 调整垂直位置 */
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            background: #6750A4; /* 深紫色滑块手柄 */
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+        
+        input[type="range"]::-moz-range-track {
+            height: 6px;
+            background-color: #E8DEF8;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body>
@@ -281,16 +351,39 @@
             <div class="form-container">
                 <form id="freefallForm">
                     <!-- 高度输入组 -->
-                    <div class="form-group">
-                        <label for="height">初始高度 (m)</label>
-                        <input type="number" id="height" name="height" th:value="${height}" min="0.1" max="100" step="0.1" value="10" required>
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <div class="slider-name">初始高度 (m)</div>
+                            <div class="slider-value" id="heightValue">10.0</div>
+                        </div>
+                        <input type="range" id="height" name="height" min="0" max="100" step="0.1" value="10">
                     </div>
+                    
+                    <!-- 空气阻力系数滑块 -->
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <div class="slider-name">空气阻力系数</div>
+                            <div class="slider-value" id="dragValue">0.1</div>
+                        </div>
+                        <input type="range" id="drag" name="drag" min="0" max="0.5" step="0.01" value="0.1">
+                    </div>
+                    
+                    <!-- 质量滑块 -->
+                    <div class="slider-container">
+                        <div class="slider-label">
+                            <div class="slider-name">物体质量 (kg)</div>
+                            <div class="slider-value" id="massValue">1.0</div>
+                        </div>
+                        <input type="range" id="mass" name="mass" min="0.1" max="5" step="0.1" value="1.0">
+                    </div>
+                    
                     <!-- 按钮组 -->
                     <div class="buttons">
-                        <button type="button" id="calculateBtn" class="button button-primary">计算落体时间</button>
+                        <button type="button" id="calculateBtn" class="button button-primary">计算落体时间(重置)</button>
                         <button type="button" id="animateBtn" class="button button-secondary">播放动画</button>
+                        <a href="/" class="button button-secondary">返回主页</a>
                     </div>
-    </form>
+                </form>
 
                 <!-- 结果容器 -->
                 <div class="result-container" id="resultContainer" style="display: none;">
@@ -312,16 +405,13 @@
                         <span class="result-value" id="kineticEnergyResult">0.0 J</span>
                     </div>
                 </div>
-    </div>
+            </div>
 
             <!-- 动画容器 -->
-    <div class="animation-container">
+            <div class="animation-container">
                 <canvas id="freefallCanvas"></canvas>
             </div>
         </div>
-
-        <!-- 返回按钮 -->
-        <a href="/" class="back-button">返回主页</a>
     </div>
 
     <script th:inline="javascript">
@@ -335,10 +425,15 @@
         const ctx = canvas.getContext('2d');
         let animationId = null;                    // 动画ID
         let isAnimating = false;                   // 动画状态标志
-        let currentHeight = 10;                    // 当前高度
+        let currentHeight = 10;                    // 当前高度(m)
+        let displayMaxHeight = 12;                 // 显示的最大高度(m)，初始为当前高度的120%
         let mass = 1.0;                           // 物体质量(kg)
         const g = 9.8;                            // 重力加速度(m/s²)
         let timeScale = 0.5;                      // 时间缩放因子
+        let dragCoefficient = 0.1;                // 空气阻力系数
+        let velocity = 0;                         // 当前速度(m/s)
+        let time = 0;                             // 当前时间(s)
+        let lastTime = 0;                         // 上一帧时间
 
         // 调整画布大小以适应容器
         function resizeCanvas() {
@@ -351,59 +446,92 @@
         function drawScene() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            const padding = 40;                    // 内边距
-            const groundY = canvas.height - padding; // 地面Y坐标
-            const maxHeight = canvas.height - 2 * padding; // 最大高度
-            const scaleFactor = maxHeight / currentHeight; // 缩放因子
-            
-            // 绘制背景和地面
+            // 绘制背景
             ctx.fillStyle = getColor('--md-sys-color-surface');
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制高度刻度
-            const scaleStep = Math.max(1, Math.ceil(currentHeight / 10)); // 刻度步长
+            // 绘制地面
+            const groundY = canvas.height - 50;
+            ctx.fillStyle = getColor('--md-sys-color-surface-variant');
+            ctx.fillRect(0, groundY, canvas.width, 50);
+            
+            // 获取刻度间隔
+            const scaleInterval = calculateScaleInterval(displayMaxHeight);
+            
+            // 绘制标尺
             ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
             ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
+            ctx.lineWidth = 1;
             ctx.font = '12px Roboto';
             ctx.textAlign = 'right';
             
+            // 计算高度到像素的转换比例
+            const scale = (canvas.height - 100) / displayMaxHeight;
+            
             // 绘制刻度线和数值
-            for (let h = 0; h <= currentHeight; h += scaleStep) {
-                const y = groundY - h * scaleFactor;
-                if (y >= padding) {
+            for (let h = 0; h <= displayMaxHeight; h += scaleInterval) {
+                const y = groundY - h * scale;
+                if (y >= 20) {
                     ctx.beginPath();
-                    ctx.moveTo(padding - 5, y);
-                    ctx.lineTo(padding, y);
+                    ctx.moveTo(30, y);
+                    ctx.lineTo(40, y);
                     ctx.stroke();
-                    ctx.fillText(h + ' m', padding - 10, y + 4);
+                    
+                    // 只在整数刻度处显示数值
+                    ctx.fillText(h + ' m', 25, y + 5);
                 }
             }
             
-            // 绘制垂直线
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, groundY);
-            ctx.stroke();
+            // 计算物体位置 (将高度映射到画布)
+            const objectY = groundY - currentHeight * scale;
+            const objectSize = 20 + mass * 5;
             
-            // 绘制地面
-            ctx.beginPath();
-            ctx.moveTo(0, groundY);
-            ctx.lineTo(canvas.width, groundY);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = getColor('--md-sys-color-outline');
-            ctx.stroke();
-            
-            // 绘制球体
-            ctx.beginPath();
-            ctx.arc(canvas.width / 2, padding, 20, 0, Math.PI * 2);
+            // 绘制物体
             ctx.fillStyle = getColor('--md-sys-color-primary');
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, objectY, objectSize / 2, 0, Math.PI * 2);
             ctx.fill();
+            
+            // 绘制速度矢量
+            if (velocity > 0.1) {
+                const arrowLength = Math.min(80, velocity * 5);
+                const arrowY = objectY + objectSize / 2 + 5;
+                
+                ctx.strokeStyle = getColor('--md-sys-color-error');
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, arrowY);
+                ctx.lineTo(canvas.width / 2, arrowY + arrowLength);
+                
+                // 箭头
+                ctx.lineTo(canvas.width / 2 - 5, arrowY + arrowLength - 10);
+                ctx.moveTo(canvas.width / 2, arrowY + arrowLength);
+                ctx.lineTo(canvas.width / 2 + 5, arrowY + arrowLength - 10);
+                ctx.stroke();
+                
+                // 速度标签
+                ctx.fillStyle = getColor('--md-sys-color-error');
+                ctx.font = '12px Roboto';
+                ctx.textAlign = 'left';
+                ctx.fillText(velocity.toFixed(1) + ' m/s', canvas.width / 2 + 10, arrowY + arrowLength / 2);
+            }
             
             // 绘制文字标签
             ctx.fillStyle = getColor('--md-sys-color-on-surface');
             ctx.font = '16px Roboto';
             ctx.textAlign = 'center';
-            ctx.fillText('高度: ' + currentHeight.toFixed(1) + ' m', canvas.width / 2, padding - 30);
+            ctx.fillText('高度: ' + currentHeight.toFixed(1) + ' m', canvas.width / 2, 30);
+        }
+
+        // 计算合适的刻度间隔
+        function calculateScaleInterval(maxHeight) {
+            if (maxHeight <= 10) return 1;
+            if (maxHeight <= 20) return 2;
+            if (maxHeight <= 50) return 5;
+            if (maxHeight <= 100) return 10;
+            if (maxHeight <= 200) return 20;
+            if (maxHeight <= 500) return 50;
+            return 100;
         }
 
         // 动画函数
@@ -419,139 +547,59 @@
             isAnimating = true;
             document.getElementById('animateBtn').textContent = '停止动画';
             
-            // 计算物理参数
-            const fallTime = Math.sqrt(2 * currentHeight / g); // 下落时间
-            const startTime = Date.now();
-            const padding = 40;
-            const groundY = canvas.height - padding;
-            const maxHeight = canvas.height - 2 * padding;
-            const scaleFactor = maxHeight / currentHeight;
+            // 重置状态
+            time = 0;
+            velocity = 0;
+            // 重置当前高度
+            currentHeight = parseFloat(document.getElementById('height').value);
+            // 在开始前固定显示高度，确保下落过程中刻度不变
+            displayMaxHeight = Math.ceil(currentHeight * 1.2);
             
-            // 动画循环
+            lastTime = performance.now();
+            
             function animate() {
                 if (!isAnimating) return;
                 
-                const elapsedTime = (Date.now() - startTime) / 1000 * timeScale;
-                const progress = Math.min(elapsedTime / fallTime, 1);
+                const now = performance.now();
+                const deltaTime = (now - lastTime) / 1000 * timeScale; // 转换为秒
+                lastTime = now;
                 
-                // 计算下落距离
-                const fallenDistance = 0.5 * g * Math.pow(elapsedTime, 2);
-                const currentPosition = Math.min(fallenDistance, currentHeight);
+                time += deltaTime;
                 
-                // 清除画布
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                // 绘制背景和地面
-                ctx.fillStyle = getColor('--md-sys-color-surface');
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // 绘制高度刻度
-                const scaleStep = Math.max(1, Math.ceil(currentHeight / 10));
-                ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
-                ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
-                ctx.font = '12px Roboto';
-                ctx.textAlign = 'right';
-                
-                // 绘制刻度线和数值
-                for (let h = 0; h <= currentHeight; h += scaleStep) {
-                    const y = groundY - h * scaleFactor;
-                    if (y >= padding) {
-                        ctx.beginPath();
-                        ctx.moveTo(padding - 5, y);
-                        ctx.lineTo(padding, y);
-                        ctx.stroke();
-                        ctx.fillText(h + ' m', padding - 10, y + 4);
-                    }
+                // 自由落体计算（考虑空气阻力）
+                if (dragCoefficient > 0) {
+                    // 计算空气阻力 (简化模型)
+                    const dragForce = 0.5 * dragCoefficient * velocity * velocity;
+                    const netForce = mass * g - dragForce;
+                    const acceleration = netForce / mass;
+                    
+                    velocity += acceleration * deltaTime;
+                } else {
+                    // 无空气阻力时，单纯的自由落体
+                    velocity += g * deltaTime;
                 }
                 
-                // 绘制垂直线
-                ctx.beginPath();
-                ctx.moveTo(padding, padding);
-                ctx.lineTo(padding, groundY);
-                ctx.stroke();
+                // 更新高度
+                currentHeight = Math.max(0, currentHeight - velocity * deltaTime);
                 
-                // 绘制地面
-                ctx.beginPath();
-                ctx.moveTo(0, groundY);
-                ctx.lineTo(canvas.width, groundY);
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = getColor('--md-sys-color-outline');
-                ctx.stroke();
+                // 检查是否落地
+                if (currentHeight <= 0) {
+                    currentHeight = 0;
+                    velocity = 0;
+                    isAnimating = false;
+                    document.getElementById('animateBtn').textContent = '播放动画';
+                }
                 
-                // 绘制物体当前位置
-                const ballY = padding + currentPosition * scaleFactor;
+                // 更新显示
+                document.getElementById('timeResult').textContent = time.toFixed(2) + ' s';
+                document.getElementById('velocityResult').textContent = velocity.toFixed(2) + ' m/s';
+                document.getElementById('potentialEnergyResult').textContent = (mass * g * currentHeight).toFixed(2) + ' J';
+                document.getElementById('kineticEnergyResult').textContent = (0.5 * mass * velocity * velocity).toFixed(2) + ' J';
                 
-                ctx.beginPath();
-                ctx.arc(canvas.width / 2, ballY, 20, 0, Math.PI * 2);
-                ctx.fillStyle = getColor('--md-sys-color-primary');
-                ctx.fill();
+                drawScene();
                 
-                // 绘制文字标签
-                const remainingHeight = currentHeight - currentPosition;
-                ctx.fillStyle = getColor('--md-sys-color-on-surface');
-                ctx.font = '16px Roboto';
-                ctx.textAlign = 'center';
-                ctx.fillText('剩余高度: ' + remainingHeight.toFixed(1) + ' m', canvas.width / 2, ballY - 30);
-                
-                // 继续动画或结束
-                if (progress < 1) {
-                animationId = requestAnimationFrame(animate);
-                } else {
-                    // 添加落地后的弹跳效果
-                    setTimeout(() => {
-                        // 小弹跳
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        
-                        // 重新绘制背景和地面
-                        ctx.fillStyle = getColor('--md-sys-color-surface');
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        
-                        // 绘制高度刻度
-                        const scaleStep = Math.max(1, Math.ceil(currentHeight / 10));
-                        ctx.strokeStyle = getColor('--md-sys-color-on-surface-variant');
-                        ctx.fillStyle = getColor('--md-sys-color-on-surface-variant');
-                        ctx.font = '12px Roboto';
-                        ctx.textAlign = 'right';
-                        
-                        // 绘制刻度线和数值
-                        for (let h = 0; h <= currentHeight; h += scaleStep) {
-                            const y = groundY - h * scaleFactor;
-                            if (y >= padding) {
-                                ctx.beginPath();
-                                ctx.moveTo(padding - 5, y);
-                                ctx.lineTo(padding, y);
-                                ctx.stroke();
-                                ctx.fillText(h + ' m', padding - 10, y + 4);
-                            }
-                        }
-                        
-                        // 绘制垂直线
-                        ctx.beginPath();
-                        ctx.moveTo(padding, padding);
-                        ctx.lineTo(padding, groundY);
-                        ctx.stroke();
-                        
-                        // 绘制地面
-                        ctx.beginPath();
-                        ctx.moveTo(0, groundY);
-                        ctx.lineTo(canvas.width, groundY);
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = getColor('--md-sys-color-outline');
-                        ctx.stroke();
-                        
-                        // 绘制球体（稍微压扁）
-                        ctx.beginPath();
-                        ctx.ellipse(canvas.width / 2, groundY - 10, 25, 15, 0, 0, Math.PI * 2);
-                        ctx.fillStyle = getColor('--md-sys-color-primary');
-                        ctx.fill();
-                        
-                        // 恢复原始状态
-                        setTimeout(() => {
-                            drawScene();
-                            isAnimating = false;
-                            document.getElementById('animateBtn').textContent = '播放动画';
-                        }, 300);
-                    }, 100);
+                if (isAnimating) {
+                    animationId = requestAnimationFrame(animate);
                 }
             }
             
@@ -580,14 +628,58 @@
             
             // 设置初始值
             const heightInput = document.getElementById('height');
+            const heightValue = document.getElementById('heightValue');
+            const dragInput = document.getElementById('drag');
+            const dragValue = document.getElementById('dragValue');
+            const massInput = document.getElementById('mass');
+            const massValue = document.getElementById('massValue');
             
             if (!heightInput.value) heightInput.value = currentHeight;
             
+            // 添加滑块样式
+            const sliders = document.querySelectorAll('input[type="range"]');
+            sliders.forEach(slider => {
+                // 只更新显示值，不设置渐变背景
+                function updateSliderValue(slider) {
+                    const id = slider.id;
+                    const valueDisplay = document.getElementById(`${id}Value`);
+                    if (valueDisplay) {
+                        valueDisplay.textContent = slider.value;
+                    }
+                }
+                
+                // 初始化滑块值
+                updateSliderValue(slider);
+                
+                // 添加滑块事件监听
+                slider.addEventListener('input', function() {
+                    updateSliderValue(this);
+                });
+            });
+            
             // 实时更新预览
             heightInput.addEventListener('input', function() {
-                const height = parseFloat(heightInput.value) || currentHeight;
-                
+                const height = parseFloat(this.value);
+                heightValue.textContent = height.toFixed(1);
                 currentHeight = height;
+                // 更新刻度显示范围
+                displayMaxHeight = Math.ceil(currentHeight * 1.2);
+                drawScene();
+            });
+            
+            // 添加空气阻力系数滑块监听
+            dragInput.addEventListener('input', function() {
+                const drag = parseFloat(this.value);
+                dragValue.textContent = drag.toFixed(2);
+                dragCoefficient = drag;
+                drawScene();
+            });
+            
+            // 添加质量滑块监听
+            massInput.addEventListener('input', function() {
+                const newMass = parseFloat(this.value);
+                massValue.textContent = newMass.toFixed(1);
+                mass = newMass;
                 drawScene();
             });
         });
@@ -622,9 +714,9 @@
         });
 
         // 初始绘制
-        const initialHeight = /*[[${height}]]*/ 10;
+        const initialHeightValue = /*[[${height}]]*/ 10;
         
-        currentHeight = initialHeight;
+        currentHeight = initialHeightValue;
         
         // 页面加载时自动调整画布大小
         if (document.readyState === 'complete') {
