@@ -785,12 +785,14 @@
                 document.getElementById('displacement').innerText = (displacement / 100).toFixed(2) + " m";
                 document.getElementById('velocity').innerText = (velocity / 100).toFixed(2) + " m/s";
                 document.getElementById('acceleration').innerText = (acceleration / 100).toFixed(2) + " m/s²";
-                document.getElementById('phase').innerText = Math.round(phase * 180 / Math.PI) + "°";
-                
+                // 相位显示与动画方向一致（逆时针递增）
+                let phaseDeg = Math.round(phase * 180 / Math.PI);
+                let displayPhase = phaseDeg % 720;
+                if (displayPhase < 0) displayPhase += 720;
+                document.getElementById('phase').innerText = displayPhase + "°";
                 // 更新能量条
                 let kineticPercent = (kineticEnergy / totalEnergy) * 100;
                 let potentialPercent = (potentialEnergy / totalEnergy) * 100;
-                
                 document.getElementById('kinetic-energy-bar').style.width = kineticPercent + "%";
                 document.getElementById('potential-energy-bar').style.width = potentialPercent + "%";
             }
